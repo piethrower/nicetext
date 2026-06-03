@@ -1,0 +1,120 @@
+# proglang-keywords/java.twlist
+#
+# language: Java (Java SE reserved keywords + literal values + java.lang
+# fundamentals).
+# source: docs.oracle.com/javase/specs/jls/ (Java Language Spec, Keywords
+#   §3.9), java.lang package roster. Library functions outside java.lang
+#   (java.util, java.io, etc.) are NOT included.
+# notes: java.lang core types are universally available without import
+#   and qualify as "built-in". Their member methods are not enumerated
+#   (those are library surface).
+
+# ----- Reserved keywords -----
+java_abstract      abstract
+java_assert        assert
+java_boolean       boolean
+java_break         break
+java_byte          byte
+java_case          case
+java_catch         catch
+java_char          char
+java_class         class
+java_const         const
+java_continue      continue
+java_default       default
+java_do            do
+java_double        double
+java_else          else
+java_enum          enum
+java_exports       exports
+java_extends       extends
+java_final         final
+java_finally       finally
+java_float         float
+java_for           for
+java_goto          goto
+java_if            if
+java_implements    implements
+java_import        import
+java_instanceof    instanceof
+java_int           int
+java_interface     interface
+java_long          long
+java_module        module
+java_native        native
+java_new           new
+java_non-sealed    non-sealed
+java_open          open
+java_opens         opens
+java_package       package
+java_permits       permits
+java_private       private
+java_protected     protected
+java_provides      provides
+java_public        public
+java_record        record
+java_requires      requires
+java_return        return
+java_sealed        sealed
+java_short         short
+java_static        static
+java_strictfp      strictfp
+java_super         super
+java_switch        switch
+java_synchronized  synchronized
+java_this          this
+java_throw         throw
+java_throws        throws
+java_to            to
+java_transient     transient
+java_transitive    transitive
+java_try           try
+java_uses          uses
+java_var           var
+java_void          void
+java_volatile      volatile
+java_when          when
+java_while         while
+java_with          with
+java_yield         yield
+
+# ----- Literal values -----
+java_true          true
+java_false         false
+java_null          null
+
+# ----- java.lang core types -----
+# (Boxed-type class names overlap with the primitive keywords above —
+# `Long`/`Short`/`Byte`/etc. lowercase to the same token. The lowercased
+# entry is already authored as the primitive keyword; no artificial
+# disambiguator is added here.)
+java_object        object
+java_string        string
+java_integer       integer
+java_character     character
+java_number        number
+java_math          math
+java_system        system
+java_thread        thread
+java_runnable      runnable
+java_throwable     throwable
+java_exception     exception
+java_runtimeexception runtimeexception
+java_error         error
+java_iterable      iterable
+java_comparable    comparable
+java_stringbuilder stringbuilder
+java_stringbuffer  stringbuffer
+java_runtime       runtime
+
+# ----- Common surface tokens -----
+java_out           out
+java_err           err
+java_in            in
+java_println       println
+java_print         print
+java_printf        printf
+
+# ----- Underscore-bearing fragments (auto-split today) -----
+java_max_value     max_value
+java_min_value     min_value

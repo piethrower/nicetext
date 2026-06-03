@@ -1,0 +1,206 @@
+# proglang-keywords/perl.twlist
+#
+# language: Perl 5 (reserved keywords + control flow + built-in functions
+# + special variables + common operators-as-words).
+# source: perldoc.perl.org/perlfunc, perldoc.perl.org/perlvar,
+#   perldoc.perl.org/perlop.
+# notes: special variables like $_, @_, %_ are punctuated by `_`-as-PUNCT
+#   and rule-2-rejected; authored for forward compat. Module functions
+#   (CPAN) are NOT included.
+
+# ----- Control flow keywords -----
+perl_if            if
+perl_elsif         elsif
+perl_else          else
+perl_unless        unless
+perl_while         while
+perl_until         until
+perl_for           for
+perl_foreach       foreach
+perl_do            do
+perl_last          last
+perl_next          next
+perl_redo          redo
+perl_return        return
+perl_goto          goto
+perl_given         given
+perl_when          when
+perl_default       default
+perl_continue      continue
+perl_break         break
+
+# ----- Declaration keywords -----
+perl_my            my
+perl_our           our
+perl_local         local
+perl_state         state
+perl_sub           sub
+perl_package       package
+perl_use           use
+perl_no            no
+perl_require       require
+perl_import        import
+
+# ----- Logical / comparison word operators -----
+perl_and           and
+perl_or            or
+perl_xor           xor
+perl_not           not
+perl_eq            eq
+perl_ne            ne
+perl_lt            lt
+perl_gt            gt
+perl_le            le
+perl_ge            ge
+perl_cmp           cmp
+
+# ----- Boolean / undef -----
+perl_true          true
+perl_false         false
+perl_undef         undef
+
+# ----- Special variables (rule-2-rejected; split fragments emit) -----
+perl_$_            $_
+perl_@_            @_
+perl_%_            %_
+perl_$0            $0
+perl_$1            $1
+perl_$2            $2
+perl_$@            $@
+perl_$!            $!
+perl_$?            $?
+perl_$$            $$
+perl_$/            $/
+perl_$\            $\
+perl_$,            $,
+perl_$.            $.
+perl_$;            $;
+perl_$"            $"
+perl_$ARGV         $ARGV
+perl_@ARGV         @ARGV
+perl_%ENV          %ENV
+perl_@INC          @INC
+perl_%INC          %INC
+perl_$ENV          $ENV
+perl_$SIG          $SIG
+
+# ----- Built-in functions: I/O -----
+perl_print         print
+perl_printf        printf
+perl_sprintf       sprintf
+perl_say           say
+perl_warn          warn
+perl_die           die
+perl_open          open
+perl_close         close
+perl_read          read
+perl_write         write
+perl_readline      readline
+perl_eof           eof
+perl_binmode       binmode
+perl_seek          seek
+perl_tell          tell
+perl_truncate      truncate
+
+# ----- Built-in functions: arrays -----
+perl_push          push
+perl_pop           pop
+perl_shift         shift
+perl_unshift       unshift
+perl_splice        splice
+perl_reverse       reverse
+perl_sort          sort
+perl_map           map
+perl_grep          grep
+perl_join          join
+perl_split         split
+perl_wantarray     wantarray
+
+# ----- Built-in functions: hashes -----
+perl_keys          keys
+perl_values        values
+perl_each          each
+perl_exists        exists
+perl_delete        delete
+perl_defined       defined
+
+# ----- Built-in functions: strings -----
+perl_length        length
+perl_substr        substr
+perl_index         index
+perl_rindex        rindex
+perl_lc            lc
+perl_uc            uc
+perl_lcfirst       lcfirst
+perl_ucfirst       ucfirst
+perl_chomp         chomp
+perl_chop          chop
+perl_chr           chr
+perl_ord           ord
+perl_hex           hex
+perl_oct           oct
+perl_pack          pack
+perl_unpack        unpack
+perl_quotemeta     quotemeta
+
+# ----- Built-in functions: math -----
+perl_abs           abs
+perl_int           int
+perl_sqrt          sqrt
+perl_exp           exp
+perl_log           log
+perl_sin           sin
+perl_cos           cos
+perl_atan2         atan2
+perl_rand          rand
+perl_srand         srand
+
+# ----- Built-in functions: misc -----
+perl_ref           ref
+perl_bless         bless
+perl_caller        caller
+perl_time          time
+perl_localtime     localtime
+perl_gmtime        gmtime
+perl_sleep         sleep
+perl_system        system
+perl_exec          exec
+perl_fork          fork
+perl_wait          wait
+perl_waitpid       waitpid
+perl_kill          kill
+perl_getppid       getppid
+perl_getpgrp       getpgrp
+perl_setpgrp       setpgrp
+perl_chdir         chdir
+perl_chmod         chmod
+perl_chown         chown
+perl_glob          glob
+perl_mkdir         mkdir
+perl_rmdir         rmdir
+perl_rename        rename
+perl_unlink        unlink
+perl_link          link
+perl_symlink       symlink
+perl_stat          stat
+perl_lstat         lstat
+
+# ----- File test operator names -----
+perl_-e            -e
+perl_-f            -f
+perl_-d            -d
+perl_-r            -r
+perl_-w            -w
+perl_-x            -x
+
+# ----- Regex / match -----
+perl_qw            qw
+perl_qr            qr
+perl_m             m
+perl_s             s
+perl_tr            tr
+perl_y             y
+
+# ----- Underscore-bearing fragments (auto-split today) -----
+perl_no_strict     no_strict
+perl_use_strict    use_strict

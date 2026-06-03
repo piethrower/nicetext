@@ -1,0 +1,229 @@
+# proglang-keywords/cobol.twlist
+#
+# language: COBOL (COBOL-85 / COBOL-2002 / COBOL-2014 reserved words +
+# structural division / section identifiers + universally-available
+# intrinsic functions).
+# source: ISO/IEC 1989 (COBOL standard) reserved-word list. Vendor
+#   extensions (Micro Focus COBOL, GnuCOBOL extras) are NOT included.
+# notes: COBOL is heavily hyphenated. Hyphens lex as part of a WORD, so
+#   working-storage, end-if, end-perform admit cleanly. Authored
+#   lowercase per dict convention (case is recased at render time).
+
+# ----- Division / section / paragraph identifiers -----
+cobol_identification identification
+cobol_environment    environment
+cobol_data           data
+cobol_procedure      procedure
+cobol_division       division
+cobol_section        section
+cobol_program-id     program-id
+cobol_author         author
+cobol_installation   installation
+cobol_date-written   date-written
+cobol_date-compiled  date-compiled
+cobol_security       security
+cobol_configuration  configuration
+cobol_input-output   input-output
+cobol_source-computer source-computer
+cobol_object-computer object-computer
+cobol_special-names  special-names
+cobol_file-control   file-control
+cobol_i-o-control    i-o-control
+cobol_file           file
+cobol_working-storage working-storage
+cobol_linkage        linkage
+cobol_local-storage  local-storage
+cobol_report         report
+cobol_screen         screen
+
+# ----- Control-flow verbs -----
+cobol_if           if
+cobol_else         else
+cobol_end-if       end-if
+cobol_evaluate     evaluate
+cobol_when         when
+cobol_end-evaluate end-evaluate
+cobol_perform      perform
+cobol_end-perform  end-perform
+cobol_varying      varying
+cobol_until        until
+cobol_while        while
+cobol_thru         thru
+cobol_through      through
+cobol_times        times
+cobol_goto         goto
+cobol_go-to        go-to
+cobol_exit         exit
+cobol_stop         stop
+cobol_run          run
+cobol_continue     continue
+
+# ----- Data definition keywords -----
+cobol_picture      picture
+cobol_pic          pic
+cobol_value        value
+cobol_values       values
+cobol_redefines    redefines
+cobol_renames      renames
+cobol_occurs       occurs
+cobol_depending    depending
+cobol_indexed      indexed
+cobol_usage        usage
+cobol_comp         comp
+cobol_comp-1       comp-1
+cobol_comp-2       comp-2
+cobol_comp-3       comp-3
+cobol_comp-4       comp-4
+cobol_comp-5       comp-5
+cobol_computational computational
+cobol_binary       binary
+cobol_display      display
+cobol_packed-decimal packed-decimal
+cobol_sign         sign
+cobol_leading      leading
+cobol_trailing     trailing
+cobol_separate     separate
+cobol_synchronized synchronized
+cobol_sync         sync
+cobol_justified    justified
+cobol_just         just
+cobol_blank        blank
+cobol_zero         zero
+cobol_zeros        zeros
+cobol_zeroes       zeroes
+cobol_spaces       spaces
+cobol_space        space
+cobol_high-value   high-value
+cobol_high-values  high-values
+cobol_low-value    low-value
+cobol_low-values   low-values
+cobol_quote        quote
+cobol_quotes       quotes
+cobol_filler       filler
+
+# ----- Statement verbs -----
+cobol_accept       accept
+cobol_add          add
+cobol_alter        alter
+cobol_call         call
+cobol_cancel       cancel
+cobol_close        close
+cobol_compute      compute
+cobol_delete       delete
+cobol_divide       divide
+cobol_initialize   initialize
+cobol_initiate     initiate
+cobol_inspect      inspect
+cobol_invoke       invoke
+cobol_merge        merge
+cobol_move         move
+cobol_multiply     multiply
+cobol_open         open
+cobol_read         read
+cobol_release      release
+cobol_return       return
+cobol_rewrite      rewrite
+cobol_search       search
+cobol_set          set
+cobol_sort         sort
+cobol_start        start
+cobol_string       string
+cobol_subtract     subtract
+cobol_terminate    terminate
+cobol_unstring     unstring
+cobol_write        write
+cobol_use          use
+cobol_validate     validate
+
+# ----- File / I-O modes -----
+cobol_input        input
+cobol_output       output
+cobol_i-o          i-o
+cobol_extend       extend
+cobol_organization organization
+cobol_sequential   sequential
+cobol_relative     relative
+cobol_random       random
+cobol_dynamic      dynamic
+cobol_access       access
+cobol_mode         mode
+cobol_record       record
+cobol_records      records
+cobol_block        block
+cobol_label        label
+cobol_standard     standard
+cobol_omitted      omitted
+cobol_assign       assign
+
+# ----- Conditional words -----
+cobol_and          and
+cobol_or           or
+cobol_not          not
+cobol_equal        equal
+cobol_greater      greater
+cobol_less         less
+cobol_than         than
+cobol_to           to
+cobol_giving       giving
+cobol_by           by
+cobol_into         into
+cobol_from         from
+cobol_using        using
+cobol_returning    returning
+cobol_at-end       at-end
+cobol_end-of-file  end-of-file
+cobol_eof          eof
+cobol_invalid      invalid
+cobol_key          key
+cobol_size         size
+cobol_error        error
+cobol_corresponding corresponding
+cobol_corr         corr
+cobol_all          all
+cobol_with         with
+cobol_in           in
+cobol_of           of
+cobol_is           is
+cobol_are          are
+cobol_as           as
+
+# ----- Reporting -----
+cobol_heading      heading
+cobol_footing      footing
+cobol_first        first
+cobol_final        final
+cobol_summing      summing
+cobol_group        group
+cobol_detail       detail
+cobol_page         page
+cobol_line         line
+cobol_column       column
+cobol_lines        lines
+
+# ----- OO / modern extensions -----
+cobol_class        class
+cobol_class-id     class-id
+cobol_method       method
+cobol_method-id    method-id
+cobol_object       object
+cobol_inherits     inherits
+cobol_factory      factory
+cobol_property     property
+cobol_self         self
+cobol_super        super
+cobol_new          new
+
+# ----- Intrinsic functions (FUNCTION keyword) -----
+# (Function names that collide with COBOL keywords — LENGTH, REVERSE,
+# RANDOM — are not re-listed here; the keyword entry above already
+# carries the word.)
+cobol_function     function
+cobol_integer      integer
+cobol_numval       numval
+cobol_numval-c     numval-c
+cobol_lower-case   lower-case
+cobol_upper-case   upper-case
+cobol_trim         trim
+cobol_substitute   substitute
+cobol_current-date current-date
+cobol_when-compiled when-compiled

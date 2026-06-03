@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NiceText. Stress Test</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../css/nicetext.css">
+  <script src="../../js/theme.js"></script>
+  <script src="../../js/runtime-check.js"></script>
+  <script src="../../js/matrix-rain.js"></script>
+  <script src="../../js/coi.js"></script>
+</head>
+<body class="noderun">
+
+<header class="topbar">
+  <a class="home-link" href="../../index.html" title="Back to home">
+    <svg class="home-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V6z"/>
+      <line x1="7" y1="9" x2="15" y2="9"/>
+      <line x1="7" y1="13" x2="17" y2="13"/>
+    </svg>
+    <h1 data-hacker-text="./nicetext/bin/a.out">NiceText</h1>
+  </a>
+  <p class="tagline">Stress Test</p>
+  <button type="button" class="theme-toggle" id="theme-toggle"
+          aria-label="Toggle dark mode"
+          title="Toggle dark mode">
+    <svg class="theme-icon theme-icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="8" r="3"/>
+      <path d="M8 1.5v1.5M8 13v1.5M1.5 8h1.5M13 8h1.5M3.05 3.05l1.06 1.06M11.9 11.9l1.05 1.05M3.05 12.95l1.06-1.05M11.9 4.1l1.05-1.05"/>
+    </svg>
+    <svg class="theme-icon theme-icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/>
+    </svg>
+  </button>
+</header>
+
+<main class="noderun-main">
+
+  <section class="noderun-section">
+    <h2>Stress Test</h2>
+    <p class="noderun-intro">
+      Repeatedly hides data of varying sizes inside cover text and recovers
+      it, checking that every byte survives the round trip. Also available as
+      a command line interface (CLI) tool,
+      <a href="../../whats-new.html#cli">see the CLI docs</a>.
+    </p>
+    <div class="noderun-field">
+      <span class="noderun-field-label">Corpus</span>
+      <div class="adv-segmented" role="radiogroup" aria-label="Corpus shape">
+        <label><input type="radio" name="stress-corpus" value="snip" checked> Sample files</label>
+        <label><input type="radio" name="stress-corpus" value="random"> Random bytes</label>
+      </div>
+    </div>
+    <div class="noderun-field">
+      <span class="noderun-field-label">Length</span>
+      <div class="adv-segmented" role="radiogroup" aria-label="Stress run length">
+        <label><input type="radio" name="stress-length" value="quick" checked> Quick</label>
+        <label><input type="radio" name="stress-length" value="extended"> Extended</label>
+      </div>
+    </div>
+    <div class="noderun-controls">
+      <button id="stress-run-btn" class="primary" type="button">Run</button>
+      <button id="stress-cancel-btn" type="button" hidden>Cancel</button>
+    </div>
+    <div id="stress-summary" class="noderun-summary" data-status="idle">Idle.</div>
+    <div class="noderun-field">
+      <span class="noderun-field-label">Show</span>
+      <div class="adv-segmented" role="radiogroup" aria-label="Result filter">
+        <label><input type="radio" name="stress-results-filter" value="all" checked> All (<span class="filter-count" data-count="all">0</span>)</label>
+        <label><input type="radio" name="stress-results-filter" value="pass"> Pass (<span class="filter-count" data-count="pass">0</span>)</label>
+        <label><input type="radio" name="stress-results-filter" value="fail"> Fail (<span class="filter-count" data-count="fail">0</span>)</label>
+        <label><input type="radio" name="stress-results-filter" value="skip"> Skip (<span class="filter-count" data-count="skip">0</span>)</label>
+        <label><input type="radio" name="stress-results-filter" value="todo"> Todo (<span class="filter-count" data-count="todo">0</span>)</label>
+      </div>
+    </div>
+    <ul id="stress-log" class="noderun-results" data-filter="all"></ul>
+  </section>
+
+</main>
+
+<script type="module">
+// Spawns tests/node/stress-worker.js, which owns asset loading,
+// dictionary + model building, and the encode-decode loop. Main
+// thread only renders events posted back from the worker so the
+// UI stays responsive while the long build runs. Shared lifecycle
+// scaffolding (Worker spawn, envelope unwrap, AbortSignal teardown,
+// 1 Hz ticker) lives in ./runner-shell.js; this script owns the
+// stress-specific event vocabulary (sweep-start/tick/roundtrip/...)
+// and the scoreboard renderer.
+
+import { mountRunner, startTicker } from './runner-shell.js';
+import { attachLoaderProxy } from '../../js/src/resource-loader.js';
+
+const stressRunBtn    = document.getElementById('stress-run-btn');
+const stressCancelBtn = document.getElementById('stress-cancel-btn');
+const stressSummary   = document.getElementById('stress-summary');
+const stressLog       = document.getElementById('stress-log');
+
+// Filter the stress-log entries by status (all / pass / fail). CSS
+// rule in .noderun-results[data-filter=...] hides the non-matching
+// <li>s.
+for (const r of document.querySelectorAll('input[name="stress-results-filter"]')) {
+  r.addEventListener('change', (e) => {
+    if (e.target.checked) stressLog.dataset.filter = e.target.value;
+  });
+}
+// Filter-button labels carry a live count of matching rows so the
+// user can see at a glance how many passes / fails are sitting
+// behind each chip. Bumped from inside stressLogEntry().
+const FILTER_KEYS = ['all', 'pass', 'fail', 'skip', 'todo'];
+const filterCounts = { all: 0, pass: 0, fail: 0, skip: 0, todo: 0 };
+const filterCountEls = {};
+for (const k of FILTER_KEYS) {
+  filterCountEls[k] = document.querySelector(`.filter-count[data-count="${k}"]`);
+}
+function bumpFilterCount(status) {
+  filterCounts.all++;
+  if (Object.prototype.hasOwnProperty.call(filterCounts, status)) {
+    filterCounts[status]++;
+  }
+  for (const k of FILTER_KEYS) filterCountEls[k].textContent = fmt(filterCounts[k]);
+}
+function resetFilterCounts() {
+  for (const k of FILTER_KEYS) {
+    filterCounts[k] = 0;
+    filterCountEls[k].textContent = '0';
+  }
+}
+
+// Live counters for the in-flight round-trip. Updated as `tick` events
+// stream in from the worker; rendered into the status line once per
+// second by runner-shell's startTicker so the UI doesn't thrash on
+// every tick.
+const live = {
+  active: false,
+  size: 0,
+  rep: 0,
+  phase: '',
+  modelsProcessed: 0,
+  bitsRead: 0,
+  wordsProcessed: 0,
+  startedAt: 0,
+};
+
+function fmt(n) { return Number(n || 0).toLocaleString('en-US'); }
+
+function setStressStatus(status, text) {
+  stressSummary.dataset.status = status;
+  stressSummary.textContent = text;
+}
+
+// Scoreboard rendering for the live counters. Each label sits at
+// column 0 and its value is right-aligned inside a fixed-width
+// numeric slot, so a number gaining a digit never pushes its own
+// label or anything below it. All four counters are emitted on
+// every paint (models / bits hold their last value when the engine
+// has moved on to decode) so the row count itself is also stable.
+const LABEL_W = 10;
+const VALUE_W = 12;
+function lblPad(s) { return String(s).padEnd(LABEL_W, ' '); }
+function valPad(s) { return String(s).padStart(VALUE_W, ' '); }
+function scoreRow(label, value, unit) {
+  return lblPad(label) + valPad(value) + (unit ? ' ' + unit : '');
+}
+function renderLive() {
+  if (!live.active) return;
+  const elapsedSec = Math.floor((Date.now() - live.startedAt) / 1000);
+  const phaseDisplay = (live.phase === 'encode' || live.phase === 'decode') ? live.phase : '...';
+  const lines = [
+    scoreRow('size:',    fmt(live.size), 'B'),
+    scoreRow('rep:',     String(live.rep + 1)),
+    scoreRow('phase:',   phaseDisplay),
+    scoreRow('elapsed:', fmt(elapsedSec), 's'),
+    scoreRow('models:',  fmt(live.modelsProcessed)),
+    scoreRow('bits:',    fmt(live.bitsRead)),
+    scoreRow('words:',   fmt(live.wordsProcessed)),
+  ];
+  setStressStatus('running', lines.join('\n'));
+}
+function startLive(size, rep) {
+  live.active = true;
+  live.size = size;
+  live.rep = rep;
+  live.phase = 'encode';
+  live.modelsProcessed = 0;
+  live.bitsRead = 0;
+  live.wordsProcessed = 0;
+  live.startedAt = Date.now();
+}
+function stopLive() {
+  live.active = false;
+}
+function stressLogEntry(status, text, extra) {
+  const li = document.createElement('li');
+  const badge = document.createElement('span');
+  badge.className = `noderun-badge ${status}`;
+  badge.textContent = status;
+  const name = document.createElement('span');
+  name.className = 'noderun-name';
+  name.textContent = text;
+  li.append(badge, name);
+  if (extra != null) {
+    const ms = document.createElement('span');
+    ms.className = 'noderun-ms';
+    ms.textContent = extra;
+    li.append(ms);
+  }
+  stressLog.appendChild(li);
+  bumpFilterCount(status);
+}
+
+let runner = null;
+let stopTicker = null;
+let detachLoaderProxy = null;
+
+function teardownStressRunner(opts = {}) {
+  if (stopTicker) { stopTicker(); stopTicker = null; }
+  stopLive();
+  if (detachLoaderProxy) { detachLoaderProxy(); detachLoaderProxy = null; }
+  if (runner) { runner.terminate(); runner = null; }
+  stressRunBtn.disabled = false;
+  if (opts.cancelled) {
+    // Sticky terminal state: leave the button visible, disabled, and
+    // labelled 'Cancelled' so the page reads clearly as 'this run was
+    // cancelled, click Run to start fresh.' Reset happens on the next
+    // Run click below.
+    stressCancelBtn.hidden = false;
+    stressCancelBtn.disabled = true;
+    stressCancelBtn.textContent = 'Cancelled';
+  } else {
+    stressCancelBtn.hidden = true;
+    stressCancelBtn.disabled = false;
+    stressCancelBtn.textContent = 'Cancel';
+  }
+}
+
+stressCancelBtn.addEventListener('click', () => {
+  if (!runner) return;
+  runner.abort();
+  // Reflect the in-flight cancel on the button itself: disable so the
+  // user can't click again, and swap the label so it's obvious the
+  // request landed (the engine doesn't acknowledge instantly, it
+  // checks the abort signal between round-trips).
+  stressCancelBtn.disabled = true;
+  stressCancelBtn.textContent = 'Cancelling...';
+  setStressStatus('running', 'Cancelling...');
+});
+
+function handleEvent(ev) {
+  if (ev.kind === 'setup') {
+    stopLive();
+    setStressStatus('running', ev.detail);
+  } else if (ev.kind === 'sweep-start') {
+    stopLive();
+    stressLogEntry('skip', `sweep ${ev.sweep} starting`);
+  } else if (ev.kind === 'tick') {
+    // First tick of a round-trip kicks off the live counters; later
+    // ticks (and the 1 Hz ticker) update them. Phase switch happens
+    // implicitly when the engine moves from encode to decode.
+    if (!live.active || live.size !== ev.size || live.rep !== ev.rep) {
+      startLive(ev.size, ev.rep);
+    }
+    live.phase = ev.phase;
+    if (typeof ev.modelsProcessed === 'number') live.modelsProcessed = ev.modelsProcessed;
+    if (typeof ev.bitsRead === 'number')        live.bitsRead        = ev.bitsRead;
+    if (typeof ev.wordsProcessed === 'number')  live.wordsProcessed  = ev.wordsProcessed;
+  } else if (ev.kind === 'roundtrip') {
+    stopLive();
+    stressLogEntry(
+      ev.ok ? 'pass' : 'fail',
+      `size=${fmt(ev.size)}B rep=${ev.rep + 1}`,
+      `${fmt(ev.ms)}ms`,
+    );
+  } else if (ev.kind === 'failure') {
+    stressLogEntry('fail', `phase=${ev.phase}: ${ev.error?.message || ev.error}`);
+  } else if (ev.kind === 'sweep-end') {
+    stopLive();
+    const t = ev.totals;
+    stressLogEntry(
+      t.fail === 0 ? 'pass' : 'fail',
+      `sweep ${ev.sweep} done: ${fmt(t.pass)}p / ${fmt(t.fail)}f`,
+    );
+  } else if (ev.kind === 'cancelled') {
+    stopLive();
+    const t = ev.totals;
+    const userCancelled = ev.reason === 'signal';
+    const ok = t.fail === 0 && !userCancelled;
+    setStressStatus(
+      ok ? 'pass' : (t.fail > 0 ? 'fail' : 'idle'),
+      `Stopped (${ev.reason}). ${fmt(t.pass)} passed · ${fmt(t.fail)} failed · ${fmt(t.runs)} runs.`,
+    );
+    teardownStressRunner({ cancelled: userCancelled });
+  } else if (ev.kind === 'fatal') {
+    stopLive();
+    setStressStatus('fail', `Stress error: ${ev.message}`);
+    teardownStressRunner();
+  }
+}
+
+stressRunBtn.addEventListener('click', () => {
+  if (runner) return;
+  const mode   = document.querySelector('input[name="stress-corpus"]:checked')?.value || 'snip';
+  const length = document.querySelector('input[name="stress-length"]:checked')?.value || 'quick';
+  stressRunBtn.disabled = true;
+  // Reset cancel button from any prior 'Cancelled' sticky state.
+  stressCancelBtn.hidden = false;
+  stressCancelBtn.disabled = false;
+  stressCancelBtn.textContent = 'Cancel';
+  stressLog.innerHTML = '';
+  resetFilterCounts();
+  setStressStatus('running', `Preparing (${mode}, ${length})...`);
+  runner = mountRunner({
+    workerUrl: new URL('./stress-worker.js', import.meta.url),
+    onEvent: handleEvent,
+    onError: (e) => {
+      console.error('[stress-worker]', e);
+      setStressStatus('fail', `Worker error: ${e.message || 'unknown'}`);
+      teardownStressRunner();
+    },
+  });
+  // Wire the worker's loadResource calls to the main-thread loader so
+  // SAB fixtures (TW-lists, CLDR, curated keywords) resolve through the
+  // shared cache + resource-worker pool.
+  detachLoaderProxy = attachLoaderProxy(runner);
+  stopTicker = startTicker(renderLive, 1000);
+  runner.post({ type: 'run', mode, length });
+});
+</script>
+
+<div class="bottom-bar">
+  <p class="disclaimer">
+    <strong>Disclaimer:</strong> For entertainment purposes only. No
+    guarantee of privacy, security, secrecy, recoverability, cipher
+    strength, legality, morality, or anything else. Do not use in any
+    circumstance that could cause you or others harm. Use at your own
+    risk.
+  </p>
+</div>
+
+</body>
+</html>

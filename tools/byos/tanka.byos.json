@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "name": "tanka",
+  "label": "Tanka",
+  "casualLabel": "tanka",
+  "preview": "Spring, spring has come, while yet the landscape bears its fleecy burden of unmelted snow! Now may the zephyr gently 'gin to blow, to melt the nightingale's sweet frozen tears.",
+  "notes": "Classical Japanese verse from Japanese Literature (PG 19264), Epiphanius Wilson's 1900 anthology of waka / tanka in Victorian English translation. Five-line 5-7-5-7-7 form, often nature-themed. Master TWLIST union plus cmu-syllable for the line-length structure (no rhyme requirement in classical waka).",
+  "story": {
+    "style": "tanka",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved",
+      "rhyme",
+      "cmu-syllable"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/japanese-classical-verse-curated.txt"
+  }
+}

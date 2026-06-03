@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "name": "limerick",
+  "label": "Limerick",
+  "casualLabel": "limerick",
+  "preview": "There was a Young Lady whose chin, Resembled the point of a pin: So she had it made sharp, And purchased a harp, And played several tunes with her chin.",
+  "notes": "Edward Lear's A Book of Nonsense (PG 982). Five-line AABBA verse with anapestic meter and a fixed 8-8-5-5-8 stressed-syllable shape. Master TWLIST union plus the metrical Poetry/Song twlists (cmu-syllable, cmu-stress) so the corpus-dict's slot types carry line-length and stress-pattern hints alongside the rhyme groups rhyme already provides.",
+  "story": {
+    "style": "limerick",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved",
+      "rhyme",
+      "cmu-syllable",
+      "cmu-stress"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/edward-lear-nonsense-curated.txt"
+  }
+}

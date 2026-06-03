@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "name": "sherlock-holmes",
+  "label": "Sherlock Holmes",
+  "casualLabel": "Sherlock",
+  "preview": "To Sherlock Holmes she is always the woman; in his eyes she eclipses and predominates the whole of her sex.",
+  "notes": "The Adventures of Sherlock Holmes corpus by Arthur Conan Doyle: late-Victorian detective-fiction register, first-person Watson narration, methodical and observational prose. Base block declares the master TWLIST union with vowel augmentation; frequencies=['style'] weights the corpus dict by per-word counts in the source text.",
+  "story": {
+    "style": "sherlock-holmes",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/sherlock-holmes-curated.txt"
+  }
+}

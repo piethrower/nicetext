@@ -1,0 +1,190 @@
+/* Penny. Tutorial guide character. Inspired by the Penny in the
+   Span-It! project (https://piethrower.github.io/spanit), but a
+   smaller spec: bubble + character + Next button. Typewriter reveal
+   and snap-to-line bubble sizing ported in spirit from Span-It!'s
+   tutorial.js and story.css. */
+
+.penny-anchor {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;    /* bubble floats to the top of the dock */
+  gap: 0.6rem;
+  pointer-events: none;       /* container is decorative; children opt-in */
+  max-width: min(720px, 100%);
+  margin: 0 auto;
+  flex: 1 1 auto;             /* fill the dock's flex column */
+  min-height: 0;              /* allow shrink-fit so children can scroll */
+  width: 100%;
+}
+
+/* Bubble + tail wrapper. Owns the flex/sizing rules in the row so
+   the bubble below it can stay focused on visual styles + scrolling.
+   Position: relative so the absolutely-positioned tail anchors to
+   the wrap's bottom, which is the same as the bubble's bottom
+   (the bubble fills the wrap), not the anchor's bottom (which
+   extends down to where the figure sits). */
+.penny-bubble-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.penny-figure {
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+  pointer-events: auto;
+  animation: penny-tilt 5s ease-in-out infinite alternate;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+  /* Bottom-align with the bubble so the dock's bottom-right tail
+     (right: -10px; bottom: 14px on .penny-bubble-tail) points at
+     her. The narrow-viewport "missing dog" report turned out to be
+     a horizontal-overflow bug in .panel-header-tools breaking fixed
+     positioning, not an alignment issue. */
+  align-self: flex-end;
+}
+.penny-figure img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+@keyframes penny-tilt {
+  from { transform: rotate(-3deg); }
+  to   { transform: rotate(3deg); }
+}
+
+.penny-bubble {
+  position: relative;
+  z-index: 2;                 /* above the dock's Hide Penny toggle */
+  flex: 1 1 auto;             /* fill the wrap's column */
+  min-height: 0;              /* allow shrink-fit so the bubble can scroll */
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(43, 108, 176, 0.35) transparent;
+  pointer-events: auto;
+  background: var(--surface-1);
+  border: 2px solid var(--accent);
+  border-radius: 14px 14px 4px 14px;
+  /* Right padding bumped (0.95rem → 2.4rem) so wrapped lines clear
+     the .penny-bubble-close × that sits absolute at right: 0.4rem,
+     width 1.7rem. Top + left + bottom unchanged. */
+  padding: 0.7rem 2.4rem 0.6rem 0.95rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--fg);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  animation: penny-bubble-in 280ms ease-out;
+}
+
+.penny-bubble::-webkit-scrollbar { width: 6px; }
+.penny-bubble::-webkit-scrollbar-track { background: transparent; }
+.penny-bubble::-webkit-scrollbar-thumb {
+  background: rgba(43, 108, 176, 0.35);
+  border-radius: 3px;
+}
+
+@keyframes penny-bubble-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Speech-bubble tail pointing right toward the figure. Sits as a
+   sibling of .penny-bubble inside .penny-anchor (not a pseudo on the
+   bubble itself) because the bubble's overflow-y: auto forces
+   overflow-x to clip per CSS spec, which would crop a tail extending
+   past the bubble's right edge. SVG path is open on the left so
+   only the slanted edges get stroked, mimicking the bubble's right
+   border continuing into the triangle. Anchored from the anchor's
+   right edge by figure width + flex gap so the tail's left edge
+   sits at the bubble's right border. */
+.penny-bubble-tail path {
+  fill: var(--surface-1);
+  stroke: var(--accent);
+}
+.penny-bubble-tail {
+  position: absolute;
+  pointer-events: none;
+  /* Right offset = -(visible-tail-width - bubble-border-width) so the
+     caret's left edge sits 2px INSIDE the bubble's right border.
+     The fill (matching the bubble bg) then masks that 2px slice of
+     border, visually merging the caret's interior with the bubble's.
+     Without this overlap the caret reads as a triangle floating
+     next to the bubble rather than a tail growing out of it. */
+  right: -10px;
+  bottom: 14px;               /* relative to wrap = bubble's bottom */
+  width: 12px;
+  height: 18px;
+  z-index: 2;
+}
+
+.penny-bubble p { margin: 0 0 0.5rem; }
+.penny-bubble p:last-child { margin-bottom: 0; }
+.penny-bubble strong { color: var(--accent); }
+
+/* Typewriter reveal spans: kept inline so the wrapped text wraps
+   normally and visibility:hidden preserves layout space. */
+.penny-tw { display: inline; }
+
+/* Scroll-for-more hint: a subtle fade gradient at the bottom edge of
+   the bubble appears only when there's scrollable content below the
+   fold (set by JS via .penny-has-overflow). */
+.penny-bubble.penny-has-overflow {
+  background-image: linear-gradient(
+    to bottom,
+    transparent calc(100% - 24px),
+    rgba(43, 108, 176, 0.12) 100%
+  );
+  background-attachment: local;
+  background-repeat: no-repeat;
+}
+
+.penny-next,
+.penny-skip {
+  font: inherit;
+  font-size: 0.9rem;
+  background: var(--accent);
+  color: var(--surface-1);
+  border: none;
+  border-radius: 999px;
+  padding: 0.3rem 1rem;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+.penny-next:hover { background: var(--accent-hover); }
+.penny-skip {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  margin-left: 0.4rem;
+}
+.penny-skip:hover { background: var(--code-bg); color: var(--fg); }
+
+.penny-anchor.penny-hidden {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+  pointer-events: none;
+}
+
+/* Narrow viewport: smaller figure, but keep the row layout so the
+   bubble stays to the figure's left (with the tail pointing right
+   at her). The previous column-reverse layout put the figure
+   up-and-to-the-right of the bubble, which read backwards. */
+@media (max-width: 600px) {
+  .penny-figure {
+    width: 60px;
+    height: 60px;
+  }
+  .penny-bubble {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}

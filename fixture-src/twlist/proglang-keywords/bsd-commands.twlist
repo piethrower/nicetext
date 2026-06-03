@@ -1,0 +1,151 @@
+# proglang-keywords/bsd-commands.twlist
+#
+# BSD userland command names (FreeBSD / OpenBSD / NetBSD / macOS bsd-base).
+# Source: FreeBSD man pages section 1/8, OpenBSD base set.
+# notes: many command names overlap with Linux coreutils (ls, cp, grep,
+#   ...); per the no-sharing convention each shows up here tagged
+#   `bsd-commands_*` independently of `linux-commands_*`. After sortDict
+#   merge each shared word ends up in a comma-joined supertype
+#   (`bsd-commands_ls,linux-commands_ls`) — still a singleton row.
+
+# ----- BSD-specific / standardized userland -----
+bsd-commands_pkg          pkg
+bsd-commands_pkg-static   pkg-static
+bsd-commands_pkg_add      pkg_add
+bsd-commands_pkg_delete   pkg_delete
+bsd-commands_pkg_info     pkg_info
+bsd-commands_pkg_create   pkg_create
+bsd-commands_ports        ports
+bsd-commands_portsnap     portsnap
+bsd-commands_make         make
+bsd-commands_bmake        bmake
+
+# ----- Service / init -----
+bsd-commands_service      service
+bsd-commands_rcctl        rcctl
+bsd-commands_sysrc        sysrc
+bsd-commands_rc-update    rc-update
+
+# ----- Networking (BSD variants) -----
+bsd-commands_pfctl        pfctl
+bsd-commands_pf           pf
+bsd-commands_ipfw         ipfw
+bsd-commands_ifconfig     ifconfig
+bsd-commands_route        route
+bsd-commands_netstat      netstat
+bsd-commands_ping         ping
+bsd-commands_ping6        ping6
+bsd-commands_traceroute   traceroute
+bsd-commands_traceroute6  traceroute6
+bsd-commands_arp          arp
+bsd-commands_dig          dig
+bsd-commands_drill        drill
+bsd-commands_host         host
+bsd-commands_nslookup     nslookup
+bsd-commands_tcpdump      tcpdump
+bsd-commands_curl         curl
+bsd-commands_fetch        fetch
+bsd-commands_wget         wget
+bsd-commands_ssh          ssh
+bsd-commands_scp          scp
+bsd-commands_sftp         sftp
+bsd-commands_rsync        rsync
+
+# ----- Disks / mounts -----
+bsd-commands_mount        mount
+bsd-commands_umount       umount
+bsd-commands_df           df
+bsd-commands_du           du
+bsd-commands_gpart        gpart
+bsd-commands_disklabel    disklabel
+bsd-commands_fdisk        fdisk
+bsd-commands_newfs        newfs
+bsd-commands_growfs       growfs
+bsd-commands_zfs          zfs
+bsd-commands_zpool        zpool
+bsd-commands_geom         geom
+
+# ----- Process / system -----
+bsd-commands_ps           ps
+bsd-commands_top          top
+bsd-commands_pgrep        pgrep
+bsd-commands_pkill        pkill
+bsd-commands_kill         kill
+bsd-commands_killall      killall
+bsd-commands_nice         nice
+bsd-commands_renice       renice
+bsd-commands_strace       strace
+bsd-commands_ktrace       ktrace
+bsd-commands_kdump        kdump
+bsd-commands_dmesg        dmesg
+bsd-commands_uname        uname
+bsd-commands_sysctl       sysctl
+bsd-commands_jail         jail
+bsd-commands_jls          jls
+bsd-commands_jexec        jexec
+
+# ----- Shared userland (also present on Linux but tagged here too) -----
+bsd-commands_ls           ls
+bsd-commands_cat          cat
+bsd-commands_cp           cp
+bsd-commands_mv           mv
+bsd-commands_rm           rm
+bsd-commands_mkdir        mkdir
+bsd-commands_rmdir        rmdir
+bsd-commands_touch        touch
+bsd-commands_ln           ln
+bsd-commands_chmod        chmod
+bsd-commands_chown        chown
+bsd-commands_chgrp        chgrp
+bsd-commands_pwd          pwd
+bsd-commands_cd           cd
+bsd-commands_head         head
+bsd-commands_tail         tail
+bsd-commands_less         less
+bsd-commands_more         more
+bsd-commands_sort         sort
+bsd-commands_uniq         uniq
+bsd-commands_wc           wc
+bsd-commands_cut          cut
+bsd-commands_tr           tr
+bsd-commands_tee          tee
+bsd-commands_echo         echo
+bsd-commands_printf       printf
+bsd-commands_grep         grep
+bsd-commands_egrep        egrep
+bsd-commands_awk          awk
+bsd-commands_sed          sed
+bsd-commands_find         find
+bsd-commands_xargs        xargs
+bsd-commands_file         file
+bsd-commands_tar          tar
+bsd-commands_gzip         gzip
+bsd-commands_bzip2        bzip2
+bsd-commands_xz           xz
+bsd-commands_zip          zip
+bsd-commands_unzip        unzip
+bsd-commands_man          man
+bsd-commands_apropos      apropos
+bsd-commands_clear        clear
+bsd-commands_true         true
+bsd-commands_false        false
+bsd-commands_test         test
+bsd-commands_expr         expr
+bsd-commands_date         date
+bsd-commands_cal          cal
+bsd-commands_sleep        sleep
+bsd-commands_env          env
+bsd-commands_history      history
+bsd-commands_git          git
+bsd-commands_vim          vim
+bsd-commands_emacs        emacs
+bsd-commands_tmux         tmux
+bsd-commands_screen       screen
+
+# ----- BSD-specific tools -----
+bsd-commands_freebsd-update freebsd-update
+bsd-commands_freebsd-version freebsd-version
+bsd-commands_openbsd-update openbsd-update
+bsd-commands_syspatch     syspatch
+bsd-commands_signify      signify
+bsd-commands_doas         doas

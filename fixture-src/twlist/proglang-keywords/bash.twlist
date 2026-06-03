@@ -1,0 +1,158 @@
+# proglang-keywords/bash.twlist
+#
+# language: Bash (Bourne-Again SHell; bash 4.x / 5.x extensions over
+# POSIX sh).
+# source: gnu.org/software/bash/manual/bash.html (Bash Reference Manual).
+# notes: Standalone of sh.twlist by design (developer specified no
+#   sharing). Bash inherits all sh keywords; this file lists them again
+#   tagged `bash_*` so sortDict merges produce a per-language tag set
+#   per word. The bash-only additions (select, time, [[ ]], coproc,
+#   declare/local/etc.) and bash-specific builtins are tagged as well.
+
+# ----- Inherited POSIX reserved words (bash also recognizes) -----
+bash_if            if
+bash_then          then
+bash_else          else
+bash_elif          elif
+bash_fi            fi
+bash_for           for
+bash_in            in
+bash_do            do
+bash_done          done
+bash_while         while
+bash_until         until
+bash_case          case
+bash_esac          esac
+bash_break         break
+bash_continue      continue
+bash_return        return
+bash_function      function
+
+# ----- Bash-specific reserved words -----
+bash_select        select
+bash_time          time
+bash_coproc        coproc
+bash_!             !
+bash_{             {
+bash_}             }
+bash_[[            [[
+bash_]]            ]]
+
+# ----- Bash-specific builtins -----
+bash_alias         alias
+bash_bind          bind
+bash_builtin       builtin
+bash_caller        caller
+bash_compgen       compgen
+bash_complete      complete
+bash_compopt       compopt
+bash_declare       declare
+bash_dirs          dirs
+bash_disown        disown
+bash_enable        enable
+bash_help          help
+bash_history       history
+bash_let           let
+bash_local         local
+bash_logout        logout
+bash_mapfile       mapfile
+bash_popd          popd
+bash_printf        printf
+bash_pushd         pushd
+bash_readarray     readarray
+bash_shopt         shopt
+bash_source        source
+bash_suspend       suspend
+bash_typeset       typeset
+
+# ----- Inherited POSIX builtins (also tagged bash) -----
+bash_cd            cd
+bash_command       command
+bash_echo          echo
+bash_eval          eval
+bash_exec          exec
+bash_exit          exit
+bash_export        export
+bash_false         false
+bash_fc            fc
+bash_fg            fg
+bash_bg            bg
+bash_getopts       getopts
+bash_hash          hash
+bash_jobs          jobs
+bash_kill          kill
+bash_pwd           pwd
+bash_read          read
+bash_readonly      readonly
+bash_set           set
+bash_shift         shift
+bash_test          test
+bash_trap          trap
+bash_true          true
+bash_type          type
+bash_ulimit        ulimit
+bash_umask         umask
+bash_unalias       unalias
+bash_unset         unset
+bash_wait          wait
+bash_times         times
+
+# ----- Bash special parameters / variables (rule-2-rejected; split fragments) -----
+bash_$0            $0
+bash_$#            $#
+bash_$?            $?
+bash_$$            $$
+bash_$!            $!
+bash_$@            $@
+bash_$*            $*
+bash_$-            $-
+bash_$_            $_
+bash_$BASH         $BASH
+bash_$BASH_VERSION $BASH_VERSION
+bash_$BASHPID      $BASHPID
+bash_$EUID         $EUID
+bash_$UID          $UID
+bash_$HOME         $HOME
+bash_$HOSTNAME     $HOSTNAME
+bash_$IFS          $IFS
+bash_$LANG         $LANG
+bash_$LC_ALL       $LC_ALL
+bash_$OSTYPE       $OSTYPE
+bash_$PATH         $PATH
+bash_$PPID         $PPID
+bash_$PS1          $PS1
+bash_$PS2          $PS2
+bash_$PWD          $PWD
+bash_$OLDPWD       $OLDPWD
+bash_$RANDOM       $RANDOM
+bash_$SECONDS      $SECONDS
+bash_$SHELL        $SHELL
+bash_$SHLVL        $SHLVL
+bash_$TERM         $TERM
+bash_$USER         $USER
+bash_$LINENO       $LINENO
+bash_$FUNCNAME     $FUNCNAME
+
+# ----- Bash test operators -----
+bash_-eq           -eq
+bash_-ne           -ne
+bash_-lt           -lt
+bash_-le           -le
+bash_-gt           -gt
+bash_-ge           -ge
+bash_-z            -z
+bash_-n            -n
+bash_-e            -e
+bash_-f            -f
+bash_-d            -d
+bash_-r            -r
+bash_-w            -w
+bash_-x            -x
+bash_-s            -s
+bash_-h            -h
+bash_-L            -L
+bash_-a            -a
+bash_-o            -o
+bash_-nt           -nt
+bash_-ot           -ot
+bash_-ef           -ef

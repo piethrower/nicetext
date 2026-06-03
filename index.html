@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'">
+  <title>NiceText, smuggle a secret, hope nobody notices</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/nicetext.css">
+  <script src="js/theme.js"></script>
+  <script src="js/runtime-check.js"></script>
+  <script src="js/matrix-rain.js"></script>
+</head>
+<body class="splash">
+
+<button type="button" class="theme-toggle theme-toggle-floating" id="theme-toggle"
+        aria-label="Toggle dark mode"
+        title="Toggle dark mode">
+  <svg class="theme-icon theme-icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="8" cy="8" r="3"/>
+    <path d="M8 1.5v1.5M8 13v1.5M1.5 8h1.5M13 8h1.5M3.05 3.05l1.06 1.06M11.9 11.9l1.05 1.05M3.05 12.95l1.06-1.05M11.9 4.1l1.05-1.05"/>
+  </svg>
+  <svg class="theme-icon theme-icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/>
+  </svg>
+</button>
+
+<main class="splash">
+
+  <h1 class="title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V6z"/>
+      <line x1="7" y1="9" x2="15" y2="9"/>
+      <line x1="7" y1="13" x2="17" y2="13"/>
+    </svg>
+    <span data-hacker-text="./nicetext/bin/a.out">NiceText</span>
+  </h1>
+  <p class="subtitle">an ancient game of secrets and stories<br>smuggle a secret, hope nobody notices, ask them to prove it<br>or just trade absurd stories for fun</p>
+
+  <div class="demo-frame">
+    <div id="slideshow-mount"></div>
+  </div>
+  <link rel="stylesheet" href="css/slideshow.css">
+  <script type="module" src="js/splash-svg-fade.js"></script>
+  <script type="module" src="js/splash-slideshow.js"></script>
+
+  <div class="hero-row">
+    <span class="hero-cue hero-cue-left" aria-hidden="true">Start Here &rarr;</span>
+    <a class="entry entry-hero has-penny" href="nicetext.html">
+      <span class="start-here" aria-hidden="true">Start Here</span>
+      <span class="entry-title"><span class="icon">🤫</span>Smuggle a Secret</span>
+      <span class="desc">I'll show you how. It will be fun!</span>
+      <div class="penny-figure" aria-hidden="true">
+        <svg class="penny-zzz" viewBox="0 0 32 36" xmlns="http://www.w3.org/2000/svg">
+          <text class="zzz-1" x="22" y="30" font-size="9" fill="currentColor">z</text>
+          <text class="zzz-2" x="14" y="22" font-size="12" fill="currentColor">Z</text>
+          <text class="zzz-3" x="4"  y="14" font-size="15" fill="currentColor">Z</text>
+        </svg>
+        <img src="img/penny.svg" alt="" class="penny-figure-img">
+      </div>
+    </a>
+    <span class="hero-cue hero-cue-right" aria-hidden="true">&larr; Start Here</span>
+  </div>
+
+  <div class="ref-frame">
+  <span class="ref-frame-badge">Tools &amp; History</span>
+  <div class="entries-grid">
+    <a class="entry" href="tests/node/test-suite.html">
+      <span class="entry-title"><span class="icon">🧪</span>Browser Compatibility</span>
+      <span class="desc">Run the test suite in your browser.</span>
+    </a>
+
+    <a class="entry" href="tests/node/stress-test.html">
+      <span class="entry-title"><span class="icon">💥</span>Browser Stress Test</span>
+      <span class="desc">Extreme testing for demanding users.</span>
+    </a>
+
+    <a class="entry" href="whats-new.html">
+      <span class="entry-title"><span class="icon">📄</span>What's New?</span>
+      <span class="desc">Born in 1995, updated in 2026.</span>
+    </a>
+
+    <a class="entry" href="papers/thesis.pdf">
+      <span class="entry-title"><span class="icon">📜</span>Where It All Started</span>
+      <span class="desc">1997 Thesis Paper (PDF).</span>
+    </a>
+
+    <a class="entry" href="attributions.html">
+      <span class="entry-title"><span class="icon">📜</span>Attributions</span>
+      <span class="desc">Sources, licenses, and copyright notices for the data behind NiceText.</span>
+    </a>
+  </div>
+  </div>
+
+  <p class="history">
+    A modern JavaScript port of Mark T. Chapman &amp; Dr. George Davida's
+    1995&ndash;2001 linguistic-steganography research at UW-Milwaukee.
+    Runs entirely in your browser.
+  </p>
+
+  <p class="footer">Vanilla JS &middot; Zero dependencies &middot; 2026&ndash; &middot; <a href="attributions.html">Attributions</a></p>
+
+</main>
+
+<div class="bottom-bar">
+  <p class="disclaimer">
+    <strong>Disclaimer:</strong> For entertainment purposes only. No
+    guarantee of privacy, security, secrecy, recoverability, cipher
+    strength, legality, morality, or anything else. Nothing here is
+    legal advice, talk to a real lawyer. Do not use in any
+    circumstance that could cause you or others harm. Use at your own
+    risk.
+  </p>
+</div>
+
+</body>
+</html>

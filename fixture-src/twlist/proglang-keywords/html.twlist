@@ -1,0 +1,249 @@
+# proglang-keywords/html.twlist
+#
+# language: HTML (HTML5 element names + global / common attribute names +
+# common attribute values).
+# source: html.spec.whatwg.org (Living Standard). MDN HTML Elements
+#   reference cross-checked. Vendor / framework extensions (Bootstrap,
+#   custom-element prefixes) are NOT included.
+# notes: HTML is largely no-underscore. Hyphenated tokens (data-*,
+#   aria-*, the role names) admit as single WORDs. The handful of
+#   "data-foo" / "aria-foo" entries below are listed bare; the `data-`
+#   and `aria-` prefixes themselves cover the family idiomatically.
+
+# ----- Document / sectioning -----
+html_html          html
+html_head          head
+html_body          body
+html_title         title
+html_meta          meta
+html_link          link
+html_base          base
+html_style         style
+html_script        script
+html_noscript      noscript
+html_template      template
+html_slot          slot
+html_header        header
+html_footer        footer
+html_main          main
+html_section       section
+html_article       article
+html_nav           nav
+html_aside         aside
+html_address       address
+html_hgroup        hgroup
+html_doctype       doctype
+
+# ----- Text content -----
+html_h1            h1
+html_h2            h2
+html_h3            h3
+html_h4            h4
+html_h5            h5
+html_h6            h6
+html_p             p
+html_hr            hr
+html_pre           pre
+html_blockquote    blockquote
+html_ol            ol
+html_ul            ul
+html_li            li
+html_dl            dl
+html_dt            dt
+html_dd            dd
+html_figure        figure
+html_figcaption    figcaption
+html_div           div
+
+# ----- Inline text semantics -----
+html_a             a
+html_em            em
+html_strong        strong
+html_small         small
+html_s             s
+html_cite          cite
+html_q             q
+html_dfn           dfn
+html_abbr          abbr
+html_data          data
+html_time          time
+html_code          code
+html_var           var
+html_samp          samp
+html_kbd           kbd
+html_sub           sub
+html_sup           sup
+html_i             i
+html_b             b
+html_u             u
+html_mark          mark
+html_ruby          ruby
+html_rt            rt
+html_rp            rp
+html_bdi           bdi
+html_bdo           bdo
+html_span          span
+html_br            br
+html_wbr           wbr
+
+# ----- Embedded -----
+html_img           img
+html_iframe        iframe
+html_embed         embed
+html_object        object
+html_param         param
+html_video         video
+html_audio         audio
+html_source        source
+html_track         track
+html_map           map
+html_area          area
+html_picture       picture
+html_portal        portal
+html_canvas        canvas
+html_svg           svg
+html_math          math
+
+# ----- Tables -----
+html_table         table
+html_caption       caption
+html_colgroup      colgroup
+html_col           col
+html_tbody         tbody
+html_thead         thead
+html_tfoot         tfoot
+html_tr            tr
+html_td            td
+html_th            th
+
+# ----- Forms -----
+html_form          form
+html_label         label
+html_input         input
+html_button        button
+html_select        select
+html_datalist      datalist
+html_optgroup      optgroup
+html_option        option
+html_textarea      textarea
+html_output        output
+html_progress      progress
+html_meter         meter
+html_fieldset      fieldset
+html_legend        legend
+
+# ----- Interactive -----
+html_details       details
+html_summary       summary
+html_dialog        dialog
+
+# ----- Global / common attributes -----
+# (style and title as attributes are the same word as the elements
+# `<style>` / `<title>` above — no artificial disambiguator added.)
+html_id            id
+html_class         class
+html_lang          lang
+html_dir           dir
+html_hidden        hidden
+html_tabindex      tabindex
+html_accesskey     accesskey
+html_contenteditable contenteditable
+html_draggable     draggable
+html_spellcheck    spellcheck
+html_translate     translate
+html_role          role
+html_data-         data-
+html_aria-         aria-
+
+# ----- Link / source attributes -----
+html_href          href
+html_src           src
+html_srcset        srcset
+html_sizes         sizes
+html_target        target
+html_rel           rel
+html_download      download
+html_loading       loading
+html_referrerpolicy referrerpolicy
+html_crossorigin   crossorigin
+html_integrity     integrity
+html_alt           alt
+html_width         width
+html_height        height
+html_loop          loop
+html_muted         muted
+html_autoplay      autoplay
+html_controls      controls
+html_poster        poster
+html_preload       preload
+
+# ----- Form attributes -----
+html_name          name
+html_value         value
+html_type          type
+html_placeholder   placeholder
+html_required      required
+html_disabled      disabled
+html_readonly      readonly
+html_checked       checked
+html_selected      selected
+html_multiple      multiple
+html_action        action
+html_method        method
+html_enctype       enctype
+html_autocomplete  autocomplete
+html_autofocus     autofocus
+html_minlength     minlength
+html_maxlength     maxlength
+html_min           min
+html_max           max
+html_step          step
+html_pattern       pattern
+html_accept        accept
+html_for           for
+
+# ----- Event handler attributes (no-underscore subset) -----
+html_onclick       onclick
+html_onsubmit      onsubmit
+html_onchange      onchange
+html_oninput       oninput
+html_onload        onload
+html_onerror       onerror
+html_onfocus       onfocus
+html_onblur        onblur
+html_onkeydown     onkeydown
+html_onkeyup       onkeyup
+html_onmouseover   onmouseover
+html_onmouseout    onmouseout
+
+# ----- Common attribute values -----
+html_text          text
+html_email         email
+html_password      password
+html_number        number
+html_url           url
+html_tel           tel
+html_search        search
+html_checkbox      checkbox
+html_radio         radio
+html_submit        submit
+html_reset         reset
+html_get           get
+html_post          post
+html_anonymous     anonymous
+html_blank         blank
+html_self          self
+html_parent        parent
+html_top           top
+html_noopener      noopener
+html_noreferrer    noreferrer
+html_nofollow      nofollow
+html_stylesheet    stylesheet
+html_alternate     alternate
+html_canonical     canonical
+html_icon          icon
+html_manifest      manifest
+html_modulepreload modulepreload
+html_dns-prefetch  dns-prefetch
+html_preconnect    preconnect
+html_prefetch      prefetch

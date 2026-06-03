@@ -1,0 +1,21 @@
+{
+  "name": "nicetext",
+  "version": "0.1.0",
+  "description": "JavaScript port of NiceText — linguistic steganography. Encodes any binary file as pseudo-natural-language text and recovers it losslessly. Original C++ by Mark T. Chapman and Dr. George Davida (1995-2001, UW-Milwaukee).",
+  "type": "module",
+  "engines": {
+    "node": ">=20.4"
+  },
+  "exports": {
+    ".": "./js/src/index.js"
+  },
+  "bin": {
+    "nicetext": "./js/bin/nicetext.js",
+    "scramble": "./js/bin/scramble.js",
+    "gendict": "./js/bin/gendict.js"
+  },
+  "scripts": {
+    "test": "node tests/node/run-node.mjs"
+  },
+  "license": "SEE nicetext-1.0/COPYRIGHT in the OG-NiceText-C++ archive repo"
+}

@@ -1,0 +1,9 @@
+node_modules/
+*.log
+*.pid
+.DS_Store
+.claude/
+tmp/stress-failure-*/
+# Audit fixtures — large random binaries, regenerate with:
+#   for sz in 1 10 20 30 50 200; do head -c $((sz*1024*1024)) /dev/urandom > tmp/audit-bin-${sz}mb.bin; done
+tmp/audit-bin-*.bin

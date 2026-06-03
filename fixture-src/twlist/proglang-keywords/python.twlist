@@ -1,0 +1,194 @@
+# proglang-keywords/python.twlist
+#
+# language: Python (CPython 3.x reserved keywords + built-in functions
+# + built-in constants + dunder protocol identifiers).
+# source: docs.python.org/3/reference/lexical_analysis.html (keywords),
+#   docs.python.org/3/library/functions.html (built-in functions),
+#   docs.python.org/3/reference/datamodel.html (dunder protocol).
+# notes: dunder identifiers like __init__, __name__ are rule-2-rejected
+#   (lexer punctuates `_`); authored for forward compat, split transform
+#   synthesizes python_split_<word> fragments. Library functions
+#   (numpy.array, os.path.join, etc.) are NOT included.
+
+# ----- Python reserved keywords (PEP 3104 + 3.x additions) -----
+python_false       false
+python_none        none
+python_true        true
+python_and         and
+python_as          as
+python_assert      assert
+python_async       async
+python_await       await
+python_break       break
+python_class       class
+python_continue    continue
+python_def         def
+python_del         del
+python_elif        elif
+python_else        else
+python_except      except
+python_finally     finally
+python_for         for
+python_from        from
+python_global      global
+python_if          if
+python_import      import
+python_in          in
+python_is          is
+python_lambda      lambda
+python_nonlocal    nonlocal
+python_not         not
+python_or          or
+python_pass        pass
+python_raise       raise
+python_return      return
+python_try         try
+python_while       while
+python_with        with
+python_yield       yield
+python_match       match
+python_case        case
+
+# ----- Built-in constants -----
+python_ellipsis    ellipsis
+python_notimplemented notimplemented
+
+# ----- Built-in functions (no-underscore; admit cleanly) -----
+python_abs         abs
+python_aiter       aiter
+python_all         all
+python_anext       anext
+python_any         any
+python_ascii       ascii
+python_bin         bin
+python_bool        bool
+python_breakpoint  breakpoint
+python_bytearray   bytearray
+python_bytes       bytes
+python_callable    callable
+python_chr         chr
+python_classmethod classmethod
+python_compile     compile
+python_complex     complex
+python_delattr     delattr
+python_dict        dict
+python_dir         dir
+python_divmod      divmod
+python_enumerate   enumerate
+python_eval        eval
+python_exec        exec
+python_exit        exit
+python_filter      filter
+python_float       float
+python_format      format
+python_frozenset   frozenset
+python_getattr     getattr
+python_globals     globals
+python_hasattr     hasattr
+python_hash        hash
+python_help        help
+python_hex         hex
+python_id          id
+python_input       input
+python_int         int
+python_isinstance  isinstance
+python_issubclass  issubclass
+python_iter        iter
+python_len         len
+python_list        list
+python_locals      locals
+python_map         map
+python_max         max
+python_memoryview  memoryview
+python_min         min
+python_next        next
+python_object      object
+python_oct         oct
+python_open        open
+python_ord         ord
+python_pow         pow
+python_print       print
+python_property    property
+python_quit        quit
+python_range       range
+python_repr        repr
+python_reversed    reversed
+python_round       round
+python_self        self
+python_cls         cls
+python_set         set
+python_setattr     setattr
+python_slice       slice
+python_sorted      sorted
+python_staticmethod staticmethod
+python_str         str
+python_sum         sum
+python_super       super
+python_tuple       tuple
+python_type        type
+python_vars        vars
+python_zip         zip
+
+# ----- Dunder protocol (rule-2-rejected today; split fragments emit) -----
+python___init__    __init__
+python___new__     __new__
+python___del__     __del__
+python___repr__    __repr__
+python___str__     __str__
+python___bytes__   __bytes__
+python___format__  __format__
+python___lt__      __lt__
+python___le__      __le__
+python___eq__      __eq__
+python___ne__      __ne__
+python___gt__      __gt__
+python___ge__      __ge__
+python___hash__    __hash__
+python___bool__    __bool__
+python___getattr__ __getattr__
+python___getattribute__ __getattribute__
+python___setattr__ __setattr__
+python___delattr__ __delattr__
+python___dir__     __dir__
+python___slots__   __slots__
+python___class__   __class__
+python___dict__    __dict__
+python___name__    __name__
+python___qualname__ __qualname__
+python___module__  __module__
+python___doc__     __doc__
+python___file__    __file__
+python___main__    __main__
+python___all__     __all__
+python___call__    __call__
+python___len__     __len__
+python___getitem__ __getitem__
+python___setitem__ __setitem__
+python___delitem__ __delitem__
+python___iter__    __iter__
+python___next__    __next__
+python___contains__ __contains__
+python___enter__   __enter__
+python___exit__    __exit__
+python___add__     __add__
+python___sub__     __sub__
+python___mul__     __mul__
+python___truediv__ __truediv__
+python___floordiv__ __floordiv__
+python___mod__     __mod__
+python___pow__     __pow__
+python___int__     __int__
+python___float__   __float__
+python___index__   __index__
+python___copy__    __copy__
+python___deepcopy__ __deepcopy__
+python___reduce__  __reduce__
+python___getstate__ __getstate__
+python___setstate__ __setstate__
+python___init_subclass__ __init_subclass__
+python___class_getitem__ __class_getitem__
+python___subclasshook__  __subclasshook__
+python___aiter__   __aiter__
+python___anext__   __anext__
+python___aenter__  __aenter__
+python___aexit__   __aexit__

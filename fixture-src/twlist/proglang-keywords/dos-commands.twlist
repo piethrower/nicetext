@@ -1,0 +1,98 @@
+# proglang-keywords/dos-commands.twlist
+#
+# MS-DOS / classic Windows command-prompt internal and external commands.
+# Source: MS-DOS 6.22 reference, the COMMAND.COM internal-command list,
+# and standard DOS external utilities. Windows-NT-and-later expansions
+# (tasklist, wmic, powershell cmdlets) live in windows-commands.twlist.
+
+# ----- Internal commands -----
+dos-commands_dir          dir
+dos-commands_cd           cd
+dos-commands_chdir        chdir
+dos-commands_md           md
+dos-commands_mkdir        mkdir
+dos-commands_rd           rd
+dos-commands_rmdir        rmdir
+dos-commands_del          del
+dos-commands_erase        erase
+dos-commands_copy         copy
+dos-commands_move         move
+dos-commands_ren          ren
+dos-commands_rename       rename
+dos-commands_type         type
+dos-commands_cls          cls
+dos-commands_echo         echo
+dos-commands_pause        pause
+dos-commands_set          set
+dos-commands_path         path
+dos-commands_prompt       prompt
+dos-commands_ver          ver
+dos-commands_vol          vol
+dos-commands_time         time
+dos-commands_date         date
+dos-commands_exit         exit
+dos-commands_break        break
+dos-commands_verify       verify
+dos-commands_chcp         chcp
+dos-commands_cluster      cluster
+dos-commands_call         call
+dos-commands_goto         goto
+dos-commands_if           if
+dos-commands_for          for
+dos-commands_in           in
+dos-commands_do           do
+dos-commands_shift        shift
+dos-commands_rem          rem
+dos-commands_lh           lh
+dos-commands_loadhigh     loadhigh
+dos-commands_loadfix      loadfix
+dos-commands_lfnfor       lfnfor
+dos-commands_truename     truename
+
+# ----- External utilities (DOS / Windows base) -----
+dos-commands_attrib       attrib
+dos-commands_chkdsk       chkdsk
+dos-commands_chkntfs      chkntfs
+dos-commands_choice       choice
+dos-commands_comp         comp
+dos-commands_compact      compact
+dos-commands_convert      convert
+dos-commands_defrag       defrag
+dos-commands_deltree      deltree
+dos-commands_diskcomp     diskcomp
+dos-commands_diskcopy     diskcopy
+dos-commands_doskey       doskey
+dos-commands_edit         edit
+dos-commands_edlin        edlin
+dos-commands_emm386       emm386
+dos-commands_expand       expand
+dos-commands_fastopen     fastopen
+dos-commands_fc           fc
+dos-commands_fdisk        fdisk
+dos-commands_find         find
+dos-commands_findstr      findstr
+dos-commands_forfiles     forfiles
+dos-commands_format       format
+dos-commands_graphics     graphics
+dos-commands_help         help
+dos-commands_himem        himem
+dos-commands_keyb         keyb
+dos-commands_label        label
+dos-commands_mem          mem
+dos-commands_more         more
+dos-commands_msd          msd
+dos-commands_print        print
+dos-commands_recover      recover
+dos-commands_replace      replace
+dos-commands_scandisk     scandisk
+dos-commands_setver       setver
+dos-commands_share        share
+dos-commands_smartdrv     smartdrv
+dos-commands_sort         sort
+dos-commands_subst        subst
+dos-commands_sys          sys
+dos-commands_tree         tree
+dos-commands_undelete     undelete
+dos-commands_unformat     unformat
+dos-commands_xcopy        xcopy
+dos-commands_xcopy32      xcopy32

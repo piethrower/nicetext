@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "name": "texting-teen",
+  "label": "Texting Teen 📱💬",
+  "casualLabel": "Texting Teen",
+  "preview": "omg bestie 💖 pizza tonight 🍕🎉 fr fr no cap 🧢 bye 💕",
+  "notes": "Texting Teen corpus 📱💖✨: short one-line tween/teen text messages, emoji-saturated. Showcases the full Emoji 16 source family (single emoji + CLDR phrases + hand-curated emoji phrases + curated keyword filter) plus all three cross-modal augmentations (emoji-into-words + words-into-emoji + narrow mixed phrases) layered on top of the master TWLIST union. Random sentence playback. frequencies=['style'] weights the corpus dict by per-word counts in the source text.",
+  "story": {
+    "style": "texting-teen",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved",
+      "emoji16",
+      "emoji-cldr-names-16",
+      "emoji-curated-phrases-16",
+      "emoji16-curated-keywords"
+    ],
+    "augment": {
+      "emojiIntoWords": {
+        "enabled": true,
+        "intensity": 5
+      },
+      "wordsIntoEmoji": {
+        "enabled": true,
+        "intensity": 5
+      }
+    },
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/texting-teen*.txt"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "name": "mit",
+  "label": "Names and Places",
+  "notes": "MIT names + places + CFG connectors. Pairs with grammars/mit-names.def. Deliberately built without the possessive/vowel-augmentation transforms that master applies, so the _UNIQUE_ drop-rule does not strip CFG connector words. hashedMergedTypes is OFF: the paired grammar references atomic source type names (name_male, name_female, place_general, ...) by string, and hashing the dict's type names would break the grammar's lookupTypeByName resolution.",
+  "story": {
+    "style": "flat"
+  },
+  "base": {
+    "sources": [
+      "mit",
+      "connectors"
+    ],
+    "frequencies": [],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": false
+  }
+}

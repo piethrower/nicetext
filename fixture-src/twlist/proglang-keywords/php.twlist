@@ -1,0 +1,258 @@
+# proglang-keywords/php.twlist
+#
+# language: PHP (reserved keywords + language constructs + universally-
+# available built-in functions).
+# source: php.net/manual/en/reserved.keywords.php,
+#   php.net/manual/en/funcref.php (Core Predefined Functions).
+# notes: PHP's standard library uses underscores extensively
+#   (is_array, array_map, str_replace, var_dump, ...). Today's lexer
+#   punctuates `_`, so these are rule-2-rejected; the build's split
+#   transform synthesizes php_split_<word> fragments. Authored in full
+#   for forward compatibility with any lexer loosening.
+#   Library function names from PECL/Composer packages are NOT included.
+
+# ----- Reserved keywords + language constructs -----
+php_abstract       abstract
+php_and            and
+php_array          array
+php_as             as
+php_break          break
+php_callable       callable
+php_case           case
+php_catch          catch
+php_class          class
+php_clone          clone
+php_const          const
+php_continue       continue
+php_declare        declare
+php_default        default
+php_die            die
+php_do             do
+php_echo           echo
+php_else           else
+php_elseif         elseif
+php_empty          empty
+php_enddeclare     enddeclare
+php_endfor         endfor
+php_endforeach     endforeach
+php_endif          endif
+php_endswitch      endswitch
+php_endwhile       endwhile
+php_enum           enum
+php_eval           eval
+php_exit           exit
+php_extends        extends
+php_final          final
+php_finally        finally
+php_fn             fn
+php_for            for
+php_foreach        foreach
+php_function       function
+php_global         global
+php_goto           goto
+php_if             if
+php_implements     implements
+php_include        include
+php_include_once   include_once
+php_instanceof     instanceof
+php_insteadof      insteadof
+php_interface      interface
+php_isset          isset
+php_list           list
+php_match          match
+php_namespace      namespace
+php_new            new
+php_null           null
+php_or             or
+php_print          print
+php_private        private
+php_protected      protected
+php_public         public
+php_readonly       readonly
+php_require        require
+php_require_once   require_once
+php_return         return
+php_self           self
+php_static         static
+php_switch         switch
+php_throw          throw
+php_trait          trait
+php_true           true
+php_false          false
+php_try            try
+php_unset          unset
+php_use            use
+php_var            var
+php_while         while
+php_xor            xor
+php_yield          yield
+php_parent         parent
+php_this           this
+php_$this          $this
+
+# ----- Magic constants -----
+php___line__       __line__
+php___file__       __file__
+php___dir__        __dir__
+php___function__   __function__
+php___class__      __class__
+php___trait__      __trait__
+php___method__     __method__
+php___namespace__  __namespace__
+
+# ----- Type-checking built-ins -----
+php_is_array       is_array
+php_is_bool        is_bool
+php_is_callable    is_callable
+php_is_countable   is_countable
+php_is_dir         is_dir
+php_is_file        is_file
+php_is_float       is_float
+php_is_int         is_int
+php_is_integer     is_integer
+php_is_iterable    is_iterable
+php_is_long        is_long
+php_is_null        is_null
+php_is_numeric     is_numeric
+php_is_object      is_object
+php_is_resource    is_resource
+php_is_scalar      is_scalar
+php_is_string      is_string
+
+# ----- Array built-ins -----
+php_array_chunk    array_chunk
+php_array_combine  array_combine
+php_array_count_values array_count_values
+php_array_diff     array_diff
+php_array_fill     array_fill
+php_array_filter   array_filter
+php_array_flip     array_flip
+php_array_intersect array_intersect
+php_array_key_exists array_key_exists
+php_array_keys     array_keys
+php_array_map      array_map
+php_array_merge    array_merge
+php_array_pop      array_pop
+php_array_push     array_push
+php_array_reduce   array_reduce
+php_array_reverse  array_reverse
+php_array_search   array_search
+php_array_shift    array_shift
+php_array_slice    array_slice
+php_array_splice   array_splice
+php_array_sum      array_sum
+php_array_unique   array_unique
+php_array_unshift  array_unshift
+php_array_values   array_values
+php_array_walk     array_walk
+php_in_array       in_array
+php_count          count
+php_sort           sort
+php_rsort          rsort
+php_asort          asort
+php_ksort          ksort
+php_usort          usort
+php_uasort         uasort
+php_uksort         uksort
+
+# ----- String built-ins (no-underscore subset admits cleanly) -----
+php_strlen         strlen
+php_strpos         strpos
+php_strrpos        strrpos
+php_strstr         strstr
+php_strrev         strrev
+php_strtolower     strtolower
+php_strtoupper     strtoupper
+php_substr         substr
+php_trim           trim
+php_ltrim          ltrim
+php_rtrim          rtrim
+php_explode        explode
+php_implode        implode
+php_sprintf        sprintf
+php_printf         printf
+php_ucfirst        ucfirst
+php_ucwords        ucwords
+php_lcfirst        lcfirst
+php_chr            chr
+php_ord            ord
+php_nl2br          nl2br
+
+# ----- String built-ins (underscore-bearing; auto-split today) -----
+php_str_replace    str_replace
+php_str_ireplace   str_ireplace
+php_str_split      str_split
+php_str_repeat     str_repeat
+php_str_pad        str_pad
+php_str_contains   str_contains
+php_str_starts_with str_starts_with
+php_str_ends_with  str_ends_with
+php_preg_match     preg_match
+php_preg_match_all preg_match_all
+php_preg_replace   preg_replace
+php_preg_split     preg_split
+
+# ----- Variable / output built-ins -----
+php_var_dump       var_dump
+php_var_export     var_export
+php_print_r        print_r
+php_get_class      get_class
+php_get_object_vars get_object_vars
+php_get_class_vars get_class_vars
+php_get_class_methods get_class_methods
+php_func_get_args  func_get_args
+php_func_num_args  func_num_args
+
+# ----- File built-ins -----
+php_fopen          fopen
+php_fclose         fclose
+php_fread          fread
+php_fwrite         fwrite
+php_fgets          fgets
+php_feof           feof
+php_fseek          fseek
+php_ftell          ftell
+php_rewind         rewind
+php_file_get_contents file_get_contents
+php_file_put_contents file_put_contents
+php_file_exists    file_exists
+php_unlink         unlink
+php_rename         rename
+php_copy           copy
+php_basename       basename
+php_dirname        dirname
+php_pathinfo       pathinfo
+php_realpath       realpath
+
+# ----- Math built-ins -----
+php_abs            abs
+php_ceil           ceil
+php_floor          floor
+php_round          round
+php_max            max
+php_min            min
+php_pow            pow
+php_sqrt           sqrt
+php_log            log
+php_exp            exp
+php_sin            sin
+php_cos            cos
+php_tan            tan
+php_pi             pi
+php_rand           rand
+php_mt_rand        mt_rand
+php_mt_srand       mt_srand
+
+# ----- Misc -----
+php_define         define
+php_defined        defined
+php_phpinfo        phpinfo
+php_phpversion     phpversion
+php_get_defined_vars get_defined_vars
+php_compact        compact
+php_extract        extract
+php_range          range
+php_serialize      serialize
+php_unserialize    unserialize
+php_json_encode    json_encode
+php_json_decode    json_decode

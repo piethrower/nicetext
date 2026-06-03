@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "name": "shakespeare",
+  "label": "Shakespeare",
+  "casualLabel": "Shakespeare",
+  "preview": "Tarry but a moment, gentle sir, and hear what news the messenger brings.",
+  "chipId": "shak",
+  "notes": "Shakespeare's complete works corpus: large vocabulary (~25K types) and rich sentence-shape variety (~64.7K unique shapes). Random sentence playback. Base block declares the master TWLIST union with vowel augmentation; frequencies=['style'] weights the corpus dict by per-word counts in the source text.",
+  "story": {
+    "style": "shakespeare",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "cmu-alliteration",
+      "cmu-stress",
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved",
+      "rhyme"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/shakespeare-curated.txt"
+  }
+}

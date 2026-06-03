@@ -1,0 +1,184 @@
+# proglang-keywords/sql.twlist
+#
+# language: SQL (ANSI/ISO SQL:2016 reserved + non-reserved keywords + the
+# universally-portable subset of aggregate / scalar functions).
+# source: ISO/IEC 9075 (SQL standard) reserved-word list,
+#   en.wikipedia.org/wiki/List_of_SQL_reserved_words. Vendor-specific
+#   keywords (T-SQL, PL/pgSQL, MySQL, Oracle) are NOT included.
+# notes: dialects vary on which keywords are reserved vs non-reserved;
+#   this list errs toward the union.
+
+# ----- DML -----
+sql_select         select
+sql_insert         insert
+sql_update         update
+sql_delete         delete
+sql_merge          merge
+sql_into           into
+sql_from           from
+sql_where          where
+sql_set            set
+sql_values         values
+sql_returning      returning
+
+# ----- DDL -----
+sql_create         create
+sql_alter          alter
+sql_drop           drop
+sql_truncate       truncate
+sql_table          table
+sql_view           view
+sql_index          index
+sql_database       database
+sql_schema         schema
+sql_sequence       sequence
+sql_trigger        trigger
+sql_procedure      procedure
+sql_function       function
+sql_column         column
+sql_constraint     constraint
+sql_primary        primary
+sql_foreign        foreign
+sql_unique         unique
+sql_key            key
+sql_references     references
+sql_check          check
+sql_default        default
+sql_cascade        cascade
+sql_restrict       restrict
+
+# ----- TCL -----
+sql_begin          begin
+sql_commit         commit
+sql_rollback       rollback
+sql_savepoint      savepoint
+sql_transaction    transaction
+sql_start          start
+sql_end            end
+
+# ----- DCL -----
+sql_grant          grant
+sql_revoke         revoke
+
+# ----- Joins / set ops -----
+sql_join           join
+sql_inner          inner
+sql_outer          outer
+sql_left           left
+sql_right          right
+sql_full           full
+sql_cross          cross
+sql_natural        natural
+sql_on             on
+sql_using          using
+sql_union          union
+sql_intersect      intersect
+sql_except         except
+
+# ----- Filtering / ordering / grouping -----
+sql_and            and
+sql_or             or
+sql_not            not
+sql_in             in
+sql_between        between
+sql_like           like
+sql_ilike          ilike
+sql_is             is
+sql_null           null
+sql_exists         exists
+sql_any            any
+sql_all            all
+sql_some           some
+sql_distinct       distinct
+sql_group          group
+sql_by             by
+sql_having         having
+sql_order          order
+sql_asc            asc
+sql_desc           desc
+sql_limit          limit
+sql_offset         offset
+sql_fetch          fetch
+sql_first          first
+sql_last           last
+sql_next           next
+sql_rows           rows
+sql_only           only
+sql_top            top
+
+# ----- Conditional -----
+sql_case           case
+sql_when           when
+sql_then           then
+sql_else           else
+
+# ----- Types -----
+sql_int            int
+sql_integer        integer
+sql_smallint       smallint
+sql_bigint         bigint
+sql_decimal        decimal
+sql_numeric        numeric
+sql_real           real
+sql_float          float
+sql_double         double
+sql_precision      precision
+sql_char           char
+sql_varchar        varchar
+sql_text           text
+sql_clob           clob
+sql_blob           blob
+sql_date           date
+sql_time           time
+sql_timestamp      timestamp
+sql_interval       interval
+sql_boolean        boolean
+
+# ----- Literal values -----
+sql_true           true
+sql_false          false
+sql_unknown        unknown
+
+# ----- Aggregate functions -----
+sql_count          count
+sql_sum            sum
+sql_avg            avg
+sql_min            min
+sql_max            max
+sql_stddev         stddev
+sql_variance       variance
+
+# ----- Scalar functions -----
+sql_coalesce       coalesce
+sql_nullif         nullif
+sql_cast           cast
+sql_convert        convert
+sql_substring      substring
+sql_position       position
+sql_trim           trim
+sql_upper          upper
+sql_lower          lower
+sql_length         length
+sql_concat         concat
+sql_extract        extract
+sql_current_date   current_date
+sql_current_time   current_time
+sql_current_timestamp current_timestamp
+sql_current_user   current_user
+
+# ----- Other reserved words -----
+sql_as             as
+sql_with           with
+sql_recursive      recursive
+sql_window         window
+sql_partition      partition
+sql_over           over
+sql_row            row
+sql_rownum         rownum
+sql_identity       identity
+sql_autoincrement  autoincrement
+sql_to             to
+sql_for            for
+sql_user           user
+sql_session_user   session_user
+sql_system_user    system_user

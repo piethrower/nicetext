@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'">
+  <title>NiceText, smuggle a secret, hope nobody notices</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/nicetext.css">
+  <script src="js/theme.js"></script>
+  <script src="js/runtime-check.js"></script>
+  <script src="js/matrix-rain.js"></script>
+  <script src="js/coi.js"></script>
+</head>
+<body class="style-mode-premade">
+
+<header class="topbar">
+  <a class="home-link" href="index.html" title="Back to home">
+    <svg class="home-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V6z"/>
+      <line x1="7" y1="9" x2="15" y2="9"/>
+      <line x1="7" y1="13" x2="17" y2="13"/>
+    </svg>
+    <h1 data-hacker-text="./nicetext/bin/a.out">NiceText</h1>
+  </a>
+  <div class="topbar-actions">
+    <button id="adv-build" class="primary topbar-btn" type="button">
+      <svg class="topbar-btn-icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="8" r="2.25"/>
+        <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"/>
+      </svg>
+      <span class="btn-text">
+        <span class="btn-main" id="adv-build-label">Build</span>
+        <span class="btn-sub">your style</span>
+      </span>
+    </button>
+    <button id="encode-go" class="primary topbar-btn" type="button">
+      <svg class="topbar-btn-icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="12" height="8" rx="1.5"/>
+        <path d="M6 5V3.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V5"/>
+        <line x1="2" y1="8.5" x2="14" y2="8.5"/>
+      </svg>
+      <span class="btn-text">
+        <span class="btn-main" data-hacker-text="wrap">Conceal</span>
+        <span class="btn-sub">a secret</span>
+      </span>
+    </button>
+    <button id="share-go" class="primary topbar-btn" type="button" disabled
+            title="Share the style + cover with a friend (enabled after Conceal or Reveal)">
+      <svg class="topbar-btn-icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 1.5L1.5 7l5 1.5L8 13l1.5-4.5z"/>
+        <path d="M14.5 1.5L6.5 8.5"/>
+      </svg>
+      <span class="btn-text">
+        <span class="btn-main" data-hacker-text="share">Share</span>
+        <span class="btn-sub">two parts</span>
+      </span>
+    </button>
+    <button id="decode-go" class="primary topbar-btn" type="button">
+      <svg class="topbar-btn-icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="6.5" cy="6.5" r="4.5"/>
+        <line x1="10" y1="10" x2="13.5" y2="13.5"/>
+      </svg>
+      <span class="btn-text">
+        <span class="btn-main" data-hacker-text="unwrap">Reveal</span>
+        <span class="btn-sub">a secret</span>
+      </span>
+    </button>
+  </div>
+  <button type="button" class="topbar-tutorial-btn" id="topbar-tutorial-toggle" title="Toggle tutorial">
+    <span class="topbar-tutorial-glyph">?</span>
+  </button>
+  <button type="button" class="theme-toggle" id="theme-toggle"
+          aria-label="Toggle dark mode"
+          title="Toggle dark mode">
+    <svg class="theme-icon theme-icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="8" r="3"/>
+      <path d="M8 1.5v1.5M8 13v1.5M1.5 8h1.5M13 8h1.5M3.05 3.05l1.06 1.06M11.9 11.9l1.05 1.05M3.05 12.95l1.06-1.05M11.9 4.1l1.05-1.05"/>
+    </svg>
+    <svg class="theme-icon theme-icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/>
+    </svg>
+  </button>
+  <div id="navbar-status" class="status" aria-live="polite"></div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Section">
+  <button type="button" role="tab" id="tab-style"  data-tab="style"  aria-selected="true"  aria-controls="panel-style">Story Style</button>
+  <button type="button" role="tab" id="tab-secret" data-tab="secret" aria-selected="false" aria-controls="panel-secret">Secrets or Silliness</button>
+  <button type="button" role="tab" id="tab-cover"  data-tab="cover"  aria-selected="false" aria-controls="panel-cover">The Cover Story</button>
+  <button type="button" role="tab" id="tab-eve"    data-tab="eve"    aria-selected="false" aria-controls="panel-eve">Eve</button>
+</nav>
+
+
+<section class="panel style" id="panel-style" role="tabpanel" aria-labelledby="tab-style">
+  <div class="panel-header">
+    <h2 class="panel-h2"><span data-hacker-text="/etc/sys.conf">Story Style</span><small class="panel-subtitle" id="tab-style-subtitle"></small></h2>
+    <div class="panel-header-tools">
+      <div class="style-mode-toggle" role="tablist" aria-label="Style mode">
+        <button type="button" role="tab" id="style-mode-premade"  data-style-mode="premade"  aria-selected="true">Premade</button>
+        <button type="button" role="tab" id="style-mode-custom"   data-style-mode="custom"   aria-selected="false">Custom</button>
+        <button type="button" role="tab" id="style-mode-pro"      data-style-mode="pro"      aria-selected="false">Pro</button>
+      </div>
+      <div class="actions">
+        <button id="style-copy" class="icon-btn" type="button" title="Copy this style to the clipboard">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2.5" y="4.5" width="9" height="10" rx="1.5"/>
+            <path d="M5.5 4.5V3a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1.5"/>
+          </svg>
+          <span class="icon-btn-label">Copy</span>
+        </button>
+        <button id="style-paste" class="icon-btn" type="button" title="Paste a style from the clipboard">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="10" height="11" rx="1.5"/>
+            <rect x="5.5" y="1.5" width="5" height="3" rx="0.6"/>
+          </svg>
+          <span class="icon-btn-label">Paste</span>
+        </button>
+        <label class="file-load icon-btn" title="Load a style from .byos.json">
+          <input type="file" id="style-file" accept=".json,application/json" autocomplete="off">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Load</span>
+        </label>
+        <button id="style-download" class="icon-btn" title="Save this style as .byos.json">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="style-meta" class="panel-meta"></div>
+  <div class="tab-content">
+  <div class="style-chips" id="style-chips"></div>
+  <div class="advanced-body" id="advanced-body">
+  <div class="adv-section-row">Sentence model</div>
+  <div class="adv-section" id="adv-corpus-grid">
+      <span class="adv-row-label" id="adv-sample-row">Sample text:</span>
+      <div class="adv-row-body">
+        <select id="adv-story-sel" autocomplete="off">
+          <!-- Populated at startup from cardsRegistry by
+               populateStoryDropdown() in js/app.js. -->
+        </select>
+        <div class="adv-row-desc" id="adv-sample-desc">The Cover Story will mimic the sentence shapes of a sample text.</div>
+      </div>
+      <div class="adv-row-full adv-stack-row" id="adv-custom-row" hidden>
+        <textarea id="adv-custom-text" rows="6" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Paste, type, or load a sample text here."></textarea>
+        <div class="adv-stack-footer">
+          <span class="adv-custom-status" id="adv-custom-status">No sample text loaded.</span>
+          <button type="button" class="info-btn" id="adv-corpus-info-toggle"
+                  aria-expanded="false" aria-controls="adv-corpus-info-body"
+                  title="What kind of text works best?">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="8" r="6.25"/>
+              <path d="M8 7.25v4"/>
+              <circle cx="8" cy="5" r="0.45" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
+        </div>
+        <div class="actions">
+          <button id="adv-custom-share" class="icon-btn" type="button" title="Share via your device's share sheet">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11.5" cy="3.5" r="1.5"/>
+              <circle cx="4.5" cy="8" r="1.5"/>
+              <circle cx="11.5" cy="12.5" r="1.5"/>
+              <path d="M6 7l4-3"/>
+              <path d="M6 9l4 3"/>
+            </svg>
+            <span class="icon-btn-label">Share</span>
+          </button>
+          <button id="adv-custom-copy" class="icon-btn" type="button" title="Copy to clipboard">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2.5" y="4.5" width="9" height="10" rx="1.5"/>
+              <path d="M5.5 4.5V3a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1.5"/>
+            </svg>
+            <span class="icon-btn-label">Copy</span>
+          </button>
+          <button id="adv-custom-paste" class="icon-btn" type="button" title="Paste from clipboard">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="10" height="11" rx="1.5"/>
+              <rect x="5.5" y="1.5" width="5" height="3" rx="0.6"/>
+            </svg>
+            <span class="icon-btn-label">Paste</span>
+          </button>
+          <label class="file-load icon-btn" title="Load a file">
+            <input type="file" id="adv-custom-file" autocomplete="off">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+              <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+            </svg>
+            <span class="icon-btn-label">Load</span>
+          </label>
+          <button id="adv-custom-download" class="icon-btn" type="button" title="Save to file">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+              <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+            </svg>
+            <span class="icon-btn-label">Save</span>
+          </button>
+          <button id="adv-custom-clear" class="icon-btn" type="button" title="Clear">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4l8 8M12 4l-8 8"/>
+            </svg>
+            <span class="icon-btn-label">Clear</span>
+          </button>
+          <button id="adv-custom-view-go" class="icon-btn" type="button" title="View at full width">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 6V3a1 1 0 0 1 1-1h3"/>
+              <path d="M14 6V3a1 1 0 0 0-1-1h-3"/>
+              <path d="M2 10v3a1 1 0 0 0 1 1h3"/>
+              <path d="M14 10v3a1 1 0 0 1-1 1h-3"/>
+            </svg>
+            <span class="icon-btn-label">View</span>
+          </button>
+        </div>
+        <div class="adv-info-body" id="adv-corpus-info-body" hidden>
+          <p>Best results come from plain text by a single author, several paragraphs long, in the language and tone you want the cover stories to mimic.</p>
+          <p>Public-domain text sources to download from:</p>
+          <ul>
+            <li><a href="https://www.gutenberg.org" target="_blank" rel="noopener">Project Gutenberg</a>: plain-text classics, decades of public-domain literature.</li>
+            <li><a href="https://standardebooks.org" target="_blank" rel="noopener">Standard Ebooks</a>: curated, cleaned-up versions of Gutenberg titles.</li>
+            <li><a href="https://wikisource.org" target="_blank" rel="noopener">Wikisource</a>: historical documents and shorter pieces.</li>
+          </ul>
+          <p>If you download from Gutenberg, trimming the license preamble and trailer (the all-caps notices at the start and end) gives cleaner output. Otherwise the parser reads it all.</p>
+          <p>Any file works. The parser ignores binary noise and short stray strings, so PDFs, eBooks, even executables can be uploaded. Text-heavy files (.txt, .md, scraped HTML, .epub stripped of markup) produce the cleanest sentence patterns. Larger inputs give richer sentence-shape variety.</p>
+        </div>
+      </div>
+      <span class="adv-row-label" id="adv-scope-row">Sentence order:</span>
+      <div class="adv-row-body">
+        <select id="adv-scope-toggle" autocomplete="off">
+          <option value="sequential">Whole sample as one big model</option>
+          <option value="random">Split sample into sentence-level models</option>
+        </select>
+        <div class="adv-row-desc">Whole-model output keeps the original sentence sequence. Split-model output mixes and matches sentence shapes.</div>
+      </div>
+      <span class="adv-row-label" id="adv-vocab-row">Vocabulary:</span>
+      <div class="adv-row-body">
+        <select id="adv-vocab-toggle" autocomplete="off">
+          <option value="corpus">Limit to words found in sample only</option>
+          <option value="base">Expand to include codebook words</option>
+        </select>
+        <div class="adv-row-desc">Limit word choices to those in the sample text, or expand the vocabulary to include sources you select in the Codebook below. "Mary had a little lamb" might become "Mary had a white snow" (limited) or "Xavier owned a parsnickety armadillo" (expanded).</div>
+      </div>
+    </div>
+  <div class="adv-section-row">Codebook</div>
+  <div class="adv-section" id="adv-sources-grid">
+    <!-- Rows rendered by js/app.js renderAdvancedSourcesTable(). -->
+  </div>
+  <div class="adv-stack-row adv-row-full" id="adv-twlist-row" hidden>
+      <textarea id="adv-twlist-text" rows="6" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Paste, type, or load a list of type,word lines, one per row. Bad lines are commented out automatically."></textarea>
+      <div class="adv-stack-footer">
+        <span class="adv-custom-status" id="adv-twlist-status">No word-list loaded.</span>
+        <button type="button" class="info-btn" id="adv-twlist-info-toggle"
+                aria-expanded="false" aria-controls="adv-twlist-info-body"
+                title="What formats are accepted?">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="8" r="6.25"/>
+            <path d="M8 7.25v4"/>
+            <circle cx="8" cy="5" r="0.45" fill="currentColor" stroke="none"/>
+          </svg>
+        </button>
+      </div>
+      <div class="actions">
+        <button id="adv-twlist-share" class="icon-btn" type="button" title="Share via your device's share sheet">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11.5" cy="3.5" r="1.5"/>
+            <circle cx="4.5" cy="8" r="1.5"/>
+            <circle cx="11.5" cy="12.5" r="1.5"/>
+            <path d="M6 7l4-3"/>
+            <path d="M6 9l4 3"/>
+          </svg>
+          <span class="icon-btn-label">Share</span>
+        </button>
+        <button id="adv-twlist-copy" class="icon-btn" type="button" title="Copy to clipboard">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2.5" y="4.5" width="9" height="10" rx="1.5"/>
+            <path d="M5.5 4.5V3a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1.5"/>
+          </svg>
+          <span class="icon-btn-label">Copy</span>
+        </button>
+        <button id="adv-twlist-paste" class="icon-btn" type="button" title="Paste from clipboard">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="10" height="11" rx="1.5"/>
+            <rect x="5.5" y="1.5" width="5" height="3" rx="0.6"/>
+          </svg>
+          <span class="icon-btn-label">Paste</span>
+        </button>
+        <label class="file-load icon-btn" title="Load a file">
+          <input type="file" id="adv-twlist-file" autocomplete="off">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Load</span>
+        </label>
+        <button id="adv-twlist-download" class="icon-btn" type="button" title="Save to file">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Save</span>
+        </button>
+        <button id="adv-twlist-clear" class="icon-btn" type="button" title="Clear">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4l8 8M12 4l-8 8"/>
+          </svg>
+          <span class="icon-btn-label">Clear</span>
+        </button>
+        <button id="adv-twlist-view-go" class="icon-btn" type="button" title="View at full width">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 6V3a1 1 0 0 1 1-1h3"/>
+            <path d="M14 6V3a1 1 0 0 0-1-1h-3"/>
+            <path d="M2 10v3a1 1 0 0 0 1 1h3"/>
+            <path d="M14 10v3a1 1 0 0 1-1 1h-3"/>
+          </svg>
+          <span class="icon-btn-label">View</span>
+        </button>
+      </div>
+    </div>
+    <div class="adv-info-body" id="adv-twlist-info-body" hidden>
+      <p>Custom is most useful for vocabulary the built-ins don't cover: industry jargon, character names from a novel, niche technical terms, regional slang. The eight built-in sources already cover general English; a small hand-curated list usually beats a larger generic one for stylistic flavor.</p>
+      <p>The text area uses one <code>type,word</code> pair per line. Paste, Load, and the editor accept tab- or space-delimited input too; the verify pass rewrites every valid line to the canonical comma form.</p>
+      <p>After paste, file load, or when you tab out of the text area, NiceText validates each line. Bad lines (whitespace inside the type or word, or words the lexer wouldn't accept) are kept in place but prefixed with <code>#</code> so the rest of the build still proceeds. Edit the offending line and tab out again to re-validate.</p>
+      <p>Lines starting with <code>#</code> are treated as comments. The same word may appear with multiple types; types merge naturally during build.</p>
+    </div>
+  <div class="adv-section-row" data-section="word-frequencies">Word frequencies</div>
+  <div class="adv-section" id="adv-freq-grid" data-section="word-frequencies">
+    <!-- Rows rendered by js/app.js renderFreqTable(). -->
+  </div>
+  <div class="adv-section-row">Rewriters</div>
+  <div class="adv-section" id="adv-rewriter-grid">
+    <!-- Rows rendered by js/app.js renderRewriterTable(). -->
+  </div>
+  <div class="adv-section-row">Reformatters</div>
+  <div class="adv-section" id="adv-formatter-grid">
+    <!-- Rows rendered by js/app.js renderFormatterTable(). -->
+  </div>
+  </div>
+  </div>
+  <div id="style-stats" class="panel-stats">
+    <div class="stats-panel" id="stats-panel" aria-live="polite">
+      <div class="stats-panel-header">
+        <span class="stats-panel-title" id="stats-panel-title">Stats</span>
+        <button id="stats-panel-build" class="primary topbar-btn build-attention" type="button" hidden>
+          <svg class="topbar-btn-icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="8" r="2.25"/>
+            <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"/>
+          </svg>
+          <span class="btn-text">
+            <span class="btn-main">Build</span>
+            <span class="btn-sub">your style</span>
+          </span>
+        </button>
+      </div>
+      <dl class="stats-panel-grid" id="stats-panel-base"></dl>
+      <dl class="stats-panel-grid" id="stats-panel-model" hidden></dl>
+      <div class="stats-panel-corpus" id="stats-panel-corpus-wrap" hidden>
+        <span class="stats-panel-subtitle">Base dictionary (pre-corpus)</span>
+        <dl class="stats-panel-grid" id="stats-panel-corpus"></dl>
+      </div>
+      <div class="stats-panel-error" id="stats-panel-error" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- Parking spot for the reusable wrap-controls block (filename / subject /
+     envelope / format stack). Moved into the active modal on open via JS
+     (#share-modal cover section, or #save-cover-modal). Single set of
+     IDs → single wrapState. -->
+<div id="wrap-controls-park" hidden>
+  <div id="wrap-controls" class="share-wrap-config">
+    <div class="share-wrap-row">
+      <label class="share-wrap-field">
+        <span>Subject (optional):</span>
+        <input type="text" id="share-cover-subject" maxlength="64"
+               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+               value="Re: Your request">
+      </label>
+      <label class="share-wrap-field">
+        <span>File name (optional, <span id="share-cover-filename-suffix"></span>):</span>
+        <input type="text" id="share-cover-filename" maxlength="64"
+               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+               placeholder="message">
+      </label>
+    </div>
+    <p class="share-modal-card-note share-wrap-intro">Make the cover story look like an ordinary file. Pick a <strong>File type</strong> below, and optionally stack <strong>Wrapping layers</strong> (base64, gzip, uuencode) on top for extra obscurity. Your friend reverses the wrapping on the receiving end.</p>
+    <div class="share-wrap-row">
+      <div class="share-wrap-stack">
+        <div class="share-wrap-stack-header">
+          <span>Wrapping layers (optional):</span>
+          <button type="button" id="share-cover-stack-add" class="share-wrap-stack-add">+ Add layer</button>
+        </div>
+        <ol id="share-cover-stack-list" class="share-wrap-stack-list"></ol>
+      </div>
+    </div>
+    <div class="share-wrap-row">
+      <label class="share-wrap-field share-wrap-envelope-field">
+        <span>File type:</span>
+        <select id="share-cover-envelope" class="share-wrap-envelope">
+        <optgroup label="Documents">
+          <option value="eml">EML</option>
+          <option value="html">HTML page</option>
+          <option value="html-active">HTML page (active)</option>
+          <option value="markdown">Markdown</option>
+          <option value="nroff">nroff/man</option>
+          <option value="pdf">PDF</option>
+          <option value="none" selected>Plain Text</option>
+          <option value="xml">XML</option>
+        </optgroup>
+        <optgroup label="Programs">
+          <option value="bash">Bash</option>
+          <option value="cpp">C++</option>
+          <option value="go">Go</option>
+          <option value="java">Java</option>
+          <option value="javascript">JavaScript (Node)</option>
+          <option value="perl">Perl</option>
+          <option value="php">PHP</option>
+          <option value="python">Python</option>
+          <option value="ruby">Ruby</option>
+        </optgroup>
+        </select>
+      </label>
+    </div>
+    <p class="share-wrap-hint" id="share-cover-envelope-hint" aria-live="polite"></p>
+    <p class="share-wrap-puzzle" id="share-cover-puzzle" aria-live="polite" hidden></p>
+  </div>
+</div>
+
+<!-- Unified Share modal, opened by the navbar #share-go pill. Two
+     independent sections (Style / Cover) intentionally NEVER bundled
+     into one send: the sender should use different channels for each
+     so an interceptor of one can't trivially Reveal. -->
+<dialog id="share-modal" class="share-style-dialog" aria-labelledby="share-modal-title">
+  <div class="share-style-header">
+    <div class="share-modal-title-group">
+      <h2 id="share-modal-title">Share, in Two Parts</h2>
+      <p class="share-modal-subtitle">Share both the Story Style and the Cover Story with your friend. If you can, use a different channel for each, to make it harder for an eavesdropper to know you're using NiceText.</p>
+    </div>
+    <button type="button" id="share-modal-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body">
+    <section class="share-modal-section share-modal-card" id="share-modal-style-section">
+      <div class="share-modal-card-header">
+        <div class="share-modal-card-titleblock">
+          <h3 class="share-style-section-title">Part 1: Share Story Style</h3>
+          <div class="share-modal-card-meta">
+            <span class="share-modal-card-stats" id="share-style-size"></span>
+          </div>
+          <p class="share-modal-card-note share-modal-card-emphasis">You and your friend both need this style to reveal the Secrets or Silliness from the Cover Story. Without it, reveal will be difficult.</p>
+        </div>
+        <div class="share-card-toolbar actions">
+          <button type="button" id="share-style-mail" class="icon-btn" title="Send via mail">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1.5" y="3.5" width="13" height="9" rx="1"/>
+              <path d="M1.5 4.5L8 9.5L14.5 4.5"/>
+            </svg>
+            <span class="icon-btn-label">Mail</span>
+          </button>
+          <button type="button" id="share-style-os" class="icon-btn" title="Share via your device's share sheet">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11.5" cy="3.5" r="1.5"/>
+              <circle cx="4.5" cy="8" r="1.5"/>
+              <circle cx="11.5" cy="12.5" r="1.5"/>
+              <path d="M6 7l4-3"/>
+              <path d="M6 9l4 3"/>
+            </svg>
+            <span class="icon-btn-label">Share</span>
+          </button>
+        </div>
+      </div>
+      <div class="share-wrap-row">
+        <label class="share-wrap-field">
+          <span>Subject (optional):</span>
+          <input type="text" id="share-style-subject" maxlength="64"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                 value="Sharing a Story Style">
+        </label>
+        <label class="share-wrap-field">
+          <span>File name (optional, .json):</span>
+          <input type="text" id="share-style-filename" maxlength="64"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                 placeholder="story-style">
+        </label>
+      </div>
+      <p class="share-style-status" id="share-style-status" aria-live="polite"></p>
+      <p class="share-modal-card-note" id="share-style-canonical-slot"></p>
+    </section>
+
+    <section class="share-modal-section share-modal-card" id="share-modal-cover-section">
+      <div class="share-modal-card-header">
+        <div class="share-modal-card-titleblock">
+          <h3 class="share-style-section-title">Part 2: Share The Cover Story</h3>
+          <div class="share-modal-card-meta">
+            <span class="share-modal-card-stats" id="share-cover-size"></span>
+          </div>
+          <p class="share-modal-card-note share-modal-card-emphasis">This is what your friend reads. The Secrets or Silliness are woven into it. The style from Part 1 is the key to take them back out.</p>
+        </div>
+        <div class="share-card-toolbar actions">
+          <button type="button" id="share-cover-mail" class="icon-btn" title="Send via mail">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1.5" y="3.5" width="13" height="9" rx="1"/>
+              <path d="M1.5 4.5L8 9.5L14.5 4.5"/>
+            </svg>
+            <span class="icon-btn-label">Mail</span>
+          </button>
+          <button type="button" id="share-cover-os" class="icon-btn" title="Share via your device's share sheet">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11.5" cy="3.5" r="1.5"/>
+              <circle cx="4.5" cy="8" r="1.5"/>
+              <circle cx="11.5" cy="12.5" r="1.5"/>
+              <path d="M6 7l4-3"/>
+              <path d="M6 9l4 3"/>
+            </svg>
+            <span class="icon-btn-label">Share</span>
+          </button>
+        </div>
+      </div>
+      <p class="share-cover-custom-note" id="share-cover-custom-note" hidden>
+        Your friend will also need the corpus you provided. Send it
+        however you'd send any other text.
+      </p>
+      <div class="share-wrap-mount" id="share-modal-wrap-mount"></div>
+      <p class="share-style-status" id="share-cover-status" aria-live="polite"></p>
+      <p class="share-modal-card-note" id="share-cover-canonical-slot"></p>
+    </section>
+  </div>
+</dialog>
+
+<!-- Reveal modal, staging surface for the Reveal pillbox. Mirrors
+     the #share-modal two-card layout (style + cover) with Load
+     buttons instead of Share/Save, and a final "Reveal" action button
+     gated on cover-non-empty. -->
+<dialog id="reveal-modal" class="share-style-dialog" aria-labelledby="reveal-modal-title">
+  <div class="share-style-header">
+    <div class="share-modal-title-group">
+      <h2 id="reveal-modal-title">Reveal a Secret or Silliness, in Two Parts</h2>
+      <p class="share-modal-subtitle">To reveal the smuggled Secret or Silliness, match the Story Style to the one used to create The Cover Story.</p>
+    </div>
+    <button type="button" id="reveal-modal-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body">
+    <section class="share-modal-section share-modal-card" id="reveal-modal-style-section">
+      <div class="share-modal-card-header">
+        <div class="share-modal-card-titleblock">
+          <h3 class="share-style-section-title">Story Style</h3>
+          <div class="share-modal-card-meta">
+            <span class="share-modal-card-stats" id="reveal-style-summary"></span>
+          </div>
+        </div>
+        <div class="share-card-toolbar actions">
+          <button type="button" id="reveal-style-paste" class="icon-btn" title="Paste a style from the clipboard">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="10" height="11" rx="1.5"/>
+              <rect x="5.5" y="1.5" width="5" height="3" rx="0.6"/>
+            </svg>
+            <span class="icon-btn-label">Paste</span>
+          </button>
+          <button type="button" id="reveal-style-load" class="icon-btn" title="Load a style file">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+              <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+            </svg>
+            <span class="icon-btn-label">Load</span>
+          </button>
+        </div>
+      </div>
+      <p class="share-modal-card-note">
+        Or <a href="#panel-style" id="reveal-style-open-panel">open the Story Style panel</a> for finer control over premade cards and custom builds.
+      </p>
+    </section>
+
+    <section class="share-modal-section share-modal-card" id="reveal-modal-cover-section">
+      <div class="share-modal-card-header">
+        <div class="share-modal-card-titleblock">
+          <h3 class="share-style-section-title">Cover Story</h3>
+          <div class="share-modal-card-meta">
+            <span class="share-modal-card-stats" id="reveal-cover-summary"></span>
+          </div>
+        </div>
+        <div class="share-card-toolbar actions">
+          <button type="button" id="reveal-cover-paste" class="icon-btn" title="Paste from clipboard">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="10" height="11" rx="1.5"/>
+              <rect x="5.5" y="1.5" width="5" height="3" rx="0.6"/>
+            </svg>
+            <span class="icon-btn-label">Paste</span>
+          </button>
+          <button type="button" id="reveal-cover-load" class="icon-btn" title="Load a cover story file">
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+              <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+            </svg>
+            <span class="icon-btn-label">Load</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <menu class="modal-actions">
+      <button type="button" id="reveal-modal-go" class="share-style-action primary">Reveal</button>
+    </menu>
+    <p class="share-style-status" id="reveal-modal-helper" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<!-- Save-cover modal, opened by the cover toolbar's Save (download)
+     button. Save-only intent; reuses the same wrap-controls element
+     (moved in on open). -->
+<dialog id="save-cover-modal" class="share-style-dialog" aria-labelledby="save-cover-modal-title">
+  <div class="share-style-header">
+    <h2 id="save-cover-modal-title">Save Cover Story</h2>
+    <button type="button" id="save-cover-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body">
+    <p class="share-cover-size" id="save-cover-size"></p>
+    <div class="share-wrap-mount" id="save-modal-wrap-mount"></div>
+    <menu class="modal-actions">
+      <button type="button" id="save-cover-go" class="share-style-action primary">Save</button>
+    </menu>
+    <p class="share-style-status" id="save-cover-status" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="save-secret-modal" class="share-style-dialog" aria-labelledby="save-secret-modal-title">
+  <div class="share-style-header">
+    <h2 id="save-secret-modal-title">Save Secret or Silliness to Disk</h2>
+    <button type="button" id="save-secret-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body">
+    <p class="share-style-warning">
+      The file will contain the unmodified contents of the Secrets tab.
+      Anyone with access to your downloads folder can read it. Best
+      practice: encrypt with another tool first, or conceal the
+      contents in a cover story before saving.
+    </p>
+    <p class="share-cover-size" id="save-secret-size"></p>
+    <label class="share-wrap-field">
+      <span>File name:</span>
+      <input type="text" id="save-secret-filename" maxlength="128"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+             value="source.bin">
+    </label>
+    <menu class="modal-actions">
+      <button type="button" id="save-secret-cancel" class="share-style-action">Cancel</button>
+      <button type="button" id="save-secret-go" class="share-style-action primary">Save</button>
+    </menu>
+    <p class="share-style-status" id="save-secret-status" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="share-twlist-modal" class="share-style-dialog" aria-labelledby="share-twlist-modal-title">
+  <div class="share-style-header">
+    <h2 id="share-twlist-modal-title">Share Word List with a Friend</h2>
+    <button type="button" id="share-twlist-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body">
+    <p class="share-style-warning">
+      <strong>WARNING:</strong> A custom word list is the type/word
+      pairs you provide so NiceText can choose between alternatives
+      when concealing. It's not the secret and it's not the cover
+      story, but together with the matching style and cover story
+      it's enough for anyone to rebuild your decoder. If you're
+      using NiceText to smuggle a message, share the word list, the
+      style, and the cover story through different channels. Don't
+      label any of them with words like "NiceText", "word list", or
+      "cover story" either.
+    </p>
+    <p class="share-cover-size" id="share-twlist-size"></p>
+    <menu class="modal-actions">
+      <button type="button" id="share-twlist-mail" class="share-style-action">Send via mail…</button>
+      <button type="button" id="share-twlist-os" class="share-style-action primary" hidden>Share</button>
+    </menu>
+    <p class="share-style-status" id="share-twlist-share-status" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="share-corpus-modal" class="share-style-dialog" aria-labelledby="share-corpus-modal-title">
+  <div class="share-style-header">
+    <h2 id="share-corpus-modal-title">Share Corpus with a Friend</h2>
+    <button type="button" id="share-corpus-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body">
+    <p class="share-style-warning">
+      <strong>WARNING:</strong> A custom corpus is the text you provide
+      for NiceText to learn its vocabulary and sentence patterns. It's
+      not the secret and it's not the cover story, but together with
+      the matching style and cover story it's enough for anyone to
+      rebuild your decoder. If you're using NiceText to smuggle a
+      message, share the corpus, the style, and the cover story
+      through different channels. Don't label any of them with words
+      like "NiceText", "corpus", or "cover story" either.
+    </p>
+    <p class="share-cover-size" id="share-corpus-size"></p>
+    <menu class="modal-actions">
+      <button type="button" id="share-corpus-mail" class="share-style-action">Send via mail…</button>
+      <button type="button" id="share-corpus-os" class="share-style-action primary" hidden>Share</button>
+    </menu>
+    <p class="share-style-status" id="share-corpus-status" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<section class="panel secret" id="panel-secret" role="tabpanel" aria-labelledby="tab-secret">
+    <div class="panel-header">
+      <h2 class="panel-h2"><span data-hacker-text="payload">Secrets or Silliness</span><small class="panel-subtitle">The content you'll conceal, a real secret that you encrypted using some other strong encryption tool, or just silliness.</small></h2>
+      <div class="actions">
+        <label class="file-load icon-btn" title="Load a file">
+          <input type="file" id="source-file" multiple>
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Load</span>
+        </label>
+        <button id="random-bytes-trigger" class="icon-btn" type="button" title="Make a random secret">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2.5" y="2.5" width="11" height="11" rx="2"/>
+            <circle cx="5.5" cy="5.5" r="0.9" fill="currentColor"/>
+            <circle cx="10.5" cy="10.5" r="0.9" fill="currentColor"/>
+          </svg>
+          <span class="icon-btn-label">Random</span>
+        </button>
+        <button id="source-download" class="icon-btn" title="Save to file">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Save</span>
+        </button>
+        <button id="source-clear" class="icon-btn" title="Clear">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4l8 8M12 4l-8 8"/>
+          </svg>
+          <span class="icon-btn-label">Clear</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="source-meta" class="panel-meta"></div>
+
+    <textarea id="source-text" rows="5" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Type silly text here.&#10;Or click Random for nonsense bytes.&#10;Or Load a real secret you already encrypted with another tool.&#10;*** NiceText is a playful disguise, not encryption. ***"></textarea>
+
+    <div id="source-stats" class="panel-stats"></div>
+  </section>
+
+<section class="panel story" id="panel-cover" role="tabpanel" aria-labelledby="tab-cover">
+    <div class="panel-header">
+      <h2 class="panel-h2"><span data-hacker-text="output.txt">The Cover Story</span><small class="panel-subtitle" id="tab-cover-subtitle"></small></h2>
+      <div class="actions">
+        <button id="cover-copy" class="icon-btn" title="Copy to clipboard">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2.5" y="4.5" width="9" height="10" rx="1.5"/>
+            <path d="M5.5 4.5V3a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1.5"/>
+          </svg>
+          <span class="icon-btn-label">Copy</span>
+        </button>
+        <button id="cover-paste" class="icon-btn" title="Paste from clipboard">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="10" height="11" rx="1.5"/>
+            <rect x="5.5" y="1.5" width="5" height="3" rx="0.6"/>
+          </svg>
+          <span class="icon-btn-label">Paste</span>
+        </button>
+        <label class="file-load icon-btn" title="Load a file">
+          <input type="file" id="cover-file" multiple>
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Load</span>
+        </label>
+        <button id="cover-download" class="icon-btn" title="Save to file">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v8m0 0l-3-3m3 3l3-3"/>
+            <path d="M2 12v1.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V12"/>
+          </svg>
+          <span class="icon-btn-label">Save</span>
+        </button>
+        <button id="cover-clear" class="icon-btn" title="Clear">
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4l8 8M12 4l-8 8"/>
+          </svg>
+          <span class="icon-btn-label">Clear</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="cover-meta" class="panel-meta"></div>
+
+    <textarea id="cover-text" rows="5" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Click Conceal to fill this with a cover story.&#10;Or paste / Load a cover story to reveal the hidden secret or silliness when matched with the original story style.&#10;*** NiceText is a playful disguise, not encryption. ***"></textarea>
+
+    <div id="cover-stats" class="panel-stats"></div>
+  </section>
+
+<dialog id="eve-busy-dialog" class="share-style-dialog eve-busy-dialog" aria-labelledby="eve-busy-title">
+  <div class="share-style-header">
+    <div class="share-modal-title-group">
+      <h2 id="eve-busy-title">Eve is running</h2>
+    </div>
+    <button type="button" id="eve-busy-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body eve-busy-body" aria-live="polite">
+    <progress class="eve-progress-banner-bar" aria-label="Eve analysis progress"></progress>
+    <p class="eve-progress-banner-test" id="eve-progress-banner-test"></p>
+    <p class="eve-progress-banner-detail" id="eve-progress-banner-detail"></p>
+    <div id="eve-busy-rows" class="progress-modal-rows" hidden></div>
+  </div>
+  <menu class="modal-actions eve-busy-actions">
+    <button type="button" id="eve-progress-banner-cancel" class="share-style-action primary">Cancel</button>
+  </menu>
+</dialog>
+
+<section class="panel eve" id="panel-eve" role="tabpanel" aria-labelledby="tab-eve">
+    <div class="panel-header">
+      <h2 class="panel-h2"><span data-hacker-text="eavesdrop.sh">Eve</span> <small class="panel-h2-aside">"An Eavesdropper"</small><small class="panel-subtitle" id="tab-eve-subtitle"></small></h2>
+      <div class="panel-header-tools">
+        <div class="actions">
+          <button id="eve-go" class="primary" type="button" disabled title="Analyze the loaded cover story (load one in The Cover Story first)">Go</button>
+          <button id="eve-cancel" type="button" hidden title="Cancel the in-progress analysis">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="eve-meta" class="panel-meta"></div>
+
+    <div class="eve-controls">
+      <label class="eve-slice-label" for="eve-slice-size">Process</label>
+      <select id="eve-slice-size" autocomplete="off"></select>
+      <span class="eve-slice-hint" id="eve-slice-hint"></span>
+    </div>
+
+    <div id="eve-log" class="eve-log" aria-live="polite">
+      <p class="eve-log-placeholder">Load a cover story in <em>The Cover Story</em> tab, then click <strong>Go</strong> to begin analysis.</p>
+    </div>
+
+    <div id="eve-stats" class="panel-stats"></div>
+  </section>
+
+<footer class="disclaimer-footer">
+  <p class="disclaimer">
+    <button type="button" class="disclaimer-link" id="disclaimer-reopen">Disclaimer:</button><small> For entertainment purposes only. No guarantee of privacy, security, secrecy, recoverability, cipher strength, legality, morality, or anything else. Nothing here is legal advice, talk to a real lawyer. Do not use in any circumstance that could cause you or others harm. Use at your own risk.</small>
+  </p>
+</footer>
+
+<dialog id="make-modal" class="confirm-dialog" aria-labelledby="make-modal-title">
+  <button type="button" id="make-modal-close" class="dialog-close" aria-label="Close">&times;</button>
+  <h2 id="make-modal-title">Make a random secret</h2>
+  <label for="random-bytes-count">How many bytes?</label>
+  <input type="number" id="random-bytes-count" value="128" min="1" step="1">
+  <label for="random-bytes-format">Format</label>
+  <select id="random-bytes-format">
+    <option value="pure" selected>Pure random (exact length)</option>
+    <option value="openssl">OpenSSL enc -aes-256-cbc -salt</option>
+    <option value="veracrypt">VeraCrypt container</option>
+  </select>
+  <p id="random-bytes-hint" aria-live="polite"></p>
+  <menu class="modal-actions">
+    <button type="button" id="random-bytes-cancel">Cancel</button>
+    <button type="button" id="random-bytes-go" class="primary">Generate</button>
+  </menu>
+</dialog>
+
+<dialog id="first-visit-disclaimer" class="confirm-dialog disclaimer-dialog" aria-labelledby="first-visit-disclaimer-title">
+  <button type="button" id="first-visit-disclaimer-close" class="dialog-close" aria-label="Close">&times;</button>
+  <h1 id="first-visit-disclaimer-title" class="disclaimer-hero">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V6z"/>
+      <line x1="7" y1="9" x2="15" y2="9"/>
+      <line x1="7" y1="13" x2="17" y2="13"/>
+    </svg>
+    <span data-hacker-text="./nicetext/bin/a.out">NiceText</span>
+  </h1>
+  <p class="disclaimer">
+    <strong>Disclaimer:</strong> For entertainment purposes only. No
+    guarantee of privacy, security, secrecy, recoverability, cipher
+    strength, legality, morality, or anything else. Nothing here is
+    legal advice, talk to a real lawyer. Do not use in any
+    circumstance that could cause you or others harm. Use at your own
+    risk.
+  </p>
+  <menu class="modal-actions">
+    <a href="index.html" class="disclaimer-learn-more">Learn more</a>
+    <button type="button" id="first-visit-disclaimer-agree" class="primary">Agree</button>
+  </menu>
+</dialog>
+
+<dialog id="view-modal" class="view-dialog" aria-labelledby="view-modal-title">
+  <div class="view-header">
+    <h2 id="view-modal-title" class="view-title">View</h2>
+    <div class="view-header-right">
+      <div class="view-actions" id="view-modal-actions-slot"></div>
+      <button type="button" id="view-modal-close" class="dialog-close" aria-label="Close">&times;</button>
+    </div>
+  </div>
+  <textarea id="view-modal-body" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+</dialog>
+
+<dialog id="progress-modal" class="share-style-dialog eve-busy-dialog" aria-labelledby="progress-modal-title">
+  <div class="share-style-header">
+    <div class="share-modal-title-group">
+      <h2 id="progress-modal-title">Working...</h2>
+    </div>
+    <button type="button" id="progress-modal-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body eve-busy-body" aria-live="polite">
+    <progress id="progress-modal-bar" class="eve-progress-banner-bar" aria-label="Progress"></progress>
+    <p class="eve-progress-banner-test" id="progress-modal-test"></p>
+    <p class="eve-progress-banner-detail" id="progress-modal-detail"></p>
+    <div id="progress-modal-rows" class="progress-modal-rows" hidden></div>
+  </div>
+  <menu class="modal-actions eve-busy-actions">
+    <button type="button" id="progress-modal-cancel" class="share-style-action primary">Cancel</button>
+  </menu>
+</dialog>
+
+<dialog id="byos-ingress-warning" class="confirm-dialog" aria-labelledby="byos-ingress-warning-title">
+  <button type="button" id="byos-ingress-warning-close" class="dialog-close" aria-label="Close">&times;</button>
+  <h2 id="byos-ingress-warning-title">Heads up, this shared style was adjusted.</h2>
+  <ul id="byos-ingress-warning-list"></ul>
+  <p class="confirm-footnote">
+    If you're trying to read a secret someone sent you with the original style,
+    <strong>Reveal won't work</strong>. Ask the sender to share the byos.json file
+    directly, or use the command line.
+  </p>
+  <menu class="modal-actions">
+    <button type="button" id="byos-ingress-warning-ok" class="primary">OK</button>
+  </menu>
+</dialog>
+
+<dialog id="overwrite-confirm" class="confirm-dialog" aria-labelledby="overwrite-confirm-title">
+  <button type="button" id="overwrite-confirm-close" class="dialog-close" aria-label="Close">&times;</button>
+  <h2 id="overwrite-confirm-title">Replace your current secret?</h2>
+  <p>
+    The recovered secret is <strong>different</strong> from what's
+    already in Your Secret. Replace your current secret with the
+    recovered one?
+  </p>
+  <menu class="modal-actions">
+    <button type="button" id="overwrite-confirm-cancel">Cancel</button>
+    <button type="button" id="overwrite-confirm-replace" class="primary">Replace</button>
+  </menu>
+</dialog>
+
+<dialog id="cover-layer-picker" class="confirm-dialog" aria-labelledby="cover-layer-picker-title">
+  <button type="button" id="cover-layer-picker-close" class="dialog-close" aria-label="Close">&times;</button>
+  <h2 id="cover-layer-picker-title">Unwrap cover story</h2>
+  <p id="cover-layer-picker-detail" class="confirm-detail">
+    The file appears to be wrapped. Check the layers to peel off, then click Unwrap.
+    Unchecked layers stay in the cover text.
+  </p>
+  <ol id="cover-layer-picker-list" class="layer-picker-list"></ol>
+  <p id="cover-layer-picker-fallback" class="layer-picker-fallback" hidden>
+    Strip failed or produced empty output. Showing raw file bytes instead.
+  </p>
+  <menu class="modal-actions">
+    <button type="button" id="cover-layer-picker-cancel">Cancel</button>
+    <button type="button" id="cover-layer-picker-ok" class="primary">Unwrap</button>
+  </menu>
+</dialog>
+
+<dialog id="large-file-routing" class="confirm-dialog" aria-labelledby="large-file-routing-title">
+  <button type="button" id="large-file-routing-close" class="dialog-close" aria-label="Close">&times;</button>
+  <h2 id="large-file-routing-title"></h2>
+  <p id="large-file-routing-size" class="pipeline-consent-size"></p>
+  <p id="large-file-routing-question" class="pipeline-consent-detail"></p>
+  <p id="large-file-routing-status" class="pipeline-consent-status"></p>
+  <menu class="modal-actions">
+    <button type="button" id="large-file-routing-cancel">Cancel</button>
+    <button type="button" id="large-file-routing-load">Load into Browser</button>
+    <button type="button" id="large-file-routing-process" class="primary">Process directly</button>
+  </menu>
+</dialog>
+
+<dialog id="pipeline-consent" class="confirm-dialog" aria-labelledby="pipeline-consent-title">
+  <button type="button" id="pipeline-consent-close" class="dialog-close" aria-label="Close">&times;</button>
+  <h2 id="pipeline-consent-title"></h2>
+  <p id="pipeline-consent-size" class="pipeline-consent-size"></p>
+  <p id="pipeline-consent-detail" class="pipeline-consent-detail"></p>
+  <div class="share-wrap-mount" id="pipeline-consent-wrap-mount"></div>
+  <p id="pipeline-consent-status" class="pipeline-consent-status"></p>
+  <menu class="modal-actions">
+    <button type="button" id="pipeline-consent-cancel">Cancel</button>
+    <button type="button" id="pipeline-consent-ok" class="primary">Run pipeline</button>
+  </menu>
+</dialog>
+
+<dialog id="pipeline-modal" class="share-style-dialog eve-busy-dialog" aria-labelledby="pipeline-modal-title">
+  <div class="share-style-header">
+    <div class="share-modal-title-group">
+      <h2 id="pipeline-modal-title">Pipeline</h2>
+    </div>
+    <button type="button" id="pipeline-modal-close" class="dialog-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="share-style-body eve-busy-body" aria-live="polite">
+    <progress id="pipeline-modal-bar" class="eve-progress-banner-bar" aria-label="Progress"></progress>
+    <p class="eve-progress-banner-test" id="pipeline-modal-test"></p>
+    <p class="eve-progress-banner-detail" id="pipeline-modal-detail"></p>
+    <div id="pipeline-modal-rows" class="progress-modal-rows" hidden></div>
+  </div>
+  <menu class="modal-actions eve-busy-actions">
+    <button type="button" id="pipeline-modal-cancel" class="share-style-action primary">Cancel</button>
+  </menu>
+</dialog>
+
+<aside class="penny-dock" id="penny-dock" aria-label="Penny tutorial">
+  <div id="penny-anchor"></div>
+</aside>
+
+<!-- Canonical descriptions for "Story Style" and "Cover Story". Edit
+     here once; js/app.js clones the template content into every slot
+     marked with the matching id (tab-style-subtitle, tab-cover-subtitle,
+     share-style-canonical-slot, share-cover-canonical-slot). Inline
+     <a> tags clone cleanly into every slot; targets are paper sections
+     in whats-new.html, opened in a new tab so the user's NiceText
+     session isn't dropped. -->
+<template id="canonical-ss">The Story Style is a <a href="whats-new.html#huffman-coding" target="_blank" rel="noopener">codebook</a> used to conceal Secrets or Silliness into Cover Stories and reveal them back. The Story Style does NOT contain your Secrets or Silliness. An eavesdropper can easily identify a shared Story Style file as a NiceText style.</template>
+<template id="canonical-cs">The Cover Story is an entertaining text that playfully conceals your Secrets or Silliness. This is <a href="whats-new.html#earns-its-keep" target="_blank" rel="noopener">steganography, not strong encryption</a>. It decodes like a <a href="whats-new.html#huffman-coding" target="_blank" rel="noopener">simple substitution cipher</a>: each word or phrase stands in for part of the Secret or Silliness. Whether an eavesdropper spots a Cover Story as NiceText output is part of the fun.</template>
+<template id="canonical-eve">An eavesdropper, named Eve, sees the loaded Cover Story and tries to figure out which Story Style parameters were used to generate it. She runs a series of cover-only tests (no descrambling needed) and reports a verdict per setting: <strong>likely</strong>, <strong>unlikely</strong>, or <strong>unknown</strong>.  More sophisticated evesdroppers may use other techniques. Eve is here to just give a flavor the process. 
+</template>
+
+<link rel="stylesheet" href="css/penny.css">
+<script type="module" src="js/app.js"></script>
+<script type="module" src="js/tutorial-script.js"></script>
+<script type="module" src="js/first-visit-disclaimer.js"></script>
+</body>
+</html>

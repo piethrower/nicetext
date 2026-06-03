@@ -1,0 +1,177 @@
+# proglang-keywords/js.twlist
+#
+# language: JavaScript (ECMAScript reserved words + global builtins +
+# common predefined objects).
+# source: tc39.es/ecma262/ (Reserved Words, Global Object), MDN
+#   Web Docs (global builtins). Built-ins limited to language-core
+#   intrinsics that lex as single WORDs.
+# notes: library globals like `console`, `document`, `window`, `fetch`,
+#   `localStorage` are included because they are built into every JS
+#   runtime (browser or Node) without an explicit import. Third-party
+#   library function names are not included.
+
+# ----- Reserved words (current + future + contextual) -----
+js_break           break
+js_case            case
+js_catch           catch
+js_class           class
+js_const           const
+js_continue        continue
+js_debugger        debugger
+js_default         default
+js_delete          delete
+js_do              do
+js_else            else
+js_enum            enum
+js_export          export
+js_extends         extends
+js_false           false
+js_finally         finally
+js_for             for
+js_function        function
+js_if              if
+js_implements      implements
+js_import          import
+js_in              in
+js_instanceof      instanceof
+js_interface       interface
+js_let             let
+js_new             new
+js_null            null
+js_package         package
+js_private         private
+js_protected       protected
+js_public          public
+js_return          return
+js_static          static
+js_super           super
+js_switch          switch
+js_this            this
+js_throw           throw
+js_true            true
+js_try             try
+js_typeof          typeof
+js_var             var
+js_void            void
+js_while           while
+js_with            with
+js_yield           yield
+
+# ----- Contextual keywords -----
+js_as              as
+js_async           async
+js_await           await
+js_from            from
+js_get             get
+js_of              of
+js_set             set
+js_target          target
+js_meta            meta
+
+# ----- Predefined values -----
+js_undefined       undefined
+js_infinity        infinity
+js_nan             nan
+
+# ----- Global constructors and intrinsics -----
+js_object          object
+js_array           array
+js_string          string
+js_number          number
+js_boolean         boolean
+js_bigint          bigint
+js_symbol          symbol
+js_date            date
+js_regexp          regexp
+js_error           error
+js_typeerror       typeerror
+js_referenceerror  referenceerror
+js_syntaxerror     syntaxerror
+js_rangeerror      rangeerror
+js_evalerror       evalerror
+js_urierror        urierror
+js_promise         promise
+js_proxy           proxy
+js_reflect         reflect
+js_map             map
+js_weakmap         weakmap
+js_set             set
+js_weakset         weakset
+js_arraybuffer     arraybuffer
+js_sharedarraybuffer sharedarraybuffer
+js_dataview        dataview
+js_int8array       int8array
+js_uint8array      uint8array
+js_uint8clampedarray uint8clampedarray
+js_int16array      int16array
+js_uint16array     uint16array
+js_int32array      int32array
+js_uint32array     uint32array
+js_float32array    float32array
+js_float64array    float64array
+js_bigint64array   bigint64array
+js_biguint64array  biguint64array
+js_json            json
+js_math            math
+js_globalthis      globalthis
+
+# ----- Common global functions -----
+js_isfinite        isfinite
+js_isnan           isnan
+js_parsefloat      parsefloat
+js_parseint        parseint
+js_encodeuri       encodeuri
+js_encodeuricomponent encodeuricomponent
+js_decodeuri       decodeuri
+js_decodeuricomponent decodeuricomponent
+
+# ----- Universal runtime globals (browser + Node) -----
+js_console         console
+js_settimeout      settimeout
+js_setinterval     setinterval
+js_cleartimeout    cleartimeout
+js_clearinterval   clearinterval
+js_queuemicrotask  queuemicrotask
+js_structuredclone structuredclone
+
+# ----- Browser globals -----
+js_window          window
+js_document        document
+js_navigator       navigator
+js_location        location
+js_history         history
+js_localstorage    localstorage
+js_sessionstorage  sessionstorage
+js_fetch           fetch
+js_xmlhttprequest  xmlhttprequest
+js_event           event
+js_element         element
+js_node            node
+js_blob            blob
+js_file            file
+js_filereader      filereader
+js_formdata        formdata
+js_url             url
+js_urlsearchparams urlsearchparams
+js_headers         headers
+js_request         request
+js_response        response
+js_websocket       websocket
+js_worker          worker
+js_serviceworker   serviceworker
+
+# ----- Node globals -----
+js_global          global
+js_process         process
+js_buffer          buffer
+js_require         require
+js_module          module
+js_exports         exports
+js_filename        filename
+js_dirname         dirname
+
+# ----- Underscore-bearing fragments (auto-split today) -----
+js_max_safe_integer max_safe_integer
+js_min_safe_integer min_safe_integer
+js_positive_infinity positive_infinity
+js_negative_infinity negative_infinity

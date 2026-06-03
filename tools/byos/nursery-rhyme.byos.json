@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "name": "nursery-rhyme",
+  "label": "Nursery Rhyme",
+  "casualLabel": "nursery rhyme",
+  "preview": "Jack and Jill went up the hill, To fetch a pail of water; Jack fell down and broke his crown, And Jill came tumbling after.",
+  "notes": "Mother Goose's Nursery Rhymes (PG 39784). Short rhymed verses with simple vocabulary, common in early-childhood reading. Master TWLIST union plus cmu-syllable so the corpus-dict's slot types carry line-length hints alongside rhyme.",
+  "story": {
+    "style": "nursery-rhyme",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "cmu-alliteration",
+      "cmu-stress",
+      "cmu-syllable",
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved",
+      "rhyme"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/mother-goose-curated.txt"
+  }
+}

@@ -1,0 +1,254 @@
+# proglang-keywords/linux-commands.twlist
+#
+# Common Linux userland command names (GNU coreutils, util-linux,
+# systemd, package managers across major distros, and the network
+# tooling shipped on a typical Linux system). Vendor-specific tools
+# (oracle-rpms, NVIDIA driver utilities, etc.) are NOT included.
+# Source: shadowing the coreutils / util-linux / systemd / iproute2 /
+# net-tools manifests + standard package-manager command sets.
+
+# ----- coreutils (file / directory) -----
+linux-commands_ls         ls
+linux-commands_cat        cat
+linux-commands_cp         cp
+linux-commands_mv         mv
+linux-commands_rm         rm
+linux-commands_mkdir      mkdir
+linux-commands_rmdir      rmdir
+linux-commands_touch      touch
+linux-commands_ln         ln
+linux-commands_chmod      chmod
+linux-commands_chown      chown
+linux-commands_chgrp      chgrp
+linux-commands_pwd        pwd
+linux-commands_cd         cd
+linux-commands_dd         dd
+linux-commands_stat       stat
+linux-commands_install    install
+linux-commands_basename   basename
+linux-commands_dirname    dirname
+linux-commands_readlink   readlink
+linux-commands_realpath   realpath
+linux-commands_tree       tree
+
+# ----- coreutils (text) -----
+linux-commands_head       head
+linux-commands_tail       tail
+linux-commands_less       less
+linux-commands_more       more
+linux-commands_sort       sort
+linux-commands_uniq       uniq
+linux-commands_wc         wc
+linux-commands_cut        cut
+linux-commands_paste      paste
+linux-commands_join       join
+linux-commands_split      split
+linux-commands_tr         tr
+linux-commands_tee        tee
+linux-commands_echo       echo
+linux-commands_printf     printf
+linux-commands_yes        yes
+linux-commands_nl         nl
+linux-commands_od         od
+linux-commands_xxd        xxd
+linux-commands_strings    strings
+linux-commands_diff       diff
+linux-commands_cmp        cmp
+linux-commands_patch      patch
+linux-commands_sdiff      sdiff
+linux-commands_comm       comm
+
+# ----- Search / process text -----
+linux-commands_grep       grep
+linux-commands_egrep      egrep
+linux-commands_fgrep      fgrep
+linux-commands_rgrep      rgrep
+linux-commands_ripgrep    ripgrep
+linux-commands_rg         rg
+linux-commands_awk        awk
+linux-commands_gawk       gawk
+linux-commands_sed        sed
+linux-commands_find       find
+linux-commands_xargs      xargs
+linux-commands_locate     locate
+linux-commands_updatedb   updatedb
+linux-commands_which      which
+linux-commands_whereis    whereis
+linux-commands_type       type
+linux-commands_file       file
+
+# ----- Archives / compression -----
+linux-commands_tar        tar
+linux-commands_gzip       gzip
+linux-commands_gunzip     gunzip
+linux-commands_bzip2      bzip2
+linux-commands_bunzip2    bunzip2
+linux-commands_xz         xz
+linux-commands_unxz       unxz
+linux-commands_zstd       zstd
+linux-commands_zip        zip
+linux-commands_unzip      unzip
+linux-commands_7z         7z
+linux-commands_cpio       cpio
+
+# ----- Process / job control -----
+linux-commands_ps         ps
+linux-commands_top        top
+linux-commands_htop       htop
+linux-commands_btop       btop
+linux-commands_pidof      pidof
+linux-commands_pgrep      pgrep
+linux-commands_pkill      pkill
+linux-commands_kill       kill
+linux-commands_killall    killall
+linux-commands_nice       nice
+linux-commands_renice     renice
+linux-commands_nohup      nohup
+linux-commands_strace     strace
+linux-commands_ltrace     ltrace
+linux-commands_lsof       lsof
+linux-commands_fuser      fuser
+linux-commands_taskset    taskset
+linux-commands_time       time
+
+# ----- systemd -----
+linux-commands_systemctl  systemctl
+linux-commands_journalctl journalctl
+linux-commands_loginctl   loginctl
+linux-commands_machinectl machinectl
+linux-commands_timedatectl timedatectl
+linux-commands_hostnamectl hostnamectl
+linux-commands_localectl  localectl
+linux-commands_resolvectl  resolvectl
+linux-commands_busctl     busctl
+linux-commands_systemd-analyze systemd-analyze
+linux-commands_systemd-cgls    systemd-cgls
+linux-commands_systemd-cgtop   systemd-cgtop
+linux-commands_systemd-run     systemd-run
+
+# ----- Networking -----
+linux-commands_ip         ip
+linux-commands_ifconfig   ifconfig
+linux-commands_route      route
+linux-commands_ss         ss
+linux-commands_netstat    netstat
+linux-commands_ping       ping
+linux-commands_ping6      ping6
+linux-commands_traceroute traceroute
+linux-commands_tracepath  tracepath
+linux-commands_mtr        mtr
+linux-commands_dig        dig
+linux-commands_host       host
+linux-commands_nslookup   nslookup
+linux-commands_arp        arp
+linux-commands_iptables   iptables
+linux-commands_nftables   nftables
+linux-commands_nft        nft
+linux-commands_tcpdump    tcpdump
+linux-commands_curl       curl
+linux-commands_wget       wget
+linux-commands_ssh        ssh
+linux-commands_scp        scp
+linux-commands_sftp       sftp
+linux-commands_rsync      rsync
+linux-commands_nc         nc
+linux-commands_ncat       ncat
+linux-commands_telnet     telnet
+linux-commands_ethtool    ethtool
+
+# ----- Disks / mounts / partitions -----
+linux-commands_mount      mount
+linux-commands_umount     umount
+linux-commands_df         df
+linux-commands_du         du
+linux-commands_lsblk      lsblk
+linux-commands_fdisk      fdisk
+linux-commands_parted     parted
+linux-commands_blkid      blkid
+linux-commands_mkfs       mkfs
+linux-commands_mkswap     mkswap
+linux-commands_swapon     swapon
+linux-commands_swapoff    swapoff
+linux-commands_fsck       fsck
+linux-commands_smartctl   smartctl
+linux-commands_hdparm     hdparm
+
+# ----- Users / permissions -----
+linux-commands_id         id
+linux-commands_whoami     whoami
+linux-commands_who        who
+linux-commands_w          w
+linux-commands_users      users
+linux-commands_groups     groups
+linux-commands_useradd    useradd
+linux-commands_userdel    userdel
+linux-commands_usermod    usermod
+linux-commands_groupadd   groupadd
+linux-commands_passwd     passwd
+linux-commands_su         su
+linux-commands_sudo       sudo
+linux-commands_doas       doas
+
+# ----- Package managers (per major distro family) -----
+linux-commands_apt        apt
+linux-commands_apt-get    apt-get
+linux-commands_apt-cache  apt-cache
+linux-commands_dpkg       dpkg
+linux-commands_dpkg-query dpkg-query
+linux-commands_dnf        dnf
+linux-commands_yum        yum
+linux-commands_rpm        rpm
+linux-commands_pacman     pacman
+linux-commands_yay        yay
+linux-commands_paru       paru
+linux-commands_zypper     zypper
+linux-commands_snap       snap
+linux-commands_flatpak    flatpak
+
+# ----- Kernel / hardware -----
+linux-commands_dmesg      dmesg
+linux-commands_uname      uname
+linux-commands_lscpu      lscpu
+linux-commands_lsmem      lsmem
+linux-commands_lspci      lspci
+linux-commands_lsusb      lsusb
+linux-commands_lshw       lshw
+linux-commands_modprobe   modprobe
+linux-commands_lsmod      lsmod
+linux-commands_insmod     insmod
+linux-commands_rmmod      rmmod
+linux-commands_sysctl     sysctl
+
+# ----- Misc -----
+linux-commands_date       date
+linux-commands_cal        cal
+linux-commands_sleep      sleep
+linux-commands_watch      watch
+linux-commands_env        env
+linux-commands_export     export
+linux-commands_alias      alias
+linux-commands_history    history
+linux-commands_man        man
+linux-commands_apropos    apropos
+linux-commands_info       info
+linux-commands_help       help
+linux-commands_clear      clear
+linux-commands_reset      reset
+linux-commands_tput       tput
+linux-commands_make       make
+linux-commands_gcc        gcc
+linux-commands_g++        g++
+linux-commands_clang      clang
+linux-commands_git        git
+linux-commands_vim        vim
+linux-commands_nvim       nvim
+linux-commands_emacs      emacs
+linux-commands_nano       nano
+linux-commands_tmux       tmux
+linux-commands_screen     screen
+linux-commands_true       true
+linux-commands_false      false
+linux-commands_test       test
+linux-commands_expr       expr
+linux-commands_bc         bc
+linux-commands_dc         dc

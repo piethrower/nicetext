@@ -1,0 +1,253 @@
+# proglang-keywords/fortran.twlist
+#
+# language: Fortran (Fortran 77 / 90 / 95 / 2003 / 2008 / 2018 keywords +
+# intrinsic types + intrinsic procedures).
+# source: ISO/IEC 1539 (Fortran standard). Vendor extensions (Intel ifort
+#   intrinsics, GNU gfortran extras) are NOT included.
+# notes: Fortran's compound keywords (`END DO`, `END IF`, `END SUBROUTINE`)
+#   are two whitespace-separated WORDs — they admit as multi-WORD phrase
+#   values per parseTwlistLines rule 1. Underscore-bearing names are rare;
+#   intrinsic functions like `selected_int_kind` are split-fragmented.
+
+# ----- Program structure -----
+fortran_program    program
+fortran_end        end
+fortran_end-program end-program
+fortran_subroutine subroutine
+fortran_end-subroutine end-subroutine
+fortran_function   function
+fortran_end-function end-function
+fortran_module     module
+fortran_end-module end-module
+fortran_submodule  submodule
+fortran_end-submodule end-submodule
+fortran_block      block
+fortran_end-block  end-block
+fortran_block-data block-data
+fortran_end-block-data end-block-data
+fortran_interface  interface
+fortran_end-interface end-interface
+fortran_contains   contains
+
+# ----- Control flow -----
+fortran_if         if
+fortran_then       then
+fortran_else       else
+fortran_else-if    else-if
+fortran_end-if     end-if
+fortran_endif      endif
+fortran_do         do
+fortran_end-do     end-do
+fortran_enddo      enddo
+fortran_while      while
+fortran_cycle      cycle
+fortran_exit       exit
+fortran_select     select
+fortran_select-case select-case
+fortran_select-type select-type
+fortran_case       case
+fortran_case-default case-default
+fortran_end-select end-select
+fortran_go-to      go-to
+fortran_goto       goto
+fortran_continue   continue
+fortran_return     return
+fortran_stop       stop
+fortran_pause      pause
+fortran_forall     forall
+fortran_end-forall end-forall
+fortran_where      where
+fortran_elsewhere  elsewhere
+fortran_end-where  end-where
+fortran_associate  associate
+fortran_end-associate end-associate
+fortran_concurrent concurrent
+
+# ----- Declarations -----
+fortran_implicit   implicit
+fortran_implicit-none implicit-none
+fortran_parameter  parameter
+fortran_dimension  dimension
+fortran_allocatable allocatable
+fortran_pointer    pointer
+fortran_target     target
+fortran_intent     intent
+fortran_optional   optional
+fortran_save       save
+fortran_data       data
+fortran_common     common
+fortran_equivalence equivalence
+fortran_external   external
+fortran_intrinsic  intrinsic
+fortran_namelist   namelist
+fortran_public     public
+fortran_private    private
+fortran_protected  protected
+fortran_volatile   volatile
+fortran_value      value
+fortran_use        use
+fortran_only       only
+fortran_import     import
+fortran_class      class
+fortran_type       type
+fortran_end-type   end-type
+fortran_extends    extends
+fortran_abstract   abstract
+fortran_deferred   deferred
+fortran_non-overridable non-overridable
+fortran_pass       pass
+fortran_nopass     nopass
+fortran_generic    generic
+fortran_procedure  procedure
+fortran_recursive  recursive
+fortran_pure       pure
+fortran_elemental  elemental
+fortran_impure     impure
+
+# ----- Intrinsic types -----
+fortran_integer    integer
+fortran_real       real
+fortran_double-precision double-precision
+fortran_complex    complex
+fortran_character  character
+fortran_logical    logical
+
+# ----- I/O statements -----
+fortran_read       read
+fortran_write      write
+fortran_print      print
+fortran_open       open
+fortran_close      close
+fortran_inquire    inquire
+fortran_rewind     rewind
+fortran_backspace  backspace
+fortran_endfile    endfile
+fortran_flush      flush
+fortran_format     format
+fortran_unit       unit
+fortran_file       file
+fortran_iostat     iostat
+fortran_err        err
+fortran_eor        eor
+fortran_eof        eof
+fortran_access     access
+fortran_action     action
+fortran_position   position
+fortran_status     status
+fortran_form       form
+fortran_recl       recl
+fortran_blank      blank
+fortran_delim      delim
+fortran_pad        pad
+
+# ----- Allocation -----
+fortran_allocate   allocate
+fortran_deallocate deallocate
+fortran_nullify    nullify
+
+# ----- Logical operators -----
+fortran_.and.      .and.
+fortran_.or.       .or.
+fortran_.not.      .not.
+fortran_.eqv.      .eqv.
+fortran_.neqv.     .neqv.
+fortran_.eq.       .eq.
+fortran_.ne.       .ne.
+fortran_.lt.       .lt.
+fortran_.le.       .le.
+fortran_.gt.       .gt.
+fortran_.ge.       .ge.
+fortran_.true.     .true.
+fortran_.false.    .false.
+
+# ----- Intrinsic procedures (no-underscore) -----
+fortran_abs        abs
+fortran_aint       aint
+fortran_anint      anint
+fortran_nint       nint
+fortran_ceiling    ceiling
+fortran_floor      floor
+fortran_max        max
+fortran_min        min
+fortran_mod        mod
+fortran_modulo     modulo
+fortran_sign       sign
+fortran_sqrt       sqrt
+fortran_exp        exp
+fortran_log        log
+fortran_log10      log10
+fortran_sin        sin
+fortran_cos        cos
+fortran_tan        tan
+fortran_asin       asin
+fortran_acos       acos
+fortran_atan       atan
+fortran_atan2      atan2
+fortran_sinh       sinh
+fortran_cosh       cosh
+fortran_tanh       tanh
+fortran_int        int
+fortran_dble       dble
+fortran_cmplx      cmplx
+fortran_conjg      conjg
+fortran_aimag      aimag
+fortran_kind       kind
+fortran_len        len
+fortran_size       size
+fortran_shape      shape
+fortran_lbound     lbound
+fortran_ubound     ubound
+fortran_index      index
+fortran_scan       scan
+fortran_verify     verify
+fortran_trim       trim
+fortran_adjustl    adjustl
+fortran_adjustr    adjustr
+fortran_repeat     repeat
+fortran_iachar     iachar
+fortran_ichar      ichar
+fortran_achar      achar
+fortran_char       char
+fortran_dot-product dot-product
+fortran_matmul     matmul
+fortran_transpose  transpose
+fortran_reshape    reshape
+fortran_pack       pack
+fortran_unpack     unpack
+fortran_merge      merge
+fortran_count      count
+fortran_sum        sum
+fortran_product    product
+fortran_minval     minval
+fortran_maxval     maxval
+fortran_minloc     minloc
+fortran_maxloc     maxloc
+fortran_any        any
+fortran_all        all
+fortran_present    present
+fortran_allocated  allocated
+fortran_associated associated
+fortran_cshift     cshift
+fortran_eoshift    eoshift
+fortran_spread     spread
+
+# ----- Intrinsic procedures (underscore-bearing; split fragments emit) -----
+fortran_selected_int_kind   selected_int_kind
+fortran_selected_real_kind  selected_real_kind
+fortran_command_argument_count command_argument_count
+fortran_get_command         get_command
+fortran_get_command_argument get_command_argument
+fortran_get_environment_variable get_environment_variable
+fortran_iso_fortran_env     iso_fortran_env
+fortran_iso_c_binding       iso_c_binding
+fortran_c_int               c_int
+fortran_c_double            c_double
+fortran_c_char              c_char
+fortran_c_ptr               c_ptr
+fortran_c_null_ptr          c_null_ptr
+fortran_c_funptr            c_funptr
+fortran_c_loc               c_loc
+fortran_c_f_pointer         c_f_pointer
+fortran_error_unit          error_unit
+fortran_input_unit          input_unit
+fortran_output_unit         output_unit

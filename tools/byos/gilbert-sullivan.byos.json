@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "name": "gilbert-sullivan",
+  "label": "Gilbert & Sullivan",
+  "casualLabel": "Gilbert & Sullivan",
+  "preview": "I am the very model of a modern Major-General, I've information vegetable, animal, and mineral.",
+  "notes": "The Complete Plays of Gilbert and Sullivan (PG 808). Libretti for H.M.S. Pinafore, The Mikado, The Pirates of Penzance, and the rest of the Savoy operas. Dense rhyme, patter-song lines. Master TWLIST union plus cmu-syllable for line-length hints alongside rhyme.",
+  "story": {
+    "style": "gilbert-sullivan",
+    "sentence": "sequential",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "cmu-alliteration",
+      "cmu-stress",
+      "cmu-syllable",
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved",
+      "rhyme"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/gilbert-sullivan-curated.txt"
+  }
+}

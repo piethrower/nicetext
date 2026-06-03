@@ -1,0 +1,76 @@
+# emoji-phrases-16/phrases.twlist — hand-curated multi-emoji and
+# mixed Latin+emoji phrases under em16_<subgroup> types. Step 6 (§F)
+# of the phrase-and-charset arc; structural support landed in Step 4
+# (phrases as TW-list values) and Step 5 (emoji-as-WORD).
+#
+# Phrases compete with single-emoji entries in the same em16_<subgroup>
+# type for cover slots. Models built with both `emoji16` and
+# `emoji-phrases-16` ticked see slot competition between, e.g.,
+# 🌹 / 💐 / 🌷 (single emoji from emoji16) and 🌹 💐 / hello 👋
+# (phrases from this file) — Step 4's phrase machinery emits them
+# atomically and the decoder fuses them at lex time.
+#
+# Phrases are stored canonical: WORD tokens single-space-joined.
+# parseTwlistLines's rule-2 round-trip gate filters anything the
+# lexer can't reproduce.
+
+# --- Multi-emoji phrases (same subgroup, natural pairings) ---
+
+em16_plant_flower	🌹 💐
+em16_plant_flower	🌷 🌼
+em16_plant_flower	🌻 🌸
+em16_sky_weather	🌧️ ☔
+em16_sky_weather	⛈️ 🌪️
+em16_sky_weather	☀️ 🌞
+em16_face_smiling	😀 😄
+em16_face_smiling	😁 😆
+em16_face_affection	😍 🥰
+em16_face_affection	😘 😗
+em16_face_concerned	😢 😭
+em16_food_sweet	🍰 🍪
+em16_food_sweet	🍦 🍩
+em16_food_fruit	🍎 🍐
+em16_food_fruit	🍌 🍇
+em16_food_vegetable	🍅 🥕
+em16_animal_mammal	🐶 🐱
+em16_animal_mammal	🐰 🐹
+em16_animal_bird	🦅 🦉
+em16_animal_marine	🐠 🐡
+em16_animal_bug	🐝 🦋
+em16_transport_ground	🚗 🚕
+em16_transport_air	🚀 🛸
+em16_heart	❤️ 💖
+em16_heart	💕 💞
+
+# --- Mixed Latin+emoji phrases (semantic anchor + emoji) ---
+
+em16_face_smiling	happy 😀
+em16_face_smiling	joy 😄
+em16_face_concerned	sad 😢
+em16_face_concerned	cry 😭
+em16_face_negative	angry 😠
+em16_face_affection	love 😍
+em16_heart	heart ❤️
+em16_heart	love 💖
+em16_sky_weather	rain 🌧️
+em16_sky_weather	sunshine ☀️
+em16_sky_weather	snow ❄️
+em16_plant_flower	rose 🌹
+em16_plant_flower	flower 🌻
+em16_food_sweet	cake 🍰
+em16_food_sweet	cookie 🍪
+em16_drink	coffee ☕
+em16_drink	tea 🍵
+em16_food_prepared	pizza 🍕
+em16_animal_mammal	dog 🐶
+em16_animal_mammal	cat 🐱
+em16_transport_ground	car 🚗
+em16_event	party 🎉
+em16_event	birthday 🎂
+em16_hand_fingers_open	hello 👋
+em16_hand_fingers_open	bye 👋
+em16_hand_fingers_closed	thanks 🙏
+em16_other_symbol	yes ✅
+em16_other_symbol	no ❌
+em16_music	music 🎵
+em16_sport	soccer ⚽

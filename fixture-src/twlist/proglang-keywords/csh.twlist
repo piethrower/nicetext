@@ -1,0 +1,109 @@
+# proglang-keywords/csh.twlist
+#
+# language: csh / tcsh (C Shell + TENEX C Shell).
+# source: tcsh(1) manual page, csh(1) BSD manual.
+# notes: csh's control-flow vocabulary diverges from sh/bash. tcsh adds
+#   editor / completion builtins absent in classic csh.
+
+# ----- Control flow -----
+csh_if             if
+csh_then           then
+csh_else           else
+csh_endif          endif
+csh_switch         switch
+csh_case           case
+csh_default        default
+csh_breaksw        breaksw
+csh_endsw          endsw
+csh_while          while
+csh_end            end
+csh_foreach        foreach
+csh_break          break
+csh_continue       continue
+csh_goto           goto
+csh_onintr         onintr
+csh_repeat         repeat
+csh_shift          shift
+
+# ----- Declaration / assignment -----
+csh_set            set
+csh_setenv         setenv
+csh_unset          unset
+csh_unsetenv       unsetenv
+csh_alias          alias
+csh_unalias        unalias
+csh_source         source
+csh_eval           eval
+csh_exec           exec
+csh_exit           exit
+csh_logout         logout
+csh_login          login
+
+# ----- Builtins -----
+csh_echo           echo
+csh_printenv       printenv
+csh_pushd          pushd
+csh_popd           popd
+csh_dirs           dirs
+csh_history        history
+csh_jobs           jobs
+csh_kill           kill
+csh_bg             bg
+csh_fg             fg
+csh_wait           wait
+csh_suspend        suspend
+csh_stop           stop
+csh_notify         notify
+csh_nice           nice
+csh_nohup          nohup
+csh_time           time
+csh_glob           glob
+csh_hashstat       hashstat
+csh_rehash         rehash
+csh_unhash         unhash
+csh_umask          umask
+csh_ulimit         ulimit
+csh_limit          limit
+csh_unlimit        unlimit
+csh_cd             cd
+csh_chdir          chdir
+csh_pwd            pwd
+csh_dirs-builtin   dirs-builtin
+csh_filetest       filetest
+csh_which          which
+csh_where          where
+csh_log            log
+csh_watchlog       watchlog
+csh_bindkey        bindkey
+csh_complete       complete
+csh_uncomplete     uncomplete
+csh_builtins       builtins
+
+# ----- Special variables (csh / tcsh) -----
+csh_$argv          $argv
+csh_$status        $status
+csh_$cwd           $cwd
+csh_$home          $home
+csh_$path          $path
+csh_$prompt        $prompt
+csh_$shell         $shell
+csh_$user          $user
+csh_$term          $term
+csh_$verbose       $verbose
+csh_$echo          $echo
+csh_$histchars     $histchars
+csh_$cdpath        $cdpath
+csh_$mail          $mail
+csh_$savehist      $savehist
+csh_$noclobber     $noclobber
+csh_$ignoreeof     $ignoreeof
+
+# ----- File-test operators -----
+csh_-e             -e
+csh_-f             -f
+csh_-d             -d
+csh_-r             -r
+csh_-w             -w
+csh_-x             -x
+csh_-z             -z
+csh_-o             -o

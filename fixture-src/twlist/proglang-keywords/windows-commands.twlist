@@ -1,0 +1,127 @@
+# proglang-keywords/windows-commands.twlist
+#
+# Windows NT-and-later native command-line utilities and batch-file
+# constructs that go beyond classic DOS. Source: docs.microsoft.com
+# Windows Commands reference. PowerShell cmdlets are in
+# powershell-commands.twlist.
+
+# ----- Batch / control-flow constructs (beyond DOS) -----
+windows-commands_setlocal      setlocal
+windows-commands_endlocal      endlocal
+windows-commands_pushd         pushd
+windows-commands_popd          popd
+
+# ----- Process / system administration -----
+windows-commands_tasklist      tasklist
+windows-commands_taskkill      taskkill
+windows-commands_sc            sc
+windows-commands_net           net
+windows-commands_wmic          wmic
+windows-commands_reg           reg
+windows-commands_regedit       regedit
+windows-commands_regsvr32      regsvr32
+windows-commands_msconfig      msconfig
+windows-commands_eventvwr      eventvwr
+windows-commands_perfmon       perfmon
+windows-commands_resmon        resmon
+windows-commands_diskmgmt      diskmgmt
+windows-commands_compmgmt      compmgmt
+windows-commands_devmgmt       devmgmt
+windows-commands_gpedit        gpedit
+windows-commands_gpresult      gpresult
+windows-commands_gpupdate      gpupdate
+windows-commands_secpol        secpol
+windows-commands_services      services
+windows-commands_shutdown      shutdown
+windows-commands_logoff        logoff
+windows-commands_runas         runas
+windows-commands_whoami        whoami
+windows-commands_systeminfo    systeminfo
+windows-commands_hostname      hostname
+windows-commands_driverquery   driverquery
+windows-commands_powercfg      powercfg
+windows-commands_bcdedit       bcdedit
+windows-commands_bootrec       bootrec
+windows-commands_sfc           sfc
+windows-commands_dism          dism
+windows-commands_takeown       takeown
+windows-commands_icacls        icacls
+windows-commands_cacls         cacls
+
+# ----- Networking -----
+windows-commands_ipconfig      ipconfig
+windows-commands_ping          ping
+windows-commands_tracert       tracert
+windows-commands_pathping      pathping
+windows-commands_route         route
+windows-commands_arp           arp
+windows-commands_netstat       netstat
+windows-commands_nbtstat       nbtstat
+windows-commands_nslookup      nslookup
+windows-commands_telnet        telnet
+windows-commands_ftp           ftp
+windows-commands_tftp          tftp
+windows-commands_netsh         netsh
+windows-commands_getmac        getmac
+
+# ----- Storage / disk -----
+windows-commands_diskpart      diskpart
+windows-commands_chkdsk        chkdsk
+windows-commands_format        format
+windows-commands_label         label
+windows-commands_vol           vol
+windows-commands_robocopy      robocopy
+windows-commands_xcopy         xcopy
+windows-commands_compact       compact
+windows-commands_cipher        cipher
+windows-commands_attrib        attrib
+windows-commands_fsutil        fsutil
+
+# ----- File / search -----
+windows-commands_findstr       findstr
+windows-commands_find          find
+windows-commands_where         where
+windows-commands_dir           dir
+windows-commands_tree          tree
+windows-commands_more          more
+windows-commands_sort          sort
+windows-commands_type          type
+windows-commands_clip          clip
+windows-commands_choice        choice
+windows-commands_forfiles      forfiles
+windows-commands_timeout       timeout
+windows-commands_waitfor       waitfor
+
+# ----- Scheduling -----
+windows-commands_schtasks      schtasks
+windows-commands_at            at
+
+# ----- Misc -----
+windows-commands_assoc         assoc
+windows-commands_ftype         ftype
+windows-commands_color         color
+windows-commands_mode          mode
+windows-commands_title         title
+windows-commands_help          help
+windows-commands_exit          exit
+windows-commands_start         start
+windows-commands_call          call
+windows-commands_doskey        doskey
+windows-commands_print         print
+windows-commands_winver        winver
+windows-commands_explorer      explorer
+windows-commands_calc          calc
+windows-commands_notepad       notepad
+windows-commands_mspaint       mspaint
+windows-commands_write         write
+windows-commands_mstsc         mstsc
+windows-commands_certutil      certutil
+windows-commands_curl          curl
+windows-commands_wsl           wsl
+windows-commands_wt            wt
+windows-commands_powershell    powershell
+windows-commands_pwsh          pwsh
+windows-commands_cmd           cmd
+windows-commands_cmd.exe       cmd.exe
+windows-commands_conhost       conhost
+windows-commands_openfiles     openfiles

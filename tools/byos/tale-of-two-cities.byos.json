@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "name": "tale-of-two-cities",
+  "label": "A Tale of Two Cities",
+  "casualLabel": "Dickens",
+  "preview": "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness.",
+  "notes": "A Tale of Two Cities corpus by Charles Dickens: Victorian historical-novel register, expansive periodic sentences, French-Revolution London/Paris setting. Base block declares the master TWLIST union with vowel augmentation; frequencies=['style'] weights the corpus dict by per-word counts in the source text.",
+  "story": {
+    "style": "tale-of-two-cities",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/tale-of-two-cities-curated.txt"
+  }
+}

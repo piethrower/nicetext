@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NiceText. Test Suite</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../css/nicetext.css">
+  <script src="../../js/theme.js"></script>
+  <script src="../../js/runtime-check.js"></script>
+  <script src="../../js/matrix-rain.js"></script>
+  <script src="../../js/coi.js"></script>
+</head>
+<body class="noderun">
+
+<header class="topbar">
+  <a class="home-link" href="../../index.html" title="Back to home">
+    <svg class="home-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V6z"/>
+      <line x1="7" y1="9" x2="15" y2="9"/>
+      <line x1="7" y1="13" x2="17" y2="13"/>
+    </svg>
+    <h1 data-hacker-text="./nicetext/bin/a.out">NiceText</h1>
+  </a>
+  <p class="tagline">Test Suite</p>
+  <button type="button" class="theme-toggle" id="theme-toggle"
+          aria-label="Toggle dark mode"
+          title="Toggle dark mode">
+    <svg class="theme-icon theme-icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="8" r="3"/>
+      <path d="M8 1.5v1.5M8 13v1.5M1.5 8h1.5M13 8h1.5M3.05 3.05l1.06 1.06M11.9 11.9l1.05 1.05M3.05 12.95l1.06-1.05M11.9 4.1l1.05-1.05"/>
+    </svg>
+    <svg class="theme-icon theme-icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/>
+    </svg>
+  </button>
+</header>
+
+<main class="noderun-main">
+
+  <section class="noderun-section">
+    <h2>Basic Functionality Tests</h2>
+    <p class="noderun-intro">
+      Runs the project's test suite in your browser. Each entry below is a
+      single assertion about lexing, encoding, decoding, dictionaries, or one
+      of the other modules. Also available as a command line interface (CLI)
+      tool, <a href="../../whats-new.html#cli">see the CLI docs</a>.
+    </p>
+    <div class="noderun-controls">
+      <button id="run-btn" class="primary" type="button">Run</button>
+    </div>
+    <div id="summary" class="noderun-summary" data-status="idle">Ready.</div>
+    <progress id="progress" class="noderun-progress" max="1" value="0"></progress>
+    <div class="noderun-field">
+      <span class="noderun-field-label">Show</span>
+      <div class="adv-segmented" role="radiogroup" aria-label="Result filter">
+        <label><input type="radio" name="results-filter" value="all" checked> All (<span class="filter-count" data-count="all">0</span>)</label>
+        <label><input type="radio" name="results-filter" value="pass"> Pass (<span class="filter-count" data-count="pass">0</span>)</label>
+        <label><input type="radio" name="results-filter" value="fail"> Fail (<span class="filter-count" data-count="fail">0</span>)</label>
+        <label><input type="radio" name="results-filter" value="skip"> Skip (<span class="filter-count" data-count="skip">0</span>)</label>
+        <label><input type="radio" name="results-filter" value="todo"> Todo (<span class="filter-count" data-count="todo">0</span>)</label>
+      </div>
+    </div>
+    <ul id="results" class="noderun-results" data-filter="all"></ul>
+  </section>
+
+</main>
+
+<script type="module">
+// The harness runs inside ./test-suite-worker.js so the main thread
+// stays a thin renderer. Shared lifecycle scaffolding (Worker spawn,
+// envelope unwrap, AbortSignal teardown, 1 Hz ticker) lives in
+// ./runner-shell.js; this script owns the page-specific bits, event
+// vocabulary mapping, the result list, and the filter chips.
+
+import { mountRunner, startTicker } from './runner-shell.js';
+
+const runBtn   = document.getElementById('run-btn');
+const summary  = document.getElementById('summary');
+const progress = document.getElementById('progress');
+const results  = document.getElementById('results');
+
+// Result-filter chips. CSS rule .noderun-results[data-filter=...]
+// hides the non-matching <li>s.
+for (const r of document.querySelectorAll('input[name="results-filter"]')) {
+  r.addEventListener('change', (e) => {
+    if (e.target.checked) results.dataset.filter = e.target.value;
+  });
+}
+// Filter-button labels carry a live count of matching rows so the
+// user can see at a glance how many passes / fails are sitting
+// behind each chip. Bumped per result.
+const FILTER_KEYS = ['all', 'pass', 'fail', 'skip', 'todo'];
+const filterCounts = { all: 0, pass: 0, fail: 0, skip: 0, todo: 0 };
+const filterCountEls = {};
+for (const k of FILTER_KEYS) {
+  filterCountEls[k] = document.querySelector(`.filter-count[data-count="${k}"]`);
+}
+function bumpFilterCount(status) {
+  filterCounts.all++;
+  if (Object.prototype.hasOwnProperty.call(filterCounts, status)) {
+    filterCounts[status]++;
+  }
+  for (const k of FILTER_KEYS) filterCountEls[k].textContent = fmt(filterCounts[k]);
+}
+function resetFilterCounts() {
+  for (const k of FILTER_KEYS) {
+    filterCounts[k] = 0;
+    filterCountEls[k].textContent = '0';
+  }
+}
+
+function setStatus(status, text) {
+  summary.dataset.status = status;
+  summary.textContent = text;
+}
+
+function describeError(err) {
+  if (!err) return '';
+  const lines = [];
+  lines.push(`${err.name || 'Error'}: ${err.message || err}`);
+  if ('actual' in err || 'expected' in err) {
+    try { lines.push(`  actual:   ${JSON.stringify(err.actual)}`); } catch {}
+    try { lines.push(`  expected: ${JSON.stringify(err.expected)}`); } catch {}
+  }
+  if (err.stack) lines.push(err.stack.split('\n').slice(1, 4).join('\n'));
+  return lines.join('\n');
+}
+
+function renderResult(r) {
+  const li = document.createElement('li');
+  const badge = document.createElement('span');
+  badge.className = `noderun-badge ${r.status}`;
+  badge.textContent = r.status;
+  const name = document.createElement('span');
+  name.className = 'noderun-name';
+  name.textContent = r.name;
+  const ms = document.createElement('span');
+  ms.className = 'noderun-ms';
+  if (r.ms != null) {
+    ms.textContent = `${Number(r.ms).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}ms`;
+  }
+  li.append(badge, name, ms);
+  if (r.status === 'fail' && r.error) {
+    const err = document.createElement('pre');
+    err.className = 'noderun-error';
+    err.textContent = describeError(r.error);
+    li.appendChild(err);
+  }
+  results.appendChild(li);
+}
+
+function fmt(n) { return Number(n || 0).toLocaleString('en-US'); }
+function fmtSec(s) {
+  return Number(s || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+// Live state read by the 1 Hz ticker. Each incoming `phase:'run'`
+// event from the worker mutates this; the ticker reprints once per
+// second instead of per event so the UI never thrashes. Sub-progress
+// fields (`subDone`, `subTotal`, `subLabel`) come from tests that
+// call `ctx.progress(...)` during long internal loops.
+const live = {
+  active: false,
+  done: 0,
+  total: 0,
+  name: '',
+  startedAt: 0,
+  subDone: 0,
+  subTotal: 0,
+  subLabel: '',
+};
+function render() {
+  if (!live.active) return;
+  const elapsed = fmtSec((Date.now() - live.startedAt) / 1000);
+  const sub = live.subTotal
+    ? ` · ${fmt(live.subDone)}/${fmt(live.subTotal)}${live.subLabel ? ' ' + live.subLabel : ''}`
+    : '';
+  setStatus(
+    'running',
+    `Running test ${fmt(live.done + 1)}/${fmt(live.total)}: ${live.name} (${elapsed}s)${sub}`,
+  );
+}
+
+let runner = null;
+let stopTicker = null;
+
+function teardown() {
+  if (stopTicker) { stopTicker(); stopTicker = null; }
+  live.active = false;
+  if (runner) { runner.terminate(); runner = null; }
+  runBtn.disabled = false;
+  runBtn.textContent = 'Run again';
+}
+
+function finalize() {
+  const pass = filterCounts.pass;
+  const fail = filterCounts.fail;
+  const skip = filterCounts.skip + filterCounts.todo;
+  if (fail === 0) setStatus('pass', `${fmt(pass)} passed${skip ? ` · ${fmt(skip)} skipped` : ''}.`);
+  else setStatus('fail', `${fmt(fail)} failed · ${fmt(pass)} passed${skip ? ` · ${fmt(skip)} skipped` : ''}.`);
+  teardown();
+}
+
+function handleEvent(ev) {
+  if (!ev || !ev.phase) return;
+  switch (ev.phase) {
+    case 'preload':
+      setStatus('running', `Preloading ${fmt(ev.total)} fixture(s)...`);
+      break;
+    case 'import':
+      setStatus('running', `Importing test files (${fmt(ev.done ?? 0)}/${fmt(ev.total)})...`);
+      break;
+    case 'run':
+      progress.value = ev.total ? ev.done / ev.total : 0;
+      live.active = true;
+      live.done = ev.done;
+      live.total = ev.total;
+      live.name = ev.current;
+      live.startedAt = Date.now();
+      // Reset sub-progress so the previous test's tail can't carry over.
+      live.subDone = 0;
+      live.subTotal = 0;
+      live.subLabel = '';
+      break;
+    case 'subprogress':
+      live.subDone = ev.done ?? 0;
+      live.subTotal = ev.total ?? 0;
+      live.subLabel = ev.label || '';
+      break;
+    case 'result':
+      renderResult(ev.result);
+      bumpFilterCount(ev.result.status);
+      break;
+    case 'done':
+      progress.value = 1;
+      finalize();
+      break;
+    case 'cancelled':
+      setStatus('idle', 'Cancelled.');
+      teardown();
+      break;
+    case 'fatal':
+      setStatus('fail', `Runner error: ${ev.message}`);
+      teardown();
+      break;
+  }
+}
+
+runBtn.addEventListener('click', () => {
+  if (runner) return;
+  runBtn.disabled = true;
+  results.innerHTML = '';
+  progress.value = 0;
+  resetFilterCounts();
+  setStatus('running', 'Loading...');
+  runner = mountRunner({
+    workerUrl: new URL('./test-suite-worker.js', import.meta.url),
+    onEvent: handleEvent,
+    onError: (e) => {
+      console.error(e);
+      setStatus('fail', `Worker error: ${e.message || 'unknown'}`);
+      teardown();
+    },
+  });
+  stopTicker = startTicker(render, 1000);
+  runner.post({ type: 'run' });
+});
+
+</script>
+
+<div class="bottom-bar">
+  <p class="disclaimer">
+    <strong>Disclaimer:</strong> For entertainment purposes only. No
+    guarantee of privacy, security, secrecy, recoverability, cipher
+    strength, legality, morality, or anything else. Do not use in any
+    circumstance that could cause you or others harm. Use at your own
+    risk.
+  </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+# cfg-words/mit-names.twlist
+#
+# Connector words used by grammars/mit-names.def, expressed as
+# _UNIQUE_word singleton type entries instead of {^literal^} pass-throughs.
+#
+# Why _UNIQUE_*: alphanumeric quoted-literals in CFGs are dangerous against
+# any dict that recognizes the literal word — the decoder lexes it as a
+# regular bit-bearing word and writes spurious bits into the recovered
+# payload. _UNIQUE_X type slots are zero-bit by construction (one word per
+# type), so the encoder/decoder agree symmetrically: the dict either has
+# the type (emit/skip the word, no bits) or doesn't (skip the slot, no
+# bits). Round-trip safe in both directions.
+#
+# How merging falls out (sortdct's _UNIQUE_ drop-rule):
+# - In a small dict like mit (built from mitlist + this file): "of" has
+#   only the _UNIQUE_of tag, so the merged type stays _UNIQUE_of. The
+#   CFG resolves and emits "of" cleanly with zero bits.
+# - In master (built from kimmo + ... + this file): "of" picks up
+#   kimmo's preposition tags, the drop-rule strips _UNIQUE_of, and master
+#   ends up with just the kimmo-derived merged type for "of". The CFG's
+#   _UNIQUE_of reference doesn't resolve in master, so the encode-time
+#   skip-mode drops the slot — cover text omits "of," decoder skips
+#   nothing-to-skip, round-trip preserved.
+
+_UNIQUE_all       all
+_UNIQUE_and       and
+_UNIQUE_arrived   arrived
+_UNIQUE_came      came
+_UNIQUE_from      from
+_UNIQUE_in        in
+_UNIQUE_met       met
+_UNIQUE_of        of
+_UNIQUE_to        to
+_UNIQUE_visited   visited
+_UNIQUE_went      went
+_UNIQUE_with      with

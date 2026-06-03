@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "name": "aesop",
+  "label": "Aesop's Fables",
+  "casualLabel": "Aesop's",
+  "preview": "A wolf, meeting with a lamb astray from the fold, resolved to devour him.",
+  "notes": "Aesop's Fables corpus: short narrative sentences, ~5K vocabulary. Corpus-dict + sentence model built from fixture-src/texts/aesop.txt; the corpus-dict's Huffman codes are weighted by per-word counts in the source text. Random sentence playback. Base block declares the same TWLIST union and augmentation as master (since aesop's corpus dict restricts master's vocabulary to corpus words); frequencies=['style'] means weight by the corpus's own word counts.",
+  "story": {
+    "style": "aesop",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/aesop-curated.txt"
+  }
+}

@@ -1,0 +1,4141 @@
+/* NiceText web UI, minimal, no frameworks. */
+
+@font-face {
+  font-family: "Apple II Screen";
+  src: url("../fixtures/font/AppleIiScreenTypeface-2aP3.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --bg: #fafaf7;
+  --fg: #1c1c1c;
+  --muted: #6a6a6a;
+  --border: #d4d4d0;
+  --accent: #2b6cb0;
+  --accent-rgb: 43, 108, 176;
+  --accent-hover: #214f86;
+  --code-bg: #f1f0eb;
+  --status-ok: #2c7a3e;
+  --status-err: #b03030;
+  /* Inner content cap so the tab strip and panels stop stretching
+     on ultrawide monitors. Topbar and disclaimer-footer stay
+     full-bleed; only the centered content respects this. */
+  --content-max-width: 1400px;
+  /* Surface tokens. --surface-1 stands in for the literal "white" that
+     appears on cards / dialogs / chips; dark mode flips it to a dark
+     near-black. Panel tints carry their own per-panel vars so secret
+     / story / style / advanced-body retain visual identity in both
+     modes. --panel-strong-border is the 2px border shared by the three
+     peer panels (formerly hardcoded #b9b9b3). --panel-tint-blue is the
+     light blue accent used by chip-view-toggle.active and the
+     pipeline-consent dialog. */
+  --surface-1: #ffffff;
+  --panel-secret-bg: #f3efe6;
+  --panel-secret-accent: #b8694b;
+  --panel-story-bg:  #eef2f6;
+  --panel-story-accent: #5b8def;
+  --panel-style-bg:  #f0f3e6;
+  --panel-style-accent: #4ea76d;
+  --panel-eve-bg:    #f1ecf5;
+  --panel-eve-accent: #8a5cb8;
+  --panel-strong-border: #b9b9b3;
+  --panel-tint-blue: #eaf2fb;
+  --status-skip: #8a6d2c;
+  --pill-pass-bg: #d6f5d6;
+  --pill-fail-bg: #f5d6d6;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Code", monospace;
+  --font-serif: "Iowan Old Style", "Charter", Georgia, Cambria, serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  /* Foreground for highlighted buttons (Conceal, Reveal, OS-share,
+     progress-done flash). Default white reads against the accent
+     background in light + dark; hacker overrides to black so it
+     reads against the bright-green accent. */
+  --primary-fg: white;
+}
+
+/* Dark mode. Triggered by html.dark (set in <head> by js/theme.js
+   before body parses, so there's no flash). Same vars, dark palette;
+   page chrome remains identical, only colors change. The "smuggling
+   mode" framing is not stated in copy, implied through the muted,
+   moodier palette. */
+html.dark {
+  --bg: #16181b;
+  --fg: #e5e7eb;
+  --muted: #9aa0a6;
+  --border: #2f3338;
+  --accent: #6aa3e2;
+  --accent-rgb: 106, 163, 226;
+  --accent-hover: #8fbef0;
+  --code-bg: #1e2024;
+  --status-ok: #6cb27a;
+  --status-err: #e57373;
+  --surface-1: #1c1f23;
+  --panel-secret-bg: #2a231d;
+  --panel-secret-accent: #b8694b;
+  --panel-story-bg:  #1c2530;
+  --panel-story-accent: #5b8def;
+  --panel-style-bg:  #232a1d;
+  --panel-style-accent: #4ea76d;
+  --panel-eve-bg:    #261d2e;
+  --panel-eve-accent: #b08be0;
+  --panel-strong-border: #4a4d52;
+  --panel-tint-blue: #1d2a3a;
+  --status-skip: #c9a559;
+  --pill-pass-bg: #1f2e22;
+  --pill-fail-bg: #2e1f1f;
+}
+
+/* Hacker mode. Triggered by triple-tapping the theme toggle within 2
+   seconds (see js/theme.js). Pure CSS-variable overrides plus the
+   Apple //e screen font + a matrix-rain canvas dropped behind body
+   content (js/matrix-rain.js). Panels keep opaque backgrounds so the
+   rain stays a backdrop, not a readability hazard. */
+html.hacker {
+  --bg: #000000;
+  --fg: #00ff41;
+  --muted: #00aa2b;
+  --border: #00ff41;
+  --accent: #b4ffb4;
+  --accent-rgb: 180, 255, 180;
+  --accent-hover: #ffffff;
+  --code-bg: #001000;
+  --status-ok: #00ff41;
+  --status-err: #ff4141;
+  --surface-1: rgba(0, 16, 0, 0.88);
+  /* Hacker is a monochrome green theme, collapse all three panel
+     accents to the same green bg + accent. Light/dark keep the
+     per-tab color coding; hacker doesn't. */
+  --panel-secret-bg: rgba(0, 24, 0, 0.88);
+  --panel-secret-accent: #00ff41;
+  --panel-story-bg:  rgba(0, 24, 0, 0.88);
+  --panel-story-accent: #00ff41;
+  --panel-style-bg:  rgba(0, 24, 0, 0.88);
+  --panel-style-accent: #00ff41;
+  --panel-eve-bg:    rgba(0, 24, 0, 0.88);
+  --panel-eve-accent: #00ff41;
+  --panel-strong-border: #00ff41;
+  --panel-tint-blue: rgba(0, 32, 64, 0.88);
+  --status-skip: #c9a559;
+  --pill-pass-bg: rgba(0, 64, 0, 0.85);
+  --pill-fail-bg: rgba(64, 0, 0, 0.85);
+  --font-mono: "Apple II Screen", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-serif: "Apple II Screen", "Iowan Old Style", "Charter", Georgia, Cambria, serif;
+  --font-body: "Apple II Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  /* Black text on the bright-green accent reads at high contrast
+     where white-on-pale-green didn't. */
+  --primary-fg: #000;
+}
+/* Body becomes transparent so the matrix-rain canvas (z-index: -1)
+   shows through; <html> keeps the pure black so unpainted areas
+   never flash a stray color while the canvas is initialising. */
+html.hacker { background: #000; }
+html.hacker body { background: transparent; }
+/* Native checkbox/radio tint. The `accent-color` property recolors
+   the browser's native form-control rendering (checkmark + filled
+   background) without any custom appearance hacks. */
+html.hacker { accent-color: #00ff41; }
+/* Hacker mode: navbar, tabs-row, and disclaimer-footer backgrounds
+   go transparent so the matrix-rain canvas (rendered on the html
+   element) shows through in the gaps between the pill buttons,
+   between the tabs, and behind the disclaimer text. The pill
+   buttons, tab buttons, and panel content area each keep their
+   own backgrounds. (The disclaimer-footer's separating top border
+   was removed globally, see the .disclaimer-footer rule.) */
+html.hacker header.topbar,
+html.hacker nav.tabs,
+html.hacker .disclaimer-footer {
+  background: transparent;
+}
+/* Green glow on big surfaces in hacker mode. Headings and primary
+   buttons keep whatever casing the data-hacker-text values use, so
+   labels like "a.out" or "/etc/sys.conf" render lowercase. */
+html.hacker .panel-h2,
+html.hacker h2.about-section,
+html.hacker .topbar h1,
+html.hacker .panel-status,
+html.hacker .primary {
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+/* Disable the global colour transition in hacker mode, the rain
+   canvas paints continuously and the smooth fade looks washy. */
+html.hacker, html.hacker * { transition: none !important; }
+
+* { box-sizing: border-box; }
+
+/* Theme-toggle transition. Applies to every element so the
+   light/dark flip fades smoothly instead of snapping. Hover-state
+   transitions on buttons/links still win because their explicit
+   `transition: background 0.12s, ...` rules override this default. */
+* {
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+
+/* Generic link color routes through the theme accent so dark mode
+   reads light-blue on dark, not browser-default deep blue on dark. */
+a, a:visited { color: var(--accent); }
+a:hover { color: var(--accent-hover); }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.5;
+  /* Whole-page scroll model: body is a flex column at least viewport
+     tall. Topbar, tabs, active panel, disclaimer all stack in normal
+     flow. The active panel gets flex: 1 1 auto so it absorbs slack
+     and lets its textareas (Secret / Cover) grow to fill the
+     viewport. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Defense in depth: keep the document from ever growing wider than
+     the viewport. Horizontal document overflow breaks position:fixed
+     anchoring on Firefox (Penny floats half-off the right edge at
+     ~400px). Any future row that exceeds viewport width hits this
+     clip instead of breaking the fixed dock. */
+  overflow-x: hidden;
+}
+
+header {
+  margin: 0 auto;
+  padding: 2rem 1.5rem 1rem;
+}
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+/* Compact one-row topbar: home link + short tagline + "What is this?"
+   inline. The functional panels appear high in the viewport so (on a
+   desktop) the whole page can fit without scrolling. */
+/* Topbar in normal flow at the top of the body. Scrolls away with
+   the rest of the page when content is tall (page-level scroll
+   model). */
+header.topbar {
+  background: var(--bg);
+  margin: 0;
+  padding: 0.4rem 1rem;
+  display: flex;
+  /* flex-start (not center) so the logo and the tutorial/theme
+     cluster stay pinned to the top of the navbar when the pill
+     cluster wraps to multiple rows. With align-items:center they
+     would slide down to vertically center within the taller row. */
+  align-items: flex-start;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+/* Single global status line, last-action wins. Sits on its own
+   row inside the navbar (flex-basis:100% pushes it below the button
+   cluster). Always reserves vertical space so the tabs below don't
+   jump when status populates or clears: 1 line on wide viewports,
+   2 lines on narrow (≤720px, see media query below) where horizontal
+   room is scarce. Overflow clamps with an ellipsis. Color comes from
+   the shared .status / .ok / .err classes. */
+#navbar-status {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0 0.5rem;
+  line-height: 1.3;
+  min-height: 1.3em;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+#navbar-status.ok  { color: var(--status-ok); }
+#navbar-status.err { color: var(--status-err); font-weight: 600; }
+/* (Removed: body { padding-top: 3.4rem }, was reserving space for
+   the previously-fixed topbar. Topbar is in normal flow now, so no
+   padding compensation needed.) */
+header.topbar .home-link { margin: 0; }
+header.topbar .home-link h1 { font-size: 1.3rem; }
+header.topbar .home-link .home-logo-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/* Conceal + Reveal primary action buttons. Centered between the
+   logo and the Tutorial/Theme cluster; flex:1 claims the middle of
+   the navbar so the button cluster centers in the available space.
+   flex-wrap:wrap lets individual pills drop to a new line as the
+   navbar narrows, so the cluster expands vertically rather than
+   forcing tutorial/theme off row 1. No media-query breakpoint
+   needed, the layout reacts to whatever room is actually left. */
+.topbar-actions {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.topbar-btn {
+  padding: 0.2rem 0.9rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  line-height: 1.2;
+  gap: 0.35rem;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+.topbar-btn .btn-main { font-weight: 600; }
+.topbar-btn .btn-sub  { font-weight: normal; }
+.topbar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+/* Build-state attention (BYOS dirty, needs to be applied). Bold red
+   background to flag that the visible BYOS state hasn't been built
+   yet. Reverts to normal .primary styling once #adv-build is disabled
+   (state C, already built) or hidden (state A, built-in chip). */
+.topbar-btn.build-attention,
+.topbar-btn.build-attention:hover {
+  background: #c0392b;
+  color: #fff;
+  border-color: #c0392b;
+}
+
+/* Navbar pills (Build / Conceal / Share / Reveal): icon on the
+   left, verb + subtitle stacked on the right. Icons carry the
+   smuggling theme (wrench / briefcase / paper-plane / magnifier);
+   subtitles ("your style" / "a secret" / etc.) tell newcomers
+   what each verb acts on without changing the workflow grammar.
+   Narrow-viewport rule above already hides .btn-sub. */
+.topbar-btn .topbar-btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.topbar-btn .btn-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+  text-align: left;
+}
+.topbar-btn .btn-main {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.topbar-btn .btn-sub {
+  font-weight: 400;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  opacity: 0.82;
+  text-transform: lowercase;
+}
+
+/* Tutorial open/close toggle. Label flips via the .penny-collapsed
+   body class (.topbar-tutorial-open visible by default; -close visible
+   when Penny is in the collapsed/closed state... wait, body class
+   means OPPOSITE: penny-collapsed = closed, so "Open Tutorial" label
+   shows then). */
+.topbar-tutorial-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  font: inherit;
+  color: var(--fg);
+  cursor: pointer;
+  min-width: 1.8rem;
+}
+.topbar-tutorial-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+/* Single '?' glyph. Open vs closed state is conveyed by the
+   button background: filled accent when the tutorial is open
+   (body:not(.penny-collapsed)), outline-only otherwise. */
+.topbar-tutorial-glyph { font-size: 1rem; font-weight: 600; line-height: 1; }
+body:not(.penny-collapsed) .topbar-tutorial-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+body:not(.penny-collapsed) .topbar-tutorial-btn:hover {
+  color: #fff;
+}
+
+/* Narrow-screen navbar: collapse the "NiceText" wordmark to the
+   logo glyph only, drop the button subtitles (Build/Conceal/
+   Reveal alone fit on narrow viewports), and give the status line
+   more vertical room (2 lines vs 1) since wrapped messages are
+   more likely on narrow viewports. The pill cluster reflows on
+   its own via flex-wrap:wrap (default rules above), no media
+   query needed for pill placement. The tab-row narrow override
+   lives next to the default nav.tabs rules (later in the file)
+   so the cascade resolves in its favor. */
+@media (max-width: 720px) {
+  header.topbar .home-link h1 { display: none; }
+  .topbar-btn .btn-sub { display: none; }
+  #navbar-status {
+    min-height: 2.6em;
+    -webkit-line-clamp: 2;
+  }
+}
+.about-toggle {
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0.15rem 0;
+  user-select: none;
+}
+.about-toggle:hover { color: var(--accent-hover); }
+.about-toggle::before { content: '\203A\00a0'; }
+.about-toggle.open::before { content: '\2304\00a0'; }
+
+/* Theme toggle: icon-only button. Sun icon visible in light mode, moon
+   in dark. The other icon is hidden via display:none under the
+   matching html.* class. Lives where the Introduction button used to
+   live in the topbar. */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem;
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  background: var(--code-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.theme-toggle .theme-icon { width: 1.1rem; height: 1.1rem; }
+/* Show sun in light mode, moon in dark. */
+html:not(.dark) .theme-toggle .theme-icon-moon { display: none; }
+html.dark       .theme-toggle .theme-icon-sun  { display: none; }
+/* Floating variant for pages with no topbar (e.g. splash). */
+.theme-toggle-floating {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  background: var(--surface-1);
+}
+
+/* (Removed: .bottom-bar rules. Replaced by .disclaimer-footer on
+   2026-05-16; Historical Notes button removed in the same change.) */
+
+/* Penny dock: fixed bar pinned to the bottom of the viewport. The
+   page reserves equivalent space via body padding-bottom so the dock
+   never overlaps the Disclaimer / Historical Notes / panels above
+   it, instead the page scrolls within the area above the dock. The
+   Hide/Show button collapses the dock to a thin strip when the user
+   wants more screen real estate. */
+.penny-dock {
+  /* Fixed at viewport bottom while Penny is visible so the mascot
+     stays parked while the developer scrolls. body { padding-bottom }
+     reserves the dock's height so real content can scroll above
+     her. When collapsed (body.penny-collapsed), the dock leaves
+     normal flow and the body padding drops back to the small
+     hidden-strip reservation (rule below). */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 1.2rem;
+  z-index: 100;
+  /* Transparent dock + no box-shadow lets whatever's behind show
+     through (rain in hacker; the body's reserved padding-bottom
+     area in light/dark). Penny's bubble keeps its own tinted
+     surface bg so she stays visually distinct without the dock
+     drawing a horizontal "tray" line across the page.
+     pointer-events:none lets clicks pass through the transparent
+     dock to underlying content (e.g. the disclaimer footer that
+     sits behind the dock when scrolled to the page bottom).
+     #penny-anchor below restores pointer-events:auto for Penny's
+     actual interactive content. */
+  background: transparent;
+  pointer-events: none;
+  padding: 0.7rem 1rem 0.8rem;
+  transition: padding 0.18s ease, height 0.18s ease;
+  /* Definite height (not just max-height) so children using
+     percentage / flex-basis sizing have something to resolve
+     against. The dock is sized to clamp(120px, 28vh, 240px) so it
+     adapts to short viewports without ever exceeding 240px or
+     dropping below 120px. */
+  height: clamp(120px, 28vh, 240px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.penny-dock #penny-anchor { pointer-events: auto; }
+.penny-dock.collapsed {
+  /* Dismissed = fully hidden. The dock leaves no visible strip and
+     no interaction surface; the navbar Tutorial toggle is the only
+     way back. body.penny-collapsed below drops the body padding
+     reservation to 0 so the page bottom isn't padded out for
+     nothing. */
+  display: none;
+}
+
+.penny-bubble-close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  z-index: 3;
+  width: 1.7rem;
+  height: 1.7rem;
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+}
+.penny-bubble-close:hover { background: rgba(43, 108, 176, 0.08); }
+
+/* Reserve space at the bottom of the page so the dock never overlays
+   real content. Matches the dock's clamp(120, 28vh, 240) plus a
+   small breathing buffer so the bottom-bar isn't flush against the
+   dock's top border. */
+body { padding-bottom: clamp(140px, 30vh, 260px); }
+body.penny-collapsed { padding-bottom: 0; }
+
+/* (Removed: .encode-decode-grid wrapper rules. The grid wrapped the
+   Secret + Cover panels into a 2-col layout; the 2026-05-16 tabs pass
+   replaced the side-by-side layout with one-panel-at-a-time tabs and
+   the wrapper was deleted from nicetext.html.) */
+
+/* Each encode/decode panel is a CSS grid with a fixed-height status row
+   reserved under the H2. The big primary button (Hide-it / Get-it-back)
+   lives in a column that spans both the H2 row and the status row, so
+   the button vertically centers on the combined header area and the
+   button position never shifts when status text appears or clears.
+     - landscape (≥720 px): button on the inner edge of each panel,
+       right side of the secret panel, left side of the story panel,
+       so the two primary actions visually align across the page.
+     - portrait (<720 px): the panels stack. Hide-it falls to the bottom-
+       right of the secret panel (pointing down at the story); Get-it-back
+       sits at the top-right of the story panel (pointing up at the secret).
+*/
+/* Tab panels are flex columns. .panel-header sits at the top
+   (h2-group on the left, .actions toolbar on the right; wraps on
+   narrow viewports). Slot 4 (textarea / .tab-content) is the only
+   flex:1 child so it absorbs all extra vertical space; slot 5
+   (.panel-stats) has flex-shrink:0 so it never gets squeezed. */
+.panel.secret,
+.panel.story,
+.panel.style,
+.panel.eve {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.2rem;
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  column-gap: 0.6rem;
+  row-gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+}
+.panel-header > .actions { flex-shrink: 0; }
+
+/* Style-tab mode segmented control. Lives in the Style panel's
+   panel-header next to the Share/Load/Save toolbar (wraps to its
+   own row on narrow viewports). Two segments: Premade / Custom. */
+.style-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-1);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+/* Style panel groups the Premade/Custom toggle with the Load/Save
+   toolbar in one wrapper so they share a vertical center (the bare
+   .actions icon-btns are taller than the toggle's single-line pill,
+   so without this wrapper align-items: center would have to fight
+   the multi-line h2 height to do anything useful). flex-shrink:0 on
+   the wrapper preserves the toolbar's natural width per the same
+   rule applied to .panel-header > .actions for the other tabs. */
+.panel-header-tools {
+  display: flex;
+  align-items: center;
+  column-gap: 0.6rem;
+  flex-shrink: 0;
+  /* On narrow viewports the mode toggle + Copy/Paste/Load/Save row
+     together overflow the panel width. Let them wrap so the document
+     never grows wider than the viewport (which broke position:fixed
+     on Penny in Firefox at ~400px). */
+  flex-wrap: wrap;
+  row-gap: 0.3rem;
+}
+.style-mode-toggle button[role="tab"] {
+  background: transparent;
+  border: 0;
+  font: inherit;
+  color: var(--muted);
+  padding: 0.25rem 0.9rem;
+  cursor: pointer;
+}
+.style-mode-toggle button[role="tab"]:hover { color: var(--fg); }
+.style-mode-toggle button[role="tab"][aria-selected="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+/* Slot-4 min-height defines the "usable content area" threshold. When
+   the viewport gives the panel enough room, slot 4 grows beyond this
+   to fill remaining space (current behavior on normal screens). When
+   the panel is squeezed (short viewport, or narrow viewport whose
+   wrapped header/stats eat vertical room), slot 4 stops shrinking at
+   min-height and the panel itself overflows + scrolls. This replaces
+   the eaf385b "let textareas shrink to nothing" workaround: textareas
+   now stay usable; the panel scrolls instead. */
+.panel.secret > textarea,
+.panel.story  > textarea {
+  flex: 1 1 auto;
+  /* 50vh floor: never collapse to a sliver. Grows beyond that to
+     absorb viewport slack so the disclaimer naturally lands at the
+     bottom of a short page. The textarea has its own native vertical
+     scroll for content longer than its rendered box. */
+  min-height: 50vh;
+  resize: none;
+}
+.panel.eve > .eve-log {
+  flex: 1 1 auto;
+  min-height: 50vh;
+  overflow-y: auto;
+}
+.panel.style  > .tab-content {
+  flex: 1 1 auto;
+}
+.panel > .panel-stats { flex-shrink: 0; }
+.panel.secret, .panel.story, .panel.style, .panel.eve {
+  border-width: 1px;
+  border-color: var(--panel-strong-border);
+}
+.panel.secret { background: var(--panel-secret-bg); }
+.panel.story  { background: var(--panel-story-bg); }
+.panel.style  { background: var(--panel-style-bg); }
+.panel.eve    { background: var(--panel-eve-bg); }
+.panel.style > .actions { justify-content: flex-start; }
+.panel.secret > .panel-h2,
+.panel.story  > .panel-h2,
+.panel.style  > .panel-h2,
+.panel.eve    > .panel-h2 {
+  font-size: 1.7rem;
+}
+.advanced-body > h3.panel-h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+.panel-subtitle {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: var(--muted);
+  margin-top: 0.15rem;
+  line-height: 1.2;
+}
+/* Inline aside next to the panel title. Used by the Eve tab to
+   render the persona name + role: `Eve "An Eavesdropper"`. */
+.panel-h2-aside {
+  font-size: 1rem;
+  font-weight: normal;
+  color: var(--muted);
+  margin-left: 0.4rem;
+}
+.panel-subtitle a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.panel-subtitle a:hover { color: var(--accent-hover); }
+.panel-h2 {
+  margin: 0;
+  text-align: start;
+  align-self: stretch;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Standard template, slot 5. Content Statistics. Sticks to the
+   bottom of the tab body so the bytes/sha line (secret/cover) or the
+   stats-panel + Build button (style) is always visible while the
+   tab body scrolls. Background inherits from the panel so the sticky
+   strip masks content scrolling underneath it. */
+.panel-stats {
+  min-height: 1.3rem;
+  padding: 0.2rem 0.5rem;
+  text-align: start;
+  /* flex-shrink: 0 (set on .panel > .panel-stats) keeps the stats
+     row at natural height so slot 4 absorbs the remaining space and
+     scrolls internally. Panel has overflow: hidden, so there is no
+     panel-level scroll for stats to stick to. */
+}
+/* Secret + cover slot-5 elements (#source-stats, #cover-stats) hold a
+   single line of bytes + sha256 in sans body (slot-4 is the only
+   place that wants mono / serif). Style slot-5 (#style-stats) wraps
+   block-level children (stats-panel + Build) and keeps its native
+   sizing. */
+#source-stats,
+#cover-stats {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* BYOS stats stays at natural height so the BYOS form scrolls
+   behind it instead of squeezing the stats panel down. */
+#style-stats { flex-shrink: 0; }
+
+/* Standard template, slot 3. Content Overview. Sticks to the top of
+   the tab body so the descriptor (origin of the secret / cover / the
+   current style) stays visible while slots 1+2 scroll off. */
+.panel-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  min-height: 1.3rem;
+  line-height: 1.3;
+  padding: 0.2rem 0.5rem;
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+/* Standard template, slot 4. Content scroll wrapper for Style.
+   Carousel + advanced BYOS form scroll inside this container so
+   slot 3 (sticky top) and slot 5 (sticky bottom) stay pinned on
+   normal viewports. On short viewports slot 4 shrinks to its
+   min-height (set on .panel.style > .tab-content); once that floor
+   is hit the *panel* takes over as the scroll container so header
+   and stats remain reachable by scrolling. Secret/Cover's slot 4 is
+   the textarea, which has its own native scrollbar in addition. */
+/* Tab-content flows naturally in the page-scroll model. No inner
+   overflow; the page itself scrolls when content exceeds viewport. */
+.tab-content {
+  min-height: 0;
+}
+.primary-action {
+  grid-area: action;
+  align-self: center;
+}
+.panel.secret .primary-action { justify-self: end; }
+.panel.story  .primary-action { justify-self: start; }
+
+/* Status shares row 2 with the primary button. Reserved min-height
+   keeps the row stable when status is empty in portrait (where the
+   action moves out of this row and to the panel bottom). Text aligns
+   to the inner panel edge: right in the secret panel (next to Hide
+   it →), left in the story panel (next to ← Get it back). */
+.panel-status {
+  grid-area: status;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  min-height: 2.6rem;
+  align-self: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.panel.secret .panel-status { text-align: end; }
+
+/* Arrow span swap. Buttons carry both a horizontal arrow (landscape) and a
+   vertical arrow (portrait); CSS shows whichever fits the current breakpoint
+   so the direction always points at the other panel. */
+.arrow-v { display: none; }
+.primary.big { display: inline-flex; align-items: center; gap: 0.35rem; }
+
+@media (max-width: 720px) {
+  /* Stacked panels. Secret button drops to the bottom row pointing
+     down at the story. Story button sits at top-right pointing up
+     at the secret. Title stays centered on its own row. */
+  /* Status row moves below the Smuggle-it button on stacked layout
+     so the "Smuggled! ✓" feedback appears right where the user
+     just clicked, not above the textarea (above the fold on
+     phones). */
+  .panel.secret {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "h2"
+      "textarea"
+      "stats"
+      "actions"
+      "action"
+      "status";
+  }
+  .panel.story {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "h2       h2"
+      "status   action"
+      "textarea textarea"
+      "stats    stats"
+      "actions  actions";
+  }
+  .panel.secret .panel-status,
+  .panel.story  .panel-status { text-align: start; }
+  .panel.secret .primary-action,
+  .panel.story  .primary-action { justify-self: end; }
+  .arrow-h { display: none; }
+  .arrow-v { display: inline; }
+  /* Stack the panel-header on narrow: h2 takes the full row, toolbar
+     wraps below. Above this breakpoint the h2 absorbs leftover width
+     with flex:1 1 0 and the toolbar stays right of it. */
+  .panel-header { flex-wrap: wrap; }
+  .panel-h2 { flex: 1 1 100%; }
+}
+
+/* Home-link: top-of-page logo + wordmark, click to return to index.html.
+   Used on every non-index page. The h1 lives inside the link so the
+   wordmark is the page heading and the link target at once. */
+.home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--fg);
+  margin-bottom: 0.25rem;
+}
+.home-link:hover { color: var(--accent); }
+.home-link:hover h1 { color: var(--accent); }
+.home-link .home-logo-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+/* Secondary-page navbar title (whats-new / attributions / test-suite /
+   stress-test). Sits between the logo and the theme-toggle; flex:1
+   claims the middle of the navbar so the theme toggle is pushed to
+   the right edge of the row (mirrors how .topbar-actions does this on
+   nicetext.html). min-width keeps the title from collapsing into a
+   single character when the page is narrow. Styled as a navbar
+   heading (bolder, full fg colour, slightly larger than body) so it
+   reads as a page title rather than a muted tagline. */
+.tagline {
+  color: var(--fg);
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  flex: 1;
+  min-width: 220px;
+  /* Centered between the logo and the theme toggle: text-align:center
+     pulls the title into the horizontal middle of the flex-1 space,
+     and align-self:flex-end drops the title box to the bottom of the
+     navbar row so its bottom edge lines up with the bottom of the
+     "NiceText" wordmark (h1 is taller than the tagline, so default
+     align-items:flex-start would leave the tagline floating high). */
+  text-align: center;
+  align-self: flex-end;
+}
+
+.panel {
+  margin: 0.5rem auto;
+  max-width: var(--content-max-width);
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.panel + .panel { margin-top: 0.5rem; }
+.panel.controls { background: var(--surface-1); }
+.muted { color: var(--muted); font-weight: normal; font-size: 0.95rem; }
+.actions.center { justify-content: center; }
+.spacer { flex: 1; }
+button.big { font-size: 1rem; padding: 0.6rem 1.4rem; }
+
+.panel h2 { margin-top: 0; font-size: 1.2rem; font-weight: 500; }
+.panel h3 { font-size: 0.95rem; font-weight: 600; margin: 1.5rem 0 0.4rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.row label {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 200px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  gap: 0.2rem;
+}
+.row label span { display: block; }
+.row .hint { font-style: italic; font-size: 0.8rem; color: var(--muted); margin: 0; }
+
+select, textarea, input[type=file] {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-1);
+  color: var(--fg);
+  width: 100%;
+}
+textarea {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  resize: vertical;
+}
+textarea.is-binary {
+  background: var(--code-bg);
+  color: var(--muted);
+  font-style: italic;
+}
+/* The story side reads as prose, not code, give it a serif. Font
+   size and line-height match the secret textarea so the two panels
+   render at the same height with rows="5". */
+#cover-text {
+  font-family: var(--font-serif);
+}
+
+/* File-open is a styled <label> wrapping a hidden <input type=file>;
+   matches the visual weight of the surrounding buttons (Save, Erase,
+   etc.) so the toolbar reads as a single row of equally-styled
+   controls. */
+.file-load {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-1);
+  color: var(--fg);
+}
+.file-load:hover { background: var(--code-bg); }
+.file-load input[type=file] {
+  position: absolute;
+  width: 1px; height: 1px; opacity: 0; pointer-events: none;
+}
+
+/* Random-secret control: visually one grouped control on par with the
+   surrounding buttons. The [Random] button and the size-in-characters
+   input share a single outer border with a divider between them, so
+   the pair reads as a single toolbar widget rather than two unrelated
+   items. */
+.random-bytes-control {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-1);
+  overflow: hidden;
+}
+.random-bytes-control button {
+  border: none;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: var(--fg);
+}
+.random-bytes-control button:hover { background: var(--code-bg); }
+.random-bytes-control input[type=number] {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  width: 4rem;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  color: var(--fg);
+}
+
+/* About / "what this is" section. Collapsed by default; expanding shows the
+   honest framing of what NiceText is and isn't. */
+details.about {
+  margin: 0.5rem auto 0;
+  padding: 0 1.5rem;
+}
+details.about summary {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--accent);
+  padding: 0.4rem 0;
+  user-select: none;
+}
+details.about summary:hover { color: var(--accent-hover); }
+.about-body {
+  font-size: 0.92rem;
+  color: var(--fg);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.8rem 1.2rem;
+  margin: 0.5rem 0;
+}
+.about-body p { margin: 0.5rem 0; }
+.about-body h3.about-section {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.9rem 0 0.3rem;
+}
+.about-body strong { color: var(--status-err); }
+.about-body ul.attribution {
+  margin: 0.5rem 0;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+}
+.about-body ul.attribution li { margin: 0.4rem 0; }
+.about-body ul.attribution strong { color: var(--fg); }
+.about-body code {
+  background: var(--code-bg);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+/* Attributions page reuses .about-body's prose typography (h3.about-
+   section / ul.attribution / code / strong rules above) but is a full-
+   page wrapper, not a small disclosure box. Override the boxed
+   appearance for this context only. */
+body.attributions main.about-body {
+  background: transparent;
+  border: none;
+  max-width: 48rem;
+  margin: 1.5rem auto;
+  padding: 0 1.2rem;
+}
+body.attributions .attribution-back-link { margin-top: 2rem; }
+
+/* Toolbars at the bottom of each panel must stay on a single row at any
+   width. Children don't shrink-wrap; if the row overflows, the user
+   scrolls horizontally. The random-secret control collapses its prefix
+   text on narrow viewports (see .rb-prefix-* rules) so the row fits
+   without scrolling on typical phone widths. */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  scrollbar-width: thin;
+}
+.actions > * { flex-shrink: 0; }
+
+/* Icon-and-label buttons. Layout is icon left, label right; the label
+   collapses below ~720px so the toolbar fits on phones without
+   horizontal scroll. The title attribute and aria-label keep the
+   action accessible when the label is hidden. */
+/* Stacked icon-above-label buttons (macOS toolbar style). Always-
+   visible label kills the breakpoint guessing the side-by-side layout
+   needed; 6 buttons fit at ~3.4rem each across any viewport down to
+   320px. */
+.icon-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18rem;
+  padding: 0.4rem 0.55rem;
+  min-width: 3.2rem;
+}
+.icon-btn .icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.icon-btn .icon-btn-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  line-height: 1;
+}
+/* Hide the text labels under each icon button on narrow viewports
+   and shrink the button's min-width / padding so the panel-header
+   toolbar fits in ~400px. Without this, the row overflows the
+   panel and the document grows wider than the viewport, which
+   breaks position:fixed anchoring downstream (Penny dock drifts
+   on Firefox). */
+@media (max-width: 520px) {
+  .icon-btn .icon-btn-label { display: none; }
+  .icon-btn {
+    min-width: 0;
+    padding: 0.4rem 0.45rem;
+  }
+}
+
+.icon-btn:hover .icon { color: var(--accent-hover); }
+.icon-btn:hover .icon-btn-label { color: var(--fg); }
+.icon-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.icon-btn:disabled:hover .icon { color: var(--accent); }
+.icon-btn:disabled:hover .icon-btn-label { color: var(--muted); }
+.actions { gap: 0.25rem; }
+/* (Removed: #cover-encode / #cover-decode rules. Both buttons were
+ * deleted when Conceal / Reveal moved to the navbar sentence in
+ * 2026-05-16; the navbar primary buttons are the single canonical
+ * trigger for each action.) */
+/* Toolbars center under their panel at every viewport. */
+.panel.secret > .actions,
+.panel.story  > .actions { justify-content: flex-start; }
+
+/* Make popover: opens via the native popover attribute (Chromium 114+,
+   Safari 17+, Firefox 125+). Light-dismiss on outside click and Esc
+   are built into the API; we just style the panel and wire the
+   inner Make button to the existing random-bytes generator. */
+/* #make-modal is the random-secret generator. Was a <div popover>;
+   migrated to <dialog> + createOptionsModal. Inherits .confirm-dialog
+   chrome (border, padding, ::backdrop, modal-actions buttons); this
+   block only adds the make-specific bits: fixed width (so the dialog
+   doesn't reflow as the format <select>'s intrinsic width changes)
+   and the stacked-label form pattern (label-then-input on its own
+   line). */
+#make-modal {
+  width: 26rem;
+  box-sizing: border-box;
+}
+#make-modal-title {
+  font-size: 1.05rem;
+}
+#make-modal label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.6rem 0 0.35rem;
+}
+#make-modal input[type=number],
+#make-modal select {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+}
+#make-modal #random-bytes-hint {
+  margin: 0.5rem 0 0;
+  /* Reserve enough vertical space for the longest hint message
+     (OpenSSL's "rounded from ..." line wraps to 3 lines at this dialog
+     width). Locks the dialog height so toggling the format <select>
+     doesn't reflow / resize the modal. */
+  min-height: 4.2em;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-1);
+  color: var(--fg);
+  cursor: pointer;
+}
+button:hover { background: var(--code-bg); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.primary {
+  background: var(--accent);
+  color: var(--primary-fg);
+  border-color: var(--accent);
+  font-weight: 500;
+}
+button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+/* "attention" glow on the Encode button: source or style has changed since
+   the last encode, so a fresh click would produce a fresh cover (and a
+   different one even with no change, since each encode uses a fresh seed). */
+button.primary.attention {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.30);
+}
+
+.status {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.status.ok { color: var(--status-ok); }
+.status.err { color: var(--status-err); }
+
+/* Build's progress modal shares the Eve-busy-dialog shape (header
+   with title + X, body with animated bar + test/detail lines +
+   unified row block, footer with single Cancel). Done-state flash
+   ceremony is Build-specific; the keyframes + .is-flashing rule
+   live below. The dialog itself uses the .share-style-dialog +
+   .eve-busy-dialog classes; see those rules for header/body/footer
+   layout. */
+@keyframes progress-done-flash {
+  0%, 40%, 80%, 100% {
+    background: var(--accent);
+    color: var(--primary-fg);
+    border-color: var(--accent);
+  }
+  20%, 60% {
+    background: var(--surface-1);
+    color: var(--fg);
+    border-color: var(--border);
+  }
+}
+dialog.eve-busy-dialog .modal-actions button.is-flashing {
+  animation: progress-done-flash 900ms ease-in-out 1 forwards;
+}
+
+/* Sticky error row inside a unified row block. Shown by the Build
+   modal's showError() path; sits at the top of the rows list with
+   loud red styling until the modal is dismissed. */
+.progress-modal-rows .progress-row-error {
+  background: var(--status-err, #b3261e);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+}
+.progress-modal-rows .progress-row-error .eve-worker-row-id { color: rgba(255, 255, 255, 0.8); }
+.progress-modal-rows .progress-row-error .eve-worker-row-label { color: #fff; }
+
+/* Per-row control slot (e.g., Skip-verification button on the
+   validate row). Compact inline button hugging the right edge of
+   the row. */
+.eve-worker-row .eve-worker-row-control {
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.78rem;
+  background: var(--surface-1);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.eve-worker-row .eve-worker-row-control:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+dialog#pipeline-consent .pipeline-consent-detail { margin: 0 0 0.5rem; }
+dialog#pipeline-consent .pipeline-consent-status {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  min-height: 1.1em;
+}
+dialog#pipeline-consent .pipeline-consent-status.err { color: var(--status-err); }
+
+/* Drag-and-drop hover state. Applied to the panel section while a
+   file is being dragged over it. Visual: accent-colored dashed outline
+   so it's obvious without shifting layout. */
+.panel.drop-hover {
+  outline: 2px dashed var(--accent);
+  outline-offset: -4px;
+  background: rgba(43, 108, 176, 0.04);
+}
+
+/* Confirmation dialog (e.g., overwrite-current-secret prompt before
+   Get it back replaces a non-empty source). Native <dialog> with
+   ::backdrop dimming. */
+dialog.confirm-dialog {
+  position: relative;  /* anchor for .dialog-close absolute positioning */
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.25rem 1.5rem;
+  width: 28rem;
+  max-width: 90vw;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+/* Close-X fallback for confirm-dialogs that don't get the wrapped
+   header (e.g. first-visit-disclaimer's hero h1). When createModal
+   wraps title + X into .modal-header, this rule no longer matches
+   (X becomes a flex item of .modal-header instead of a direct
+   child of the dialog). */
+dialog.confirm-dialog > .dialog-close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.6rem;
+}
+/* Wrapped header, title + close-X on the same row, baseline
+   aligned. createModal wraps these on construction whenever both a
+   title id and a closeX id are provided. Negative margins on the
+   sides counter the dialog's own padding so the border-bottom
+   spans the full width. */
+dialog.confirm-dialog > .modal-header {
+  margin: -1.25rem -1.5rem 1rem;
+  padding: 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+dialog.confirm-dialog > .modal-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Layer-picker is a confirm-dialog with variable row count (depends
+   on the wrapper chain depth detected, up to ~6 layers in practice).
+   Reserve enough height for the heaviest expected case + the fallback
+   banner so the modal doesn't grow as rows / banner appear. */
+dialog#cover-layer-picker {
+  min-height: 20rem;
+}
+.layer-picker-list {
+  list-style: none;
+  margin: 0.6rem 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+}
+.layer-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+}
+.layer-picker-row label {
+  cursor: pointer;
+  user-select: none;
+}
+.layer-picker-fallback {
+  margin: 0.6rem 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.88rem;
+  color: #fff;
+  background: var(--status-err, #b3261e);
+  border-radius: 4px;
+}
+dialog.confirm-dialog::backdrop {
+  background: rgba(20, 20, 20, 0.35);
+}
+dialog.confirm-dialog h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+dialog.confirm-dialog p { margin: 0 0 1rem; }
+
+/* Single source of truth for modal-footer button alignment. Every
+   <dialog>'s bottom action row carries `class="modal-actions"`; flip
+   this one rule to re-justify every modal footer in unison.
+   Dialog-flavor specifics (e.g. .disclaimer-dialog's center
+   override) live next to their flavor's other rules. In-card action
+   rows (e.g. #reveal-modal's per-card Load buttons, #share-modal's
+   per-card toolbars) are NOT modal footers and don't use this class. */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* First-visit disclaimer: confirm-dialog with a splash-style hero
+   (NiceText logo + text) above the disclaimer copy. Width pushed
+   wider than the bare confirm-dialog default so the hero breathes. */
+dialog.disclaimer-dialog {
+  max-width: 32rem;
+  text-align: center;
+}
+dialog.disclaimer-dialog .disclaimer-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.5rem 0 1rem;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+dialog.disclaimer-dialog .disclaimer-hero svg {
+  width: 1em;
+  height: 1em;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+dialog.disclaimer-dialog .disclaimer {
+  margin: 0 0 1.5rem;
+  text-align: left;
+}
+dialog.disclaimer-dialog .modal-actions {
+  justify-content: center;
+}
+dialog.disclaimer-dialog .disclaimer-learn-more {
+  /* Mirror the default button look so the link sits next to the
+     primary Agree button as a peer control. */
+  display: inline-block;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+dialog.disclaimer-dialog .disclaimer-learn-more:hover {
+  background: var(--bg-hover, var(--bg));
+}
+
+/* View dialog: full-width readonly textarea for reading the smuggled
+   story or inspecting the secret. The body textarea inherits the
+   panel-side font conventions (serif for cover, mono for source) via
+   a class added by app.js when the dialog opens. The corner-X close
+   button is reusable on the other dialogs later. */
+dialog.view-dialog {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0;
+  width: min(96vw, 1024px);
+  height: min(90vh, 760px);
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+/* Native <dialog> is `display: none` when closed and `display: block`
+   when open. Override only the open case so closing actually hides
+   the element (and stops intercepting pointer events). */
+dialog.view-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+dialog.view-dialog::backdrop {
+  background: rgba(20, 20, 20, 0.35);
+}
+dialog.view-dialog .view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+dialog.view-dialog .view-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+dialog.view-dialog .view-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+dialog.view-dialog .view-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+dialog.view-dialog #view-modal-body {
+  flex: 1;
+  width: 100%;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  resize: none;
+  outline: none;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  background: var(--bg);
+  color: var(--fg);
+  white-space: pre;
+  overflow: auto;
+}
+dialog.view-dialog #view-modal-body.is-prose {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Close-X button on the view dialog (reusable). */
+.dialog-close {
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 0.1rem 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.dialog-close:hover { color: var(--fg); background: var(--code-bg); }
+/* Suppress the default focus ring when the dialog auto-focuses the
+   close button on open (or on mouse click). Keyboard tab navigation
+   still gets a visible outline via :focus-visible so a11y is intact. */
+.dialog-close:focus { outline: none; }
+.dialog-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.4rem 0 0;
+}
+
+/* (Removed: .chip-view-toggle rules + body.view-tiles overrides.
+   The view-toggle button and its tiles/gallery dual mode were
+   dropped in the 2026-05-16 Select Style redesign, cards now
+   always render as a single grid.) */
+
+/* Always-grid card layout. Carousel + chip-nav + chip-dots +
+   chip-view-toggle were dropped in the 2026-05-16 Select Style
+   redesign in favor of a static grid that adapts column count to
+   viewport width. */
+.style-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+.style-chip {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-1);
+  cursor: pointer;
+  font: inherit;
+  color: var(--fg);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+/* In Custom or Pro mode, the chip grid is hidden entirely (the
+   segmented Premade/Custom/Pro toggle replaces the BYO card as the
+   entry point; the BYOS form sits in slot 4 instead). */
+body.style-mode-custom .style-chips,
+body.style-mode-pro    .style-chips { display: none; }
+
+/* Custom mode (the simplified subset of the BYOS panel). Visible:
+   Sentence model (whole section + header) + Codebook section header
+   + Emoji Style pillbox row + Rewriters header + Word Swap
+   (rewriter.voice) row + Reformatters header + Flourishes
+   (reformatter.voice) row. Everything else stays in the DOM (so
+   listeners, presets, and bindings keep working) but is hidden from
+   layout. Pro shows the full panel; these rules are scoped to
+   body.style-mode-custom only. The unhide rules restore the ORIGINAL
+   display value, not the user-agent default: .adv-toggle-row uses
+   `display: contents` to make its cb + body flow as direct grid
+   items, and the emoji-style row's span/div sit directly in the
+   grid as label / body. Using `display: revert` here would turn
+   each cover-transform wrap into a fat block grid item whose
+   intrinsic width pushes the grid's `max-content 1fr` column 1 to
+   ~1000 px wide; that's the wrong source of truth, hence the
+   explicit values below. */
+body.style-mode-custom [data-section="word-frequencies"] { display: none; }
+body.style-mode-custom #adv-sources-grid > * { display: none; }
+body.style-mode-custom #adv-sources-grid > .adv-row-label[data-emoji-style="true"] { display: block; }
+body.style-mode-custom #adv-sources-grid > .adv-row-body[data-emoji-style="true"]  { display: block; }
+body.style-mode-custom #adv-rewriter-grid > .adv-toggle-row { display: none; }
+body.style-mode-custom #adv-rewriter-grid > .adv-toggle-row[data-cover-transform="voice"] { display: contents; }
+body.style-mode-custom #adv-formatter-grid > .adv-toggle-row { display: none; }
+body.style-mode-custom #adv-formatter-grid > .adv-toggle-row[data-cover-transform="voice"] { display: contents; }
+
+/* Emoji-style note. Hidden by default everywhere; shows ONLY when
+   the developer is on Custom AND the active emoji preset is
+   full-control (i.e. they have detailed emoji settings that no
+   preset matches and that aren't editable from the simplified
+   Custom view; the note points them at Pro). */
+#adv-emoji-preset-note { display: none; }
+body.style-mode-custom[data-emoji-preset="full-control"] #adv-emoji-preset-note { display: block; }
+.style-chip:hover {
+  background: var(--code-bg);
+  border-color: var(--muted);
+}
+.style-chip.selected {
+  border-color: var(--accent);
+  background: var(--panel-tint-blue);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.style-chip-label {
+  font-weight: 500;
+  font-size: 0.92rem;
+  margin-bottom: 0.2rem;
+}
+.style-chip-preview {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.3;
+}
+.style-chip.selected .style-chip-preview { color: var(--fg); }
+
+/* (Removed: .chip-controls-row + .chip-center-group rules. Carousel
+   chrome row deleted in the 2026-05-16 Select Style redesign.) */
+
+/* Advanced chip: distinct dashed-border + accent-tinted background so
+   it reads as "build your own" rather than another curated card. */
+.style-chip-advanced {
+  border-style: dashed;
+  border-color: var(--accent);
+  background: rgba(43, 108, 176, 0.04);
+}
+.style-chip-advanced .style-chip-label {
+  color: var(--accent);
+}
+.style-chip-advanced:hover {
+  background: rgba(43, 108, 176, 0.08);
+}
+
+/* Persistent stats panel: shows the active Decoder Dictionary's stats.
+   Lives in the same spot the Advanced disclosure used to occupy, so
+   developers see a continuous "what am I encoding with" readout. */
+.stats-panel {
+  margin: 0;
+  padding: 0.2rem 0;
+  font-size: 0.85rem;
+}
+.stats-panel-title {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 0.25rem;
+}
+/* Stats header row: title + (optional) inline Build button. Button
+   only appears in Custom-pending state via updateStyleStatsTitle. */
+.stats-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.stats-panel-header .stats-panel-title { margin-bottom: 0; }
+/* (Removed: .stats-build-btn rules. The inline pending-state Build
+   button now uses .primary .topbar-btn .build-attention so it
+   matches the navbar Build button exactly, same icon, same red
+   attention state, same "Build / your style" two-line label.) */
+
+/* The .topbar-btn class sets display: inline-flex which beats the
+   [hidden] attribute's user-agent display: none rule. Pin it back so
+   syncInlineBuildBtn(false) actually hides the inline Build button
+   in Premade mode and in Custom-clean state. */
+#stats-panel-build[hidden] { display: none; }
+/* When the panel is in Custom-pending state, hide the stats grids so
+   the stale numbers from a previous build don't sit next to the
+   "pending" banner pretending to describe the current panel. The
+   title row + Build button stay visible. */
+.stats-panel.stats-pending #stats-panel-base,
+.stats-panel.stats-pending #stats-panel-model,
+.stats-panel.stats-pending #stats-panel-corpus-wrap,
+.stats-panel.stats-pending #stats-panel-error {
+  display: none !important;
+}
+.stats-panel-subtitle {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin: 0.4rem 0 0.2rem;
+}
+/* Inline natural-language run: each number/unit phrase stays on one
+   line, separators may wrap. <dl> kept as a no-op container so the
+   IDs still resolve from JS that targets stats-panel-base /
+   -corpus. */
+.stats-panel-grid {
+  display: block;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--fg);
+}
+.stats-pair {
+  white-space: nowrap;
+  font-size: 0.86rem;
+}
+.stats-sep {
+  color: var(--muted);
+}
+.stats-panel-loading {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.82rem;
+}
+.stats-panel-corpus[hidden] { display: none; }
+.stats-panel-error {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--status-err);
+  white-space: pre-line;
+}
+.stats-panel-error[hidden] { display: none; }
+
+/* Share-style modal. Same dialog visual conventions as the other
+   dialogs (advanced, view, progress); narrower since the content is
+   short (warning + instructions + URL row). */
+dialog.share-style-dialog {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0;
+  width: min(96vw, 520px);
+  max-height: 90vh;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+dialog.share-style-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+dialog.share-style-dialog::backdrop { background: rgba(20, 20, 20, 0.35); }
+.share-style-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.share-style-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.share-modal-title-group {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.share-modal-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.share-modal-card-subtitle {
+  margin: 0.4rem 0 0.7rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.share-modal-card-subtitle a,
+.share-modal-card-note a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.share-modal-card-subtitle a:hover,
+.share-modal-card-note a:hover { color: var(--accent-hover); }
+.share-modal-card-note {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+/* Emphasized variant: matches share-modal-card-note layout but uses
+   the full foreground color + medium weight + an accent-tinted left
+   border to draw the eye to a load-bearing fact (e.g. "you both
+   need this style to reveal"). */
+.share-modal-card-emphasis {
+  color: var(--fg);
+  font-weight: 500;
+  border-left: 3px solid var(--accent);
+  padding: 0.2rem 0 0.2rem 0.55rem;
+}
+.share-style-body {
+  padding: 0.9rem 1.1rem 1rem;
+  overflow-y: auto;
+}
+.share-style-warning {
+  margin: 0 0 0.8rem;
+  padding: 0.5rem 0.7rem;
+  background: rgba(176, 48, 48, 0.06);
+  border-left: 3px solid var(--status-err);
+  font-size: 0.85rem;
+  color: var(--fg);
+}
+.share-style-warning strong { color: var(--status-err); }
+.share-style-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+.share-modal-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+}
+.share-modal-card-titleblock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+.share-modal-card-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.share-card-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.share-modal-card-stats {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.3;
+  white-space: nowrap;
+  /* Ellipsize long labels (e.g. "Civic Oratory: random pick from…")
+     instead of overflowing the modal card. min-width:0 lets the flex
+     parent shrink this child below its natural content width so
+     text-overflow:ellipsis actually kicks in. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+/* Share modal section cards: visually separates "Share Story Style"
+   from "Share The Cover Story" so the user reads them as two distinct
+   intentional channels (per the project tenet, they should be sent
+   via different paths). Subtle tinted background + border per card. */
+.share-modal-card {
+  margin: 0 0 0.8rem;
+  padding: 0.7rem 0.85rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.share-modal-card:last-child { margin-bottom: 0; }
+#share-modal-style-section,
+#reveal-modal-style-section {
+  border-left: 3px solid var(--panel-style-accent);
+  background: var(--panel-style-bg);
+}
+#share-modal-cover-section,
+#reveal-modal-cover-section {
+  border-left: 3px solid var(--panel-story-accent);
+  background: var(--panel-story-bg);
+}
+.share-style-instructions {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  background: var(--code-bg);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: normal;
+  user-select: text;
+}
+.share-style-url-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: stretch;
+  margin-top: 0.2rem;
+}
+.share-style-url {
+  flex: 1 1 auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  padding: 0.4rem 0.5rem;
+}
+.share-style-action {
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.7rem;
+}
+.share-style-status {
+  margin: 0.6rem 0 0;
+  min-height: 1.1em;
+  font-size: 0.82rem;
+  color: var(--status-ok);
+}
+.share-cover-size {
+  margin: 0.5rem 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Cover wrap configuration (Wrap your cover story modal). */
+.share-wrap-config {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0.6rem 0 0.4rem;
+}
+.share-wrap-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+.share-wrap-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 12rem;
+  font-size: 0.82rem;
+  gap: 0.2rem;
+}
+.share-wrap-field input,
+.share-wrap-field select,
+.share-wrap-envelope {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.45rem;
+  background: var(--surface-1);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.share-wrap-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 100%;
+}
+.share-wrap-stack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+.share-wrap-stack-add {
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.5rem;
+  background: var(--surface-1);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.share-wrap-stack-add:disabled { opacity: 0.5; cursor: not-allowed; }
+.share-wrap-stack-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+}
+.share-wrap-stack-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  margin: 0.3rem 0;
+}
+.share-wrap-stack-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.share-wrap-stack-type {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.2rem 0.35rem;
+  background: var(--surface-1);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.share-wrap-stack-remove {
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.share-wrap-output {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+.share-wrap-hint {
+  margin: 0 0 0.4rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  border-left: 2px solid var(--border);
+}
+.share-wrap-hint:empty { display: none; }
+.share-wrap-puzzle {
+  margin: 0.4rem 0 0;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+  font-weight: bold;
+  color: var(--fg);
+  border-left: 2px solid var(--accent, var(--border));
+}
+.share-wrap-puzzle:empty { display: none; }
+
+/* Advanced build panel. Inline disclosure under the cards section,
+   toggled by the .advanced-toggle button (bottom-right of the card
+   row) and the BYOS chip in the carousel. */
+.advanced-toggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.advanced-body {
+  padding: 0.4rem 0 0.6rem;
+  margin: 0;
+  /* No border / no surface bg, blends with the Select Style panel
+     (was a card-in-card frame from the pre-tabs era). */
+}
+/* Premade mode hides the BYOS panel; Custom and Advanced both show
+   it. The visibility is class-driven so a single body.style-mode-*
+   swap controls everything; no JS toggling of the hidden attribute. */
+body.style-mode-premade .advanced-body { display: none; }
+/* The Custom panel is ONE flat 2-column grid. Section headers
+   ("Sentence Model", "Codebook", …) and group headers ("Emoji",
+   "Synonyms", …) are full-width rows; everything else is a
+   label / body pair that flows into the two tracks. On narrow
+   viewports the columns collapse to one. */
+body:not(.style-mode-premade) .advanced-body {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 0.75rem;
+  row-gap: 0.6rem;
+}
+@media (max-width: 700px) {
+  body:not(.style-mode-premade) .advanced-body {
+    grid-template-columns: 1fr;
+  }
+}
+.adv-field {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.82rem;
+  color: var(--muted);
+  gap: 0.2rem;
+}
+.adv-field[hidden] { display: none; }
+
+/* Two .adv-field siblings stacked vertically (e.g. Vocabulary above
+   Sources inside the Codebook fieldset) need breathing room between
+   them, without this they look crowded against each other. */
+.adv-field + .adv-field {
+  margin-top: 0.6rem;
+}
+
+/* Segmented control: a row of single-select radio buttons styled as a
+   pill of adjacent segments. Used for Sentence Scope, Vocabulary Scope,
+   and Emoji Style, small finite-state taste dials whose options are
+   short enough to display side-by-side. The radios themselves are
+   visually hidden; the labels carry the visual + interactive state. */
+.adv-segmented {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  width: 100%;
+}
+.adv-segmented label {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--fg);
+  user-select: none;
+  border-right: 1px solid var(--border);
+  transition: background 0.12s ease, color 0.12s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+.adv-segmented label:last-child { border-right: none; }
+.adv-segmented label:hover { background: var(--code-bg); }
+.adv-segmented input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px; height: 1px; margin: -1px;
+}
+.adv-segmented label:has(input[type="radio"]:checked) {
+  background: var(--accent);
+  color: var(--surface-1);
+  font-weight: 500;
+}
+.adv-segmented label:has(input[type="radio"]:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+.adv-custom-status {
+  font-size: 0.83rem;
+  color: var(--muted);
+  flex: 1 1 auto;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adv-custom-status.has-file {
+  color: var(--fg);
+}
+
+/* Vertical-stack row: textarea + status footer + 7-button toolbar.
+   Used by both the corpus row (#adv-custom-row) and the twlist row
+   (#adv-twlist-row). */
+.adv-stack-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+  padding: 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.adv-stack-row[hidden] { display: none; }
+#adv-custom-text,
+#adv-twlist-text {
+  width: 100%;
+  font-family: var(--font-mono);
+  resize: vertical;
+}
+#adv-custom-text { font-family: var(--font-serif); }
+.adv-stack-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.adv-stack-row > .actions {
+  margin: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.info-btn {
+  background: transparent;
+  border: none;
+  padding: 0.1rem;
+  margin: 0;
+  cursor: pointer;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.info-btn:hover { color: var(--accent); }
+.info-btn .icon {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+.info-btn[aria-expanded="true"] { color: var(--accent); }
+
+.adv-info-body {
+  margin: 0.2rem 0 0.7rem;
+  padding: 0.5rem 0.8rem;
+  background: var(--bg-elev, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+/* (Removed: .adv-blurb. The blurb paragraph + the BYOS h3 + its
+   subtitle were dropped on 2026-05-16; the explanatory text lives
+   in slot 3 (#style-meta) when Custom mode is active.) */
+.adv-info-body[hidden] { display: none; }
+.adv-info-body p { margin: 0.35rem 0; }
+.adv-info-body ul {
+  margin: 0.35rem 0;
+  padding-left: 1.2rem;
+}
+.adv-info-body li { margin: 0.15rem 0; }
+.adv-info-body code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--bg);
+  padding: 0 0.25rem;
+  border-radius: 2px;
+}
+.adv-info-body a { color: var(--accent); }
+.adv-info-body a:hover { color: var(--accent-hover); }
+
+.wordnet-license {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 0.7rem 0.9rem;
+  margin: 0.6rem 0;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: var(--muted);
+}
+
+/* Section header row (formerly a fieldset legend). Spans both grid
+   columns. Bold + slightly larger to give a clear hierarchy above
+   the group rows and source rows. */
+.adv-section-row {
+  grid-column: 1 / -1;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--fg);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 0 0.25rem;
+  margin-top: 0.4rem;
+}
+.adv-section-row:first-child { margin-top: 0; }
+/* .adv-section is a transparent container; its children flow into
+   the parent grid. Lets each renderer keep writing to its own
+   container while still participating in the single panel grid. */
+.adv-section {
+  display: contents;
+}
+/* Grouped sources table, five columns: checkbox, source label,
+   description, types count, words count. Group headers span the
+   full row. Whole-row click toggles the row's checkbox (handler in
+   js/app.js renderAdvancedSourcesTable). */
+.adv-sources-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.adv-sources-table thead th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding: 0.25rem 0.5rem;
+}
+.adv-sources-table th.adv-src-num-col,
+.adv-sources-table td.adv-src-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.adv-sources-table .adv-src-cb-col { width: 1.6rem; }
+.adv-sources-table .adv-src-num-col { width: 5rem; }
+/* Row layout primitives shared across all fieldsets. The grid itself
+   lives on .advanced-body (see further up); .adv-grid is just a DOM
+   container that's transparent to layout (display: contents). Each
+   row contributes two grid items: a .adv-row-label and a .adv-row-body.
+   .adv-row-full spans both columns (used by Custom upload blocks). */
+.adv-row-full {
+  grid-column: 1 / -1;
+}
+/* Reusable Enable/Disable pillbox toggle. Same visual rhythm as the
+   Premade/Custom mode-toggle pill at the top of the Style panel;
+   abstracted here so any "two mutually-exclusive options" surface
+   can reuse it. Markup:
+     <div class="pill-toggle" role="group">
+       <button data-pill-value="on"  aria-pressed="true">Enable</button>
+       <button data-pill-value="off" aria-pressed="false">Disable</button>
+     </div>
+   A hidden <input type="checkbox" hidden> sibling carries the boolean
+   state for code that still reads `.checked`. Click handler keeps the
+   button aria-pressed and the checkbox in sync. */
+.pill-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-1);
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+.pill-toggle button {
+  background: transparent;
+  border: 0;
+  font: inherit;
+  color: var(--muted);
+  padding: 0.18rem 0.7rem;
+  cursor: pointer;
+}
+.pill-toggle button:hover { color: var(--fg); }
+.pill-toggle button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+/* Hacker theme: --accent is bright green; white on bright green is
+   low-contrast. Override to black on the active pillbox + tab states. */
+html.hacker .style-mode-toggle button[role="tab"][aria-selected="true"],
+html.hacker .pill-toggle button[aria-pressed="true"] {
+  color: #000;
+}
+/* Codebook grid: group header rows span the full width and carry a
+   bold group name with an italic use-case sentence next to it. */
+.adv-src-group-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.3rem 0.4rem;
+  margin-top: 0.4rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--code-bg, rgba(0, 0, 0, 0.04));
+}
+.adv-src-group-row:first-child { margin-top: 0; }
+.adv-src-group-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--fg);
+}
+.adv-src-group-use {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.adv-row-label {
+  font-size: 0.82rem;
+  font-weight: normal;
+  text-align: right;
+  /* Nudge down so the label baseline aligns with the select's
+     visible text baseline (selects have their own internal padding). */
+  padding-top: 0.35rem;
+}
+/* When a label is hidden, hide the body that follows it too, the
+   pair travels as one logical "row" even though the grid sees two
+   separate items. */
+.adv-row-label[hidden] + .adv-row-body { display: none; }
+/* Toggle rows: checkbox in col 1 (right-justified), label + desc
+   in col 2. The wrapper is transparent (display: contents) so its
+   two children flow as direct grid items. On narrow viewports the
+   wrapper becomes a flexbox so the checkbox sits next to the label
+   instead of collapsing onto its own line. */
+.adv-toggle-row {
+  display: contents;
+}
+.adv-toggle-row[hidden] { display: none; }
+.adv-row-cb-input {
+  justify-self: end;
+  align-self: start;
+  margin: 0;
+}
+.adv-toggle-label {
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: block;
+  line-height: 1.1;
+}
+.adv-toggle-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+/* Inside a toggle-row, top-align so the label's first line sits at
+   the same y as the checkbox in col 1. Slider / select retain their
+   intrinsic height; the label-vs-checkbox alignment is what the eye
+   notices. */
+.adv-toggle-row .adv-toggle-line {
+  align-items: start;
+}
+@media (max-width: 700px) {
+  .adv-toggle-row {
+    display: flex;
+    gap: 0.4rem;
+    align-items: flex-start;
+  }
+  .adv-row-cb-input {
+    justify-self: auto;
+    align-self: flex-start;
+  }
+}
+.adv-row-body {
+  min-width: 0;
+}
+.adv-row-body select {
+  width: 100%;
+  max-width: 22rem;
+  font-size: 0.85rem;
+}
+.adv-row-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+/* Stats + citation line under each row's description. Sits on its
+   own line, right-justified; the citation is a monospace hyperlink
+   to attributions.html (opens in a new tab). */
+.adv-row-citation {
+  font-size: 0.65rem;
+  color: var(--muted);
+  margin-top: 0.05rem;
+  line-height: 1.2;
+}
+.adv-row-citation-link {
+  color: var(--muted);
+  text-decoration: underline;
+  font-family: var(--font-mono, monospace);
+}
+.adv-row-citation-link:hover {
+  color: var(--fg);
+}
+.adv-row-citation-stats {
+  font-variant-numeric: tabular-nums;
+}
+/* Inline strip of controls inside a row body (used by rewriters,
+   reformatters, and the augmentation mix slider). On wide viewports
+   pillbox + select + slider + readout sit on one line; flex-wrap
+   lets them stack when the column is too narrow. */
+.adv-rewriter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.adv-rewriter-controls .adv-rewriter-mode {
+  min-width: 12rem;
+  font-size: 0.85rem;
+}
+.adv-rewriter-controls .adv-rewriter-intensity-slider {
+  flex: 1 1 8rem;
+  min-width: 6rem;
+}
+.adv-rewriter-controls .adv-rewriter-intensity-readout {
+  min-width: 2.6rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: normal;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+/* Disabled rows dim the slider + readout (and mode select on
+   reformatters) so it's obvious the controls are dormant. */
+.adv-row-body:has(input[type="checkbox"]:not(:checked))
+  .adv-rewriter-intensity-slider,
+.adv-row-body:has(input[type="checkbox"]:not(:checked))
+  .adv-rewriter-intensity-readout {
+  opacity: 0.55;
+}
+/* Emoji-aug rows: "Intensity:" prefix + 0..10 slider + readout
+   form a right-justified block on the same line as the checkbox+name.
+   Fixed-width on wide; full-width when wrapped on narrow. */
+.adv-intensity-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  width: 20em;
+  flex: 0 1 20em;
+}
+.adv-intensity-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.adv-intensity-block .adv-rewriter-intensity-readout {
+  font-weight: normal;
+  font-size: 0.85rem;
+}
+@media (max-width: 700px) {
+  .adv-intensity-block {
+    width: 100%;
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+}
+/* Cumulative-variant table inside an emoji-aug description. Small,
+   compact, monospace numbers in col 1. */
+.adv-aug-variant-table {
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-top: 0.2rem;
+}
+.adv-aug-variant-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--fg);
+  padding: 0.15rem 0.6rem 0.15rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.adv-aug-variant-table td {
+  padding: 0.15rem 0.6rem 0.15rem 0;
+  vertical-align: top;
+}
+.adv-aug-variant-table td:first-child {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 2rem;
+}
+@media (max-width: 700px) {
+  .adv-grid {
+    grid-template-columns: 1fr;
+  }
+  .adv-row-label {
+    text-align: left;
+    padding-top: 0;
+  }
+}
+/* Rewriter rows stack a checkbox + mode select (or static label)
+   on the first line, then an intensity slider + readout on the
+   second. The whole stack lives in one cell so the Description
+   column reads cleanly to its right. */
+.adv-sources-table th.adv-rewriter-control-col,
+.adv-sources-table td.adv-rewriter-control {
+  width: 22rem;
+}
+.adv-sources-table td.adv-rewriter-control {
+  vertical-align: top;
+  padding: 0.45rem 0.5rem;
+}
+.adv-rewriter-top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+.adv-rewriter-enable-cb {
+  flex: 0 0 auto;
+}
+.adv-rewriter-mode {
+  flex: 1;
+  min-width: 0;
+}
+.adv-rewriter-static-mode {
+  flex: 1;
+  cursor: pointer;
+}
+.adv-rewriter-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* Indent past the checkbox so the slider sits under the mode
+     select / static label, not under the checkbox. Matches the
+     visual rhythm "checkbox controls enable, everything else lives
+     to its right". The 1.4rem matches the native checkbox width
+     plus the 0.4rem gap defined on .adv-rewriter-top. */
+  padding-left: 1.4rem;
+}
+.adv-rewriter-intensity-slider {
+  flex: 1;
+  min-width: 0;
+}
+.adv-rewriter-intensity-readout {
+  min-width: 2.6rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--muted);
+}
+/* When the row is disabled, dim the intensity controls so it's
+   visually obvious that the slider is dormant. The mode select
+   stays full-strength because pre-configuring it before enabling
+   is a normal flow. */
+.adv-rewriter-row:has(.adv-rewriter-enable-cb:not(:checked))
+  .adv-rewriter-bottom {
+  opacity: 0.55;
+}
+/* Reformatter rows mirror the rewriter layout with one variation:
+   the top line carries the row's family label (clickable to toggle
+   the checkbox), and the mode select moves to its own indented
+   line. The slider takes a third indented line. */
+.adv-sources-table th.adv-reformatter-control-col,
+.adv-sources-table td.adv-reformatter-control {
+  width: 22rem;
+}
+.adv-sources-table td.adv-reformatter-control {
+  vertical-align: top;
+  padding: 0.45rem 0.5rem;
+}
+.adv-reformatter-top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+.adv-reformatter-enable-cb {
+  flex: 0 0 auto;
+}
+.adv-reformatter-label {
+  flex: 1;
+  cursor: pointer;
+}
+/* mode + slider share the same indent so they line up beneath the
+   label, not beneath the checkbox. 1.4rem matches the checkbox
+   width + 0.4rem gap defined on .adv-reformatter-top. */
+.adv-reformatter-mode-line {
+  padding-left: 1.4rem;
+  margin-bottom: 0.25rem;
+}
+.adv-reformatter-mode {
+  width: 100%;
+}
+.adv-reformatter-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 1.4rem;
+}
+.adv-reformatter-intensity-slider {
+  flex: 1;
+  min-width: 0;
+}
+.adv-reformatter-intensity-readout {
+  min-width: 2.6rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--muted);
+}
+.adv-reformatter-row:has(.adv-reformatter-enable-cb:not(:checked))
+  .adv-reformatter-mode-line,
+.adv-reformatter-row:has(.adv-reformatter-enable-cb:not(:checked))
+  .adv-reformatter-bottom {
+  opacity: 0.55;
+}
+.adv-sources-table tr.adv-src-group th {
+  background: var(--code-bg, rgba(0, 0, 0, 0.04));
+  color: var(--fg);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.3rem 0.5rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+/* Group-header row with a use-case sentence: empty checkbox slot,
+   bold group name in the label column, italic use case spanning the
+   description + count columns. */
+.adv-sources-table tr.adv-src-group th.adv-src-group-cb {
+  width: 1.6rem;
+}
+.adv-sources-table tr.adv-src-group th.adv-src-group-use {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--muted);
+}
+.adv-sources-table tr.adv-src-row {
+  cursor: pointer;
+}
+.adv-sources-table tr.adv-src-row:hover {
+  background: var(--code-bg, rgba(0, 0, 0, 0.04));
+}
+.adv-sources-table tr.adv-src-row td {
+  padding: 0.25rem 0.5rem;
+  vertical-align: top;
+}
+.adv-sources-table td.adv-src-desc {
+  color: var(--muted);
+  line-height: 1.35;
+}
+.adv-sources-table input[type="checkbox"] {
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Augmentations table uses the same row chrome as the source picker;
+   the first column is a "control" (checkbox or vertical slider) and
+   the row-click delegation skips input clicks so the cursor lands in
+   the field instead of toggling. */
+.adv-sources-table .adv-aug-control-col { width: 5rem; }
+/* Cover Story Template sits as a plain field above the Corpus Options
+   table, bold label + select stacked. The custom-corpus upload UI
+   directly below grows inline when the dropdown is set to "Custom". */
+/* Mixed-phrase intensity: vertical slider sized to the row, with 0
+   pinned at the bottom (direction:rtl flips the axis under
+   writing-mode:vertical-lr). Readout sits next to the slider for a
+   live integer label. */
+.adv-sources-table tr.adv-src-row-mix td {
+  vertical-align: middle;
+}
+.adv-sources-table tr.adv-src-row-mix td.adv-aug-control-mix {
+  height: 6rem;
+  white-space: nowrap;
+}
+.adv-mix-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  -webkit-appearance: slider-vertical;
+  width: 1.4rem;
+  height: 5.5rem;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+}
+#adv-mix-readout {
+  display: inline-block;
+  min-width: 1.4rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  vertical-align: middle;
+}
+/* Mixed-phrases description embeds a short example list. Pull the
+   bullet list flush with the description text so the row still scans
+   as a single cell. */
+.adv-sources-table td.adv-src-desc ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+}
+.adv-sources-table td.adv-src-desc ul li { margin: 0.1rem 0; }
+
+/* Injectors fieldset: vowel checkbox + Emoji segmented row stack
+   vertically. The .adv-injector-row inherits the same checkbox layout
+   as the Codebook grid items; .adv-injector-field gives the "Emoji"
+   sub-label + segmented control breathing room below. */
+.adv-injector-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+.adv-injector-field {
+  margin-bottom: 0.2rem;
+}
+
+.adv-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 0.2rem;
+}
+/* (Removed: #adv-build padding override. Button moved to the navbar
+   on 2026-05-16; .topbar-btn padding applies there.) */
+
+/* (Removed: .adv-validation. The in-form red hint row was dropped
+   on 2026-05-16; Build button disabled state + placeholders cover
+   the same signal, and action errors surface via showPageStatus.) */
+
+/* ===== Splash page (index.html) =====
+   Was an inline <style> block in index.html. Mechanical consolidation
+   only; Step 1.5 will rewrite the page to reuse existing primitives. */
+
+body.splash {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  padding-bottom: 2rem;
+}
+
+body.splash main.splash {
+  width: 100%;
+  max-width: 760px;
+  text-align: center;
+}
+
+body.splash .title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 0.15rem;
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+body.splash .title svg {
+  width: 1em;
+  height: 1em;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+body.splash .subtitle {
+  color: var(--muted);
+  margin: 0 0 2rem;
+  font-size: 1rem;
+}
+
+body.splash .entries-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  text-align: left;
+}
+body.splash .ref-frame {
+  position: relative;
+  max-width: 600px;
+  margin: 1.5rem auto;
+  padding: 2.5rem 0.6rem 0.6rem;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+}
+body.splash .ref-frame .entries-grid {
+  margin: 0;
+  max-width: none;
+}
+body.splash .ref-frame-badge {
+  position: absolute;
+  top: -0.55rem;
+  left: 0.8rem;
+  background: var(--accent);
+  color: var(--surface-1);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+  user-select: none;
+}
+
+body.splash .entry {
+  display: block;
+  position: relative;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg);
+  text-decoration: none;
+  transition: background 0.12s, border-color 0.12s;
+}
+body.splash .entry.has-penny {
+  padding-right: 78px;
+  min-height: 78px;
+}
+body.splash .entry:hover {
+  background: var(--code-bg);
+  border-color: var(--accent);
+}
+body.splash .hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  max-width: 880px;
+  margin: 0 auto 1.25rem;
+}
+body.splash .hero-row .entry-hero {
+  margin: 0;
+  flex: 0 0 auto;
+}
+body.splash .hero-cue {
+  flex: 0 1 240px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  animation: hero-cue-pulse 2.4s ease-in-out infinite;
+  user-select: none;
+}
+body.splash .hero-cue-left { text-align: right; }
+body.splash .hero-cue-right { text-align: left; }
+@keyframes hero-cue-pulse {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
+@media (max-width: 720px) {
+  body.splash .hero-cue { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.splash .hero-cue { animation: none; opacity: 1; }
+}
+body.splash .entry-hero {
+  display: block;
+  max-width: calc((600px - 0.7rem) / 2);
+  margin: 0 auto 1.25rem;
+  padding: 1rem 1.2rem;
+  text-align: left;
+  border-width: 2px;
+  border-color: var(--accent);
+  animation: hero-pulse 2.4s ease-in-out infinite;
+}
+body.splash .entry-hero.has-penny {
+  padding-right: 88px;
+  min-height: 88px;
+}
+body.splash .entry-hero .entry-title {
+  font-size: 1.25rem;
+}
+body.splash .entry-hero .desc {
+  font-size: 0.92rem;
+  margin-top: 0.25rem;
+}
+body.splash .entry-hero:hover {
+  animation: none;
+  background-color: rgba(var(--accent-rgb), 0.22);
+}
+@keyframes hero-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.0);
+    background-color: var(--surface-1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0.25);
+    background-color: rgba(var(--accent-rgb), 0.12);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.splash .entry-hero { animation: none; }
+}
+body.splash .start-here {
+  position: absolute;
+  top: -0.55rem;
+  left: 0.8rem;
+  background: var(--accent);
+  color: var(--surface-1);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+  user-select: none;
+}
+body.splash .entry .entry-title {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+body.splash .entry:hover .entry-title { color: var(--accent-hover); }
+body.splash .entry .desc {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+  line-height: 1.4;
+}
+body.splash .entry.soon {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+body.splash .entry.soon .entry-title { color: var(--muted); }
+body.splash .entry.soon:hover {
+  background: var(--surface-1);
+  border-color: var(--border);
+}
+body.splash .entry.soon:hover .entry-title { color: var(--muted); }
+body.splash .badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--border);
+  color: var(--fg);
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-weight: 500;
+  vertical-align: 1px;
+}
+body.splash .icon {
+  display: inline-block;
+  width: 1.2rem;
+  text-align: center;
+  margin-right: 0.15rem;
+}
+
+body.splash .penny-figure {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  width: 56px;
+  height: 64px;
+  pointer-events: none;
+  transform-origin: 50% 85%;
+  animation: penny-tilt 4s ease-in-out infinite;
+}
+body.splash .penny-figure img {
+  width: 56px;
+  height: 56px;
+  display: block;
+  filter: saturate(0.4) opacity(0.65);
+  visibility: hidden;
+}
+body.splash .penny-figure img.loaded { visibility: visible; }
+body.splash .penny-zzz {
+  position: absolute;
+  top: -8px;
+  right: -2px;
+  width: 32px;
+  height: 36px;
+  color: var(--muted);
+}
+body.splash .penny-zzz text { font-family: inherit; font-weight: 600; }
+body.splash .penny-zzz .zzz-1 { animation: penny-fx-zzz-float 2.4s ease-in-out infinite; opacity: 0; }
+body.splash .penny-zzz .zzz-2 { animation: penny-fx-zzz-float 2.4s ease-in-out 0.8s infinite; opacity: 0; }
+body.splash .penny-zzz .zzz-3 { animation: penny-fx-zzz-float 2.4s ease-in-out 1.6s infinite; opacity: 0; }
+@keyframes penny-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  40%  { transform: rotate(4deg); }
+  70%  { transform: rotate(-5deg); }
+}
+@keyframes penny-fx-zzz-float {
+  0%   { opacity: 0; transform: translateY(0); }
+  30%  { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-18px); }
+}
+body.splash .history {
+  color: var(--muted);
+  font-size: 0.88rem;
+  max-width: 540px;
+  margin: 1rem auto 0.6rem;
+}
+body.splash .footer {
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin: 0;
+}
+
+@media (max-width: 540px) {
+  body.splash .entries-grid { grid-template-columns: 1fr; }
+}
+
+/* Demo frame: wraps the bit-flow animation on the splash page as a
+   clickable link to nicetext.html. Heavier accent border + subtle
+   shadow + a small "Conceptual Animation" badge in the corner. The
+   entire frame acts as the call-to-action. */
+.demo-frame {
+  display: block;
+  position: relative;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  /* Top padding was 2.5rem to clear the "Conceptual Animation"
+     badge; badge removed, so tight padding all around. */
+  padding: 0.5rem;
+  margin: 1rem auto 1.6rem;
+  max-width: 600px;
+  background: var(--surface-1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  color: inherit;
+  text-decoration: none;
+}
+/* (No :hover transform, the frame used to be a clickable <a>; it
+   is now a <div>, and any transform here would create a new
+   containing block for the position:fixed slideshow-root in
+   fullscreen mode, causing the slideshow to jump back to the
+   demo-frame's location on hover.) */
+.demo-frame-badge {
+  position: absolute;
+  top: -0.55rem;
+  left: 0.8rem;
+  background: var(--accent);
+  color: var(--surface-1);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+  user-select: none;
+}
+/* Inside the frame, .bf-pair drops its own outer margins/centering
+   since the frame now owns those. */
+.demo-frame .bf-pair {
+  margin: 0;
+  max-width: none;
+}
+
+/* Bit-flow concept animation: three vertically-stacked phase boxes
+   (Conceal / Share / Reveal) on the splash page. Each Conceal/Reveal
+   box is internally three rows: source row (bits or cover words),
+   style label row (the transformer), output row (cover words being
+   built or bits being recovered). The Share box has one row that
+   slides the cover-story copy from above (Conceal-bottom) through
+   the box to below (Reveal-top). js/bit-flow.js drives the phase
+   machine: conceal → share → reveal → pause → loop. Aria-hidden;
+   prefers-reduced-motion shows the static end-state with no motion. */
+.bf-pair {
+  margin: 0.5rem auto 1.4rem;
+  max-width: 600px;
+}
+.bf-caption {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-align: center;
+  transition: color 250ms ease;
+}
+.bf-caption.bf-active { color: var(--accent); }
+/* Connector text between bit-flow rows: e.g. "with", "to make",
+   "and", "to recover". Reads as a continuation of the label column
+   on the left, same width as a label, right-justified so the
+   word's right edge lands at the same x as the colons above and
+   below. Tight line-height so the box doesn't grow extra space. */
+.bf-connector {
+  width: 8.5rem;
+  text-align: right;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1;
+  margin: 0;
+}
+.bit-flow {
+  position: relative;
+  border-radius: 8px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  /* Clip rather than wrap on narrow screens. The animation is
+     decorative (aria-hidden); a truncated tail of bits/words doesn't
+     hide load-bearing content. */
+  overflow: hidden;
+  transition: border-color 250ms ease, box-shadow 250ms ease;
+}
+.bf-pair .bit-flow + .bit-flow { margin-top: 0.7rem; }
+.bit-flow.bf-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.bf-pair .bit-flow { margin: 0; }
+.bf-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.95rem;
+  min-height: 1.6em;
+}
+.bf-row-style {
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+  padding: 0;
+}
+.bf-style-value {
+  font-weight: 500;
+  color: var(--accent);
+  padding: 0.05rem 0.4rem;
+}
+/* Left-side row label (Your Secret: / Your Cover Story:), kept as
+   the first child of the labeled rows. Static; survives JS row
+   updates because js/bit-flow.js preserves the label across
+   replaceChildren via setRowContent(). */
+.bf-row-label {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  min-width: 8.5rem;
+  text-align: right;
+}
+.bf-bit {
+  font-family: var(--font-mono);
+  color: var(--status-err);
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+.bf-word {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--status-ok);
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+.bf-bit.bf-pulse {
+  background-color: var(--status-err);
+  color: var(--surface-1);
+}
+.bf-word.bf-pulse {
+  background-color: var(--status-ok);
+  color: var(--surface-1);
+}
+/* Match-flash: applied to the two "Your Secret" rows after Reveal
+   completes, to underline that the recovered bits match the original
+   secret. JS in bit-flow.js toggles the class three times slowly,
+   leaves it on for a full second, then resets at the next cycle.
+   Selectors include the row id to outrank the per-row color rules
+   below (which target #bf-conceal-source .bf-row-label etc. and
+   would otherwise win on specificity over a plain .bf-flash rule). */
+#bf-conceal-source.bf-flash .bf-bit,
+#bf-reveal-output.bf-flash .bf-bit,
+#bf-conceal-source.bf-flash .bf-row-label,
+#bf-reveal-output.bf-flash .bf-row-label {
+  background-color: var(--status-err);
+  color: var(--surface-1);
+}
+#bf-conceal-source.bf-flash .bf-row-label,
+#bf-reveal-output.bf-flash .bf-row-label {
+  border-radius: 3px;
+  padding: 0 0.4rem;
+}
+.bf-row .bf-row-label { transition: background-color 200ms ease, color 200ms ease; }
+/* Secret rows get the red label; cover-story rows get the green
+   label; style rows get the accent (blue) label. Same tokens as
+   bits/words/style-value above so each row reads as one color theme
+   top to bottom. */
+#bf-conceal-source .bf-row-label,
+#bf-reveal-output  .bf-row-label { color: var(--status-err); }
+#bf-conceal-output .bf-row-label,
+#bf-share-row      .bf-row-label,
+#bf-reveal-source  .bf-row-label { color: var(--status-ok); }
+#bf-conceal-style  .bf-row-label,
+#bf-share-style    .bf-row-label,
+#bf-reveal-style   .bf-row-label { color: var(--accent); }
+/* Share-row labels stay put (static, always visible). Only the
+   non-label children (the bit/word spans and the style-value) fade
+   in via the traversal animation, just like the Conceal output row
+   shows static "Your Cover Story:" while words land into it. */
+.bf-share-row > :not(.bf-row-label) {
+  opacity: 0;
+}
+.bf-share-row.bf-share-active > :not(.bf-row-label) {
+  animation: bf-share-traverse 2.4s ease forwards;
+}
+@keyframes bf-share-traverse {
+  0%   { opacity: 0; transform: translateY(-50%); }
+  30%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-bit.bf-pulse,
+  .bf-word.bf-pulse { background-color: transparent; color: inherit; }
+  .bf-share-row > :not(.bf-row-label),
+  .bf-share-row.bf-share-active > :not(.bf-row-label) {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* Match badge: rides inside the final reveal-output row, hidden until
+   js/bit-flow.js fires flashSecrets(), then fades in and stays lit
+   for the post-reveal hold. Reset clears it for the next cycle. */
+.bf-match-badge {
+  margin-left: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--status-ok);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.bf-match-badge.bf-match-show { opacity: 1; }
+
+/* ===== Engine test runner (tests/node/test-suite.html) =====
+   Was an inline <style> block + custom :root in test-suite.html. Folded
+   here under body.noderun so the page follows the unified theme
+   tokens (light + html.dark variants applied automatically). */
+
+body.noderun {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem 1.5rem;
+}
+.noderun-main { margin-top: 0.5rem; }
+.noderun-section {
+  margin-bottom: 2rem;
+}
+.noderun-section h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+.noderun-section h2 + .noderun-intro {
+  margin-top: 0;
+}
+.noderun-intro {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+.noderun-field {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+.noderun-field-label {
+  min-width: 5.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.noderun-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+}
+/* Default button:hover only swaps the background to --code-bg, which
+   sits within ~2 RGB units of --surface-1 in dark / hacker themes
+   (i.e. visually identical). Bump the secondary buttons inside this
+   panel with an accent border so Cancel actually reads as
+   interactive when the cursor lands on it. */
+.noderun-controls button:not(.primary):hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.noderun-summary {
+  margin: 0 0 0.8rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+/* Stress page only: stable digit width + preserved leading spaces
+   let the live counters render as a fixed-column scoreboard (numbers
+   grow into their right-aligned slots instead of pushing each other
+   around). The basic-tests summary stays untouched. */
+#stress-summary {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  white-space: pre;
+}
+.noderun-summary[data-status="idle"]    { background: var(--code-bg); color: var(--muted); }
+.noderun-summary[data-status="running"] { background: var(--panel-tint-blue); color: var(--accent); }
+.noderun-summary[data-status="pass"]    { background: var(--pill-pass-bg); color: var(--status-ok); }
+.noderun-summary[data-status="fail"]    { background: var(--pill-fail-bg); color: var(--status-err); }
+.noderun-progress { width: 100%; height: 0.8rem; margin-bottom: 0.8rem; }
+.noderun-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+/* Result filter. data-filter on the <ul> is set by the segmented
+   control above it; rows whose badge doesn't match are hidden via
+   :has() so the JS stays a one-liner. Default 'all' shows everything. */
+.noderun-results[data-filter="pass"] li:not(:has(.noderun-badge.pass)) { display: none; }
+.noderun-results[data-filter="fail"] li:not(:has(.noderun-badge.fail)) { display: none; }
+.noderun-results[data-filter="skip"] li:not(:has(.noderun-badge.skip)) { display: none; }
+.noderun-results[data-filter="todo"] li:not(:has(.noderun-badge.todo)) { display: none; }
+.noderun-results li {
+  padding: 0.45rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.noderun-results li:last-child { border-bottom: none; }
+.noderun-badge {
+  display: inline-block;
+  min-width: 2.6rem;
+  text-align: center;
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--surface-1);
+}
+.noderun-badge.pass { background: var(--status-ok); }
+.noderun-badge.fail { background: var(--status-err); }
+.noderun-badge.skip { background: var(--status-skip); }
+.noderun-badge.todo { background: var(--muted); }
+.noderun-name { flex: 1; }
+.noderun-ms   { color: var(--muted); font-size: 0.78rem; }
+.noderun-error {
+  flex-basis: 100%;
+  margin: 0.4rem 0 0 3.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--code-bg);
+  padding: 0.5rem 0.7rem;
+  border-radius: 4px;
+  white-space: pre-wrap;
+}
+
+/* ===== Paper page (whats-new.html) =====
+   Was css/linguistic-steganography.css. Mechanical consolidation;
+   Step 1.5 will dedupe / reuse where applicable. */
+
+body.paper {
+  /* nicetext.html reserves bottom padding for the Penny dock. The
+     paper page has no dock; reset so the bottom-bar sits naturally. */
+  padding-bottom: 0;
+}
+
+.paper-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  gap: 2.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  align-items: start;
+}
+
+.paper-toc {
+  position: sticky;
+  top: 1rem;
+  font-size: 0.9rem;
+  border-right: 1px solid var(--border);
+  padding-right: 1rem;
+}
+.toc-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.toc-list li { margin: 0.3rem 0; }
+.toc-list a {
+  color: var(--fg);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding: 0.1rem 0 0.1rem 0.6rem;
+  display: block;
+  transition: border-color 0.12s, color 0.12s;
+}
+.toc-list a:hover {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+.toc-note {
+  margin: 1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.paper-body {
+  min-width: 0;
+}
+.paper-body article {
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--fg);
+  max-width: 38rem;
+}
+.paper-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+.paper-lede {
+  font-family: var(--font-serif);
+  color: var(--muted);
+  font-size: 1.02rem;
+  margin: 0 0 2rem;
+  font-style: italic;
+}
+.paper-body section { margin: 0 0 2.2rem; }
+.paper-body h2 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+  scroll-margin-top: 1rem;
+}
+.paper-body p { margin: 0 0 0.9rem; }
+.paper-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.paper-body a:hover { text-decoration: underline; }
+.paper-body code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+}
+
+.paper-body .stub { color: var(--muted); }
+
+.paper-body .notes-list {
+  color: var(--muted);
+  margin: 0 0 0.9rem;
+  padding-left: 1.4rem;
+}
+.paper-body .notes-list li { margin: 0.35rem 0; }
+
+.paper-body a.cite-ref {
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.paper-body a.cite-ref:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.bib-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+  margin: 0 0 1rem;
+}
+.bib-entry {
+  margin: 0 0 0.85rem;
+  padding-left: 2rem;
+  text-indent: -2rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.bib-entry .bib-id {
+  color: var(--accent);
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.figure-stub {
+  margin: 0.6rem 0 0;
+  padding: 0.55rem 0.85rem;
+  background: var(--code-bg);
+  border-left: 3px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Paper-body figures: an inline <svg class="paper-figure"> wrapped
+   in a <figure> with a <figcaption>. SVG scales responsively via
+   viewBox; max-width 100% keeps it inside the paper column on
+   narrow viewports. */
+figure.paper-figure-wrap {
+  margin: 1rem 0;
+}
+svg.paper-figure {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  color: var(--fg);
+}
+figure.paper-figure-wrap figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+table.paper-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 0.4rem 0;
+}
+table.paper-table caption {
+  caption-side: bottom;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+  text-align: left;
+}
+table.paper-table th,
+table.paper-table td {
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+table.paper-table thead th {
+  font-weight: 600;
+  border-bottom-width: 2px;
+  background: var(--code-bg);
+}
+table.paper-table .paper-table-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.paper-body h3.cli-name {
+  font-size: 1.02rem;
+  margin: 1.4rem 0 0.5rem;
+  font-weight: 600;
+}
+.paper-body h3.cli-name code {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+.paper-body .cli-table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 0 0 1.1rem;
+  font-size: 0.88rem;
+}
+.paper-body .cli-table th,
+.paper-body .cli-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.paper-body .cli-table th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+}
+/* Four-column variant (Flag / Type / Default / Description) for
+   nicetext and scramble. Three-column variant (Subcommand / Inputs /
+   Output) for gendict uses :nth-last-child to pick wider Subcommand. */
+.paper-body .cli-table th:nth-child(1):nth-last-child(4),
+.paper-body .cli-table td:nth-child(1):nth-last-child(4) { width: 22%; }
+.paper-body .cli-table th:nth-child(2):nth-last-child(3),
+.paper-body .cli-table td:nth-child(2):nth-last-child(3) { width: 10%; }
+.paper-body .cli-table th:nth-child(3):nth-last-child(2),
+.paper-body .cli-table td:nth-child(3):nth-last-child(2) { width: 14%; }
+.paper-body .cli-table th:nth-child(1):nth-last-child(3),
+.paper-body .cli-table td:nth-child(1):nth-last-child(3) { width: 38%; }
+.paper-body .cli-table th:nth-child(2):nth-last-child(2),
+.paper-body .cli-table td:nth-child(2):nth-last-child(2) { width: 18%; }
+.paper-body .cli-table td code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.9em;
+}
+.paper-body .data-table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 0 0 1.1rem;
+  font-size: 0.88rem;
+}
+.paper-body .data-table th,
+.paper-body .data-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.paper-body .data-table th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.paper-body .data-table td code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.9em;
+}
+.paper-body .data-table td:nth-child(1),
+.paper-body .data-table td:nth-child(2) { white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .paper-layout {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .paper-toc {
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0 0 0.8rem;
+  }
+  .toc-list { columns: 2; column-gap: 1rem; }
+}
+
+/* Tabs row, fixed below the navbar. Three tabs select which panel is
+   active. body.tab-secret / tab-style / tab-cover (mutually exclusive)
+   hides the other two panels and pins the active one to the viewport
+   between the navbar (top) and the two fixed footers (toolbar +
+   disclaimer). */
+nav.tabs {
+  /* Tab strip in normal flow, centered and width-capped. */
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--bg);
+  /* Four tabs at 20% each, 4% gaps, 4% side margins
+     (4*20 + 3*4 + 2*4 = 100). */
+  gap: 4%;
+  padding: 0 4%;
+}
+nav.tabs button[role="tab"] {
+  flex: 0 0 20%;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--muted);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  /* Override the generic `button { border-radius: 4px }` base rule so
+     the tab's bottom corners are flush with the panel top edge below
+     them. Without these, the 4px bottom radii curl inward and create
+     a visible notch between the active tab and the panel. */
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+}
+/* Each tab carries its panel's bg color so the inactive tabs look
+   like folder tabs hovering above the panel body. */
+#tab-style  { background: var(--panel-style-bg); }
+#tab-secret { background: var(--panel-secret-bg); }
+#tab-cover  { background: var(--panel-story-bg); }
+#tab-eve    { background: var(--panel-eve-bg); }
+nav.tabs button[role="tab"]:hover { color: var(--accent); }
+/* Active tab: bolded, accent-colored frame, nudged down so its bottom
+   edge sits over the active panel's top border for the classic
+   "tab on a piece of paper" continuity. */
+nav.tabs button[role="tab"][aria-selected="true"] {
+  color: var(--fg);
+  font-weight: 700;
+  bottom: -1px;
+  z-index: 2;
+}
+/* Skirt below the active tab that paints the tab's own bg over the
+   panel's accent border-top, masking it ONLY in the column directly
+   under the tab so subpixel rendering at non-100% zoom can't expose
+   a hairline. The panel border stays visible to the left and right
+   of the active tab (the user-requested visual frame). */
+nav.tabs button[role="tab"][aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 5px;
+  background: inherit;
+  pointer-events: none;
+}
+#tab-style[aria-selected="true"]  { border-color: var(--panel-style-accent); }
+#tab-secret[aria-selected="true"] { border-color: var(--panel-secret-accent); }
+#tab-cover[aria-selected="true"]  { border-color: var(--panel-story-accent); }
+#tab-eve[aria-selected="true"]    { border-color: var(--panel-eve-accent); }
+
+/* Active panel's full frame swaps from the shared panel-strong-border
+   to its own accent so the tab + panel is one continuous line in the
+   panel's color. Under the active tab the border is masked by the
+   tab's ::after skirt (defined a few rules up) so subpixel rendering
+   can't expose a hairline of border peeking through. Was border-top-
+   color only when the panel was full-bleed; now that the panel is
+   centered with visible side gaps on ultrawide, the left / right /
+   bottom edges need the accent too. */
+body.tab-style  .panel.style  { border-color: var(--panel-style-accent); }
+body.tab-secret .panel.secret { border-color: var(--panel-secret-accent); }
+body.tab-cover  .panel.story  { border-color: var(--panel-story-accent); }
+body.tab-eve    .panel.eve    { border-color: var(--panel-eve-accent); }
+
+/* Eve log: tab-specific content area. Same flex-grow + min-height
+   contract as the secret/story textareas (rule above), with
+   styling fit for a streaming narrative log rather than a
+   freeform textarea. */
+.panel.eve > .eve-log {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: var(--surface-1);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.panel.eve > .eve-log .eve-log-placeholder {
+  color: var(--muted);
+  margin: 0;
+  text-align: center;
+  padding: 2rem 0;
+}
+.panel.eve > .eve-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  flex-wrap: wrap;
+}
+.panel.eve > .eve-controls .eve-slice-label {
+  font-weight: 600;
+}
+.panel.eve > .eve-controls .eve-slice-hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Eve ratings markup on the Story Style controls. The dropdown
+   options + the source-picker rows pick up these classes when
+   currentEveRatings has a verdict for the matching knob.
+   Coloration follows the existing pill-pass / pill-fail tokens
+   used by other status pills in the app. */
+#adv-story-sel option.eve-likely   { background: var(--pill-pass-bg); }
+#adv-story-sel option.eve-unlikely { background: var(--pill-fail-bg); }
+tr.adv-src-row.eve-likely   .adv-src-label { color: var(--status-ok);  font-weight: 600; }
+tr.adv-src-row.eve-unlikely .adv-src-label { color: var(--status-err); font-weight: 600; }
+.panel.eve > .eve-log .eve-log-banner {
+  font-weight: 700;
+  color: var(--panel-eve-accent);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 0.4rem 0.5rem;
+  margin: 0.75rem 0 0.4rem;
+  background: var(--surface-1);
+  position: sticky;
+  top: -0.75rem;
+  z-index: 1;
+}
+.panel.eve > .eve-log .eve-log-banner:first-child { margin-top: 0; }
+.panel.eve > .eve-log .eve-log-row {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.6rem;
+  border-left: 3px solid var(--border);
+  background: rgba(var(--accent-rgb, 91, 141, 239), 0.04);
+}
+.panel.eve > .eve-log .eve-log-title {
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+.panel.eve > .eve-log .eve-log-call {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+  white-space: pre-wrap;
+}
+.panel.eve > .eve-log .eve-log-detail {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+  color: var(--muted);
+}
+.panel.eve > .eve-log .eve-log-verdict {
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.15rem 0.4rem;
+  display: inline-block;
+  border-radius: 4px;
+}
+.panel.eve > .eve-log .eve-log-verdict-likely   { background: var(--pill-pass-bg); color: var(--status-ok); }
+.panel.eve > .eve-log .eve-log-verdict-unlikely { background: var(--pill-fail-bg); color: var(--status-err); }
+.panel.eve > .eve-log .eve-log-verdict-unknown  { background: var(--code-bg); color: var(--muted); }
+.panel.eve > .eve-log .eve-log-rule {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+  letter-spacing: 0.01em;
+}
+.panel.eve > .eve-log .eve-log-row.eve-log-contradiction {
+  border-left-color: var(--status-skip);
+  background: rgba(212, 154, 0, 0.08);
+}
+.panel.eve > .eve-log .eve-log-row.eve-log-contradiction .eve-log-rule {
+  color: var(--status-skip);
+  font-weight: 600;
+}
+/* Per-rule ignore/restore links inside .eve-log-rule. The link
+   is a button styled as inline text so screen readers + keyboard
+   nav treat it as a control. */
+.panel.eve > .eve-log .eve-log-rule-line {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.panel.eve > .eve-log .eve-log-rule-line-ignored span:first-child {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+.panel.eve > .eve-log .eve-log-rule-link {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent, #5b8def);
+  background: transparent;
+  border: none;
+  padding: 0 0.2rem;
+  cursor: pointer;
+}
+.panel.eve > .eve-log .eve-log-rule-link:hover {
+  text-decoration: underline;
+}
+.panel.eve > .eve-log .eve-log-rule-overridden {
+  border-left: 2px solid var(--status-skip);
+  padding-left: 0.4rem;
+  margin-top: 0.3rem;
+}
+.panel.eve > .eve-log .eve-log-rule-contradiction-note {
+  color: var(--status-skip);
+  font-size: 0.72rem;
+  margin-top: 0.2rem;
+}
+.panel.eve > .eve-log .eve-log-error {
+  border-left-color: var(--status-err);
+  background: var(--pill-fail-bg);
+}
+
+/* Generic row block for any progress modal (Eve busy, Build,
+   Conceal/Reveal). One row per active phase / load / worker; rows
+   materialize on add() and vanish on remove(). No idle state, the
+   block stays compact because nothing sits there once a row's task
+   finishes. */
+.progress-modal-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0.5rem 0;
+  padding: 0.4rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: rgba(var(--accent-rgb, 91, 141, 239), 0.05);
+  border-left: 3px solid var(--border);
+  border-radius: 2px;
+}
+.eve-worker-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eve-worker-row-id {
+  color: var(--muted);
+  flex-shrink: 0;
+  min-width: 2.5em;
+}
+.eve-worker-row-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eve-worker-row-idle .eve-worker-row-label {
+  color: var(--muted);
+  font-style: italic;
+}
+.eve-worker-row-busy .eve-worker-row-label {
+  color: var(--text);
+}
+
+/* Eve busy modal: standard <dialog> using the share-style-dialog
+   skeleton. Fixed footprint -- the dialog never resizes as content
+   churns. Internal worker-status block scrolls within the body so
+   long lists of busy rows don't push the box around. */
+dialog.eve-busy-dialog {
+  width: min(96vw, 720px);
+  height: min(86vh, 600px);
+}
+.eve-busy-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+.eve-busy-actions {
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--border);
+}
+.eve-progress-banner-test {
+  margin: 0;
+  font-weight: 700;
+}
+.eve-progress-banner-detail {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.eve-progress-banner-bar {
+  /* Indeterminate (no `value` attr) state: keep the UA defaults for
+     border + background AND skip the pseudo overrides so Chromium's
+     built-in animated stripe paints through. (Explicit border:0 /
+     border-radius / pseudo backgrounds all suppress the animation
+     in Blink, even when they match the UA computed values.)
+     Determinate state (has `[value]`) re-skins everything below
+     with the Eve accent. */
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin: 0;
+  accent-color: var(--panel-eve-accent);
+}
+.eve-progress-banner-bar[value] {
+  border: 0;
+  border-radius: 3px;
+  background: rgba(var(--accent-rgb, 91, 141, 239), 0.15);
+}
+.eve-progress-banner-bar[value]::-webkit-progress-bar {
+  background: rgba(var(--accent-rgb, 91, 141, 239), 0.15);
+  border-radius: 3px;
+}
+.eve-progress-banner-bar[value]::-webkit-progress-value {
+  background: var(--panel-eve-accent);
+  border-radius: 3px;
+}
+.eve-progress-banner-bar[value]::-moz-progress-bar {
+  background: var(--panel-eve-accent);
+  border-radius: 3px;
+}
+.panel.eve > .eve-log .eve-log-progress {
+  border-left-color: var(--accent);
+  background: transparent;
+  font-style: italic;
+}
+.panel.eve > .eve-log .eve-log-verdict-row {
+  margin: 0.15rem 0 0.15rem 1.5rem;
+  padding: 0.25rem 0.5rem;
+  border-left-width: 2px;
+  background: transparent;
+}
+.panel.eve > .eve-log .eve-log-detail-row,
+.panel.eve > .eve-log .eve-log-detail {
+  margin: 0.15rem 0 0.5rem 1.5rem;
+  padding: 0.25rem 0.5rem;
+  border-left-width: 2px;
+  background: transparent;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Narrow-screen tab row: drop the centered fixed-width layout in
+   favor of a left-aligned row that fills the viewport. Each tab
+   gets an equal third of the width via flex: 1 1 0, white-space
+   normal lets the labels wrap inside the tab, and align-items
+   stretch on the container makes the two-word "Story Style" match
+   the height of the three-word labels. Lives after the default
+   nav.tabs rules so cascade resolves in its favor. */
+@media (max-width: 720px) {
+  nav.tabs {
+    padding: 0 0.5rem;
+    gap: 0.2rem;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+  nav.tabs button[role="tab"] {
+    flex: 1 1 0;
+    white-space: normal;
+  }
+}
+
+/* Active-panel switching. Hide inactive panels by id with !important
+   to beat the earlier .panel.secret/.panel.story display:grid rule
+   (specificity 0,0,2,0). Active panel keeps its natural display
+   (grid for secret/story, block for style) plus the fixed inset
+   below so it fills the viewport between tabs and footers. */
+body.tab-secret #panel-style,
+body.tab-secret #panel-cover,
+body.tab-secret #panel-eve,
+body.tab-style  #panel-secret,
+body.tab-style  #panel-cover,
+body.tab-style  #panel-eve,
+body.tab-cover  #panel-secret,
+body.tab-cover  #panel-style,
+body.tab-cover  #panel-eve,
+body.tab-eve    #panel-secret,
+body.tab-eve    #panel-style,
+body.tab-eve    #panel-cover { display: none !important; }
+section.panel[role="tabpanel"] {
+  /* Panel sits in normal flow. The body is a flex column with
+     min-height 100vh, and the active panel takes flex: 1 1 auto
+     (rule below) so it absorbs viewport slack and lets its textarea
+     (Secret / Cover) grow to fill the screen. Inactive panels are
+     display:none via the body.tab-{secret,style,cover} rule above. */
+  margin: 0 auto;
+  max-width: var(--content-max-width);
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 6px;
+}
+body.tab-secret #panel-secret,
+body.tab-style  #panel-style,
+body.tab-cover  #panel-cover,
+body.tab-eve    #panel-eve {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/* (Removed: grid-template-rows + #panel-{secret,cover} > textarea
+   sizing. Panels are flex columns now; the textarea grows via
+   flex: 1 1 auto in the .panel.secret/.story/.style flex block.) */
+
+/* Active panel's .actions row floats to the fixed toolbar footer
+   (just above the disclaimer). Same panel-bg color so the developer
+   sees continuity between the panel and the footer. Inactive panels'
+   actions stay hidden along with the panel itself (display: none on
+   the parent .panel covers them). */
+/* Toolbar lives in the panel header (row 1, right column on wide
+   viewports; wraps to row 2 on narrow). No longer a fixed footer. */
+.panel > .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+@media (max-width: 720px) {
+  .panel > .actions { justify-content: flex-start; }
+}
+
+/* Disclaimer footer, bottom-most fixed strip. Single line, tight
+   height (~1.2rem). Text truncates with ellipsis if it would wrap;
+   the full disclaimer text is still reachable via the agreement
+   modal that the "Disclaimer:" trigger re-opens. */
+.disclaimer-footer {
+  /* In normal flow at the bottom of the body's flex column. Lands at
+     viewport bottom when content fits; scrolls into view when the
+     page is tall. */
+  background: var(--bg);
+  padding: 0.1rem 1rem;
+  font-size: 0.75rem;
+  line-height: 1.1;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.disclaimer-footer .disclaimer { margin: 0; }
+.disclaimer-footer .disclaimer small { font-size: inherit; }
+.disclaimer-link {
+  background: transparent;
+  border: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+}
+.disclaimer-link:hover { text-decoration: underline; }

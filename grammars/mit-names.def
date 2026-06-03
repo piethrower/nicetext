@@ -1,0 +1,28 @@
+// Sample grammar for the MIT names+places dictionary (data/mit.json).
+//
+// Connector words ("and", "to", "from", "of", ...) used to be {^literal^}
+// quoted-pass-through tokens, but those are unsafe against any dict that
+// recognizes the literal word — the decoder lexes "of" as a regular
+// bit-bearing word and writes spurious bits into the recovered payload.
+//
+// They're now expressed as _UNIQUE_<word> type slots, with companion
+// entries in corpora/twlist/cfg-words/mit-names.twlist. This pairs with
+// the sortdct drop-rule to give us:
+//   - mit dict (built from mitlist + cfg-words): "of" has only the
+//     _UNIQUE_of tag → CFG resolves and emits "of" cleanly with zero bits.
+//   - master dict (built from kimmo + ... + cfg-words): "of" picks up
+//     kimmo's preposition tags, drop-rule strips _UNIQUE_of → CFG's
+//     reference doesn't resolve in master, encode-time skip-mode drops
+//     the slot. Cover text omits "of," round-trip preserved.
+//
+// Punctuation literals like {,} and {. n} stay as-is — they don't lex
+// as WORDs in the decoder so they pose no collision risk. Same for
+// {Cap} (capitalization control).
+
+sentence:
+        {Cap} name_male _UNIQUE_and {Cap} name_female _UNIQUE_went _UNIQUE_to {Cap} place {. n}                                  @5
+  |     {Cap} name_female _UNIQUE_visited {Cap} place {. n}                                                                      @3
+  |     {Cap} name_male {,} {Cap} name_male {,} _UNIQUE_and {Cap} name_male _UNIQUE_all _UNIQUE_came _UNIQUE_from {Cap} place {. n} @2
+  |     {Cap} name_family _UNIQUE_met {Cap} name_family _UNIQUE_in {Cap} place {. n}                                             @4
+  |     {Cap} name_other {,} _UNIQUE_of {Cap} place {,} _UNIQUE_arrived _UNIQUE_with {Cap} name_male {. n}                       @2
+  ;

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "name": "wizoz",
+  "label": "Wizard of Oz",
+  "casualLabel": "Wizard of Oz",
+  "preview": "Dorothy looked down the long road and saw a great green city in the distance.",
+  "notes": "The Wizard of Oz corpus: narrative-fiction sentence shapes, ~2.8K vocabulary. Random sentence playback. Base block declares the master TWLIST union with vowel augmentation; frequencies=['style'] weights the corpus dict by per-word counts in the source text.",
+  "story": {
+    "style": "wizoz",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/wizoz-curated.txt"
+  }
+}

@@ -1,0 +1,96 @@
+# proglang-keywords/sh.twlist
+#
+# language: POSIX sh (the IEEE Std 1003.1 Shell Command Language).
+# source: pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+#   (Shell Command Language), plus the POSIX-specified special built-in
+#   utilities. Bourne / KornShell / Bash extensions are NOT included here
+#   (they live in bash.twlist).
+# notes: shell reserved words are the keywords usable at command-line
+#   start positions. Underscore-bearing forms are rare in pure POSIX sh.
+
+# ----- Reserved words -----
+sh_if              if
+sh_then            then
+sh_else            else
+sh_elif            elif
+sh_fi              fi
+sh_for             for
+sh_in              in
+sh_do              do
+sh_done            done
+sh_while           while
+sh_until           until
+sh_case            case
+sh_esac            esac
+sh_break           break
+sh_continue        continue
+sh_return          return
+sh_function        function
+
+# ----- Special built-in utilities (POSIX) -----
+sh_:               :
+sh_.               .
+sh_eval            eval
+sh_exec            exec
+sh_exit            exit
+sh_export          export
+sh_readonly        readonly
+sh_set             set
+sh_shift           shift
+sh_times           times
+sh_trap            trap
+sh_unset           unset
+
+# ----- Regular built-ins -----
+sh_alias           alias
+sh_bg              bg
+sh_cd              cd
+sh_command         command
+sh_echo            echo
+sh_false           false
+sh_fc              fc
+sh_fg              fg
+sh_getopts         getopts
+sh_hash            hash
+sh_jobs            jobs
+sh_kill            kill
+sh_newgrp          newgrp
+sh_printf          printf
+sh_pwd             pwd
+sh_read            read
+sh_test            test
+sh_true            true
+sh_type            type
+sh_ulimit          ulimit
+sh_umask           umask
+sh_unalias         unalias
+sh_wait            wait
+
+# ----- Special parameters (rule-2-rejected via PUNCT) -----
+sh_$0              $0
+sh_$#              $#
+sh_$?              $?
+sh_$$              $$
+sh_$!              $!
+sh_$@              $@
+sh_$*              $*
+sh_$-              $-
+
+# ----- Test operators (no-underscore) -----
+sh_-eq             -eq
+sh_-ne             -ne
+sh_-lt             -lt
+sh_-le             -le
+sh_-gt             -gt
+sh_-ge             -ge
+sh_-z              -z
+sh_-n              -n
+sh_-e              -e
+sh_-f              -f
+sh_-d              -d
+sh_-r              -r
+sh_-w              -w
+sh_-x              -x
+sh_-s              -s
+sh_-h              -h
+sh_-L              -L

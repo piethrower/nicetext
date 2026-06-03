@@ -1,0 +1,230 @@
+# proglang-keywords/powershell-commands.twlist
+#
+# Windows PowerShell + PowerShell Core cmdlet names and language
+# keywords. Source: docs.microsoft.com/powershell, Microsoft.PowerShell.*
+# core module manifests.
+# notes: cmdlet names follow Verb-Noun PascalCase with internal hyphens;
+#   hyphens lex as part of a WORD so `get-childitem`, `where-object`,
+#   `foreach-object` admit cleanly. Authored lowercase per dict
+#   convention. Function names from non-default modules (Azure PS,
+#   PnP.PowerShell, etc.) are NOT included.
+
+# ----- Language keywords / control flow -----
+powershell-commands_if               if
+powershell-commands_else             else
+powershell-commands_elseif           elseif
+powershell-commands_switch           switch
+powershell-commands_default          default
+powershell-commands_for              for
+powershell-commands_foreach          foreach
+powershell-commands_while            while
+powershell-commands_do               do
+powershell-commands_until            until
+powershell-commands_break            break
+powershell-commands_continue         continue
+powershell-commands_return           return
+powershell-commands_function         function
+powershell-commands_param            param
+powershell-commands_filter           filter
+powershell-commands_workflow         workflow
+powershell-commands_class            class
+powershell-commands_enum             enum
+powershell-commands_using            using
+powershell-commands_try              try
+powershell-commands_catch            catch
+powershell-commands_finally          finally
+powershell-commands_throw            throw
+powershell-commands_trap             trap
+powershell-commands_data             data
+powershell-commands_dynamicparam     dynamicparam
+powershell-commands_begin            begin
+powershell-commands_process          process
+powershell-commands_end              end
+powershell-commands_inlinescript     inlinescript
+powershell-commands_parallel         parallel
+powershell-commands_sequence         sequence
+powershell-commands_in               in
+
+# ----- Comparison / logical operators (word form) -----
+powershell-commands_-eq              -eq
+powershell-commands_-ne              -ne
+powershell-commands_-lt              -lt
+powershell-commands_-le              -le
+powershell-commands_-gt              -gt
+powershell-commands_-ge              -ge
+powershell-commands_-like            -like
+powershell-commands_-notlike         -notlike
+powershell-commands_-match           -match
+powershell-commands_-notmatch        -notmatch
+powershell-commands_-contains        -contains
+powershell-commands_-notcontains     -notcontains
+powershell-commands_-in              -in
+powershell-commands_-notin           -notin
+powershell-commands_-and             -and
+powershell-commands_-or              -or
+powershell-commands_-not             -not
+powershell-commands_-xor             -xor
+powershell-commands_-band            -band
+powershell-commands_-bor             -bor
+powershell-commands_-bxor            -bxor
+powershell-commands_-bnot            -bnot
+powershell-commands_-is              -is
+powershell-commands_-isnot           -isnot
+powershell-commands_-as              -as
+powershell-commands_-replace         -replace
+powershell-commands_-split           -split
+powershell-commands_-join            -join
+
+# ----- Common verb prefixes (as standalone identifiers) -----
+powershell-commands_get              get
+powershell-commands_set              set
+powershell-commands_new              new
+powershell-commands_remove           remove
+powershell-commands_add              add
+powershell-commands_clear            clear
+powershell-commands_invoke           invoke
+powershell-commands_start            start
+powershell-commands_stop             stop
+powershell-commands_restart          restart
+powershell-commands_test             test
+powershell-commands_select           select
+powershell-commands_where            where
+powershell-commands_sort             sort
+powershell-commands_group            group
+powershell-commands_measure          measure
+powershell-commands_format           format
+powershell-commands_out              out
+powershell-commands_import           import
+powershell-commands_export           export
+powershell-commands_convert          convert
+powershell-commands_convertfrom      convertfrom
+powershell-commands_convertto        convertto
+powershell-commands_compare          compare
+powershell-commands_copy             copy
+powershell-commands_move             move
+powershell-commands_rename           rename
+powershell-commands_join             join
+powershell-commands_split            split
+powershell-commands_write            write
+powershell-commands_read             read
+powershell-commands_save             save
+powershell-commands_show             show
+powershell-commands_hide             hide
+powershell-commands_enable           enable
+powershell-commands_disable          disable
+
+# ----- Frequently used cmdlets (Verb-Noun) -----
+powershell-commands_get-childitem    get-childitem
+powershell-commands_get-content      get-content
+powershell-commands_set-content      set-content
+powershell-commands_add-content      add-content
+powershell-commands_clear-content    clear-content
+powershell-commands_get-item         get-item
+powershell-commands_get-itemproperty get-itemproperty
+powershell-commands_set-itemproperty set-itemproperty
+powershell-commands_new-item         new-item
+powershell-commands_remove-item      remove-item
+powershell-commands_copy-item        copy-item
+powershell-commands_move-item        move-item
+powershell-commands_rename-item      rename-item
+powershell-commands_test-path        test-path
+powershell-commands_resolve-path     resolve-path
+powershell-commands_join-path        join-path
+powershell-commands_split-path       split-path
+powershell-commands_get-location     get-location
+powershell-commands_set-location     set-location
+powershell-commands_push-location    push-location
+powershell-commands_pop-location     pop-location
+powershell-commands_select-object    select-object
+powershell-commands_where-object     where-object
+powershell-commands_foreach-object   foreach-object
+powershell-commands_sort-object      sort-object
+powershell-commands_group-object     group-object
+powershell-commands_measure-object   measure-object
+powershell-commands_compare-object   compare-object
+powershell-commands_tee-object       tee-object
+powershell-commands_format-list      format-list
+powershell-commands_format-table     format-table
+powershell-commands_format-wide      format-wide
+powershell-commands_format-custom    format-custom
+powershell-commands_out-host         out-host
+powershell-commands_out-file         out-file
+powershell-commands_out-string       out-string
+powershell-commands_out-null         out-null
+powershell-commands_out-gridview     out-gridview
+powershell-commands_write-host       write-host
+powershell-commands_write-output     write-output
+powershell-commands_write-error      write-error
+powershell-commands_write-warning    write-warning
+powershell-commands_write-verbose    write-verbose
+powershell-commands_write-debug      write-debug
+powershell-commands_write-progress   write-progress
+powershell-commands_read-host        read-host
+
+# ----- Process / service cmdlets -----
+powershell-commands_get-process      get-process
+powershell-commands_stop-process     stop-process
+powershell-commands_start-process    start-process
+powershell-commands_wait-process     wait-process
+powershell-commands_get-service      get-service
+powershell-commands_start-service    start-service
+powershell-commands_stop-service     stop-service
+powershell-commands_restart-service  restart-service
+
+# ----- Network / web cmdlets -----
+powershell-commands_invoke-webrequest invoke-webrequest
+powershell-commands_invoke-restmethod invoke-restmethod
+powershell-commands_test-netconnection test-netconnection
+powershell-commands_test-connection  test-connection
+powershell-commands_resolve-dnsname  resolve-dnsname
+powershell-commands_get-netadapter   get-netadapter
+powershell-commands_get-netipaddress get-netipaddress
+
+# ----- Module / package -----
+powershell-commands_import-module    import-module
+powershell-commands_remove-module    remove-module
+powershell-commands_get-module       get-module
+powershell-commands_install-module   install-module
+powershell-commands_update-module    update-module
+powershell-commands_uninstall-module uninstall-module
+powershell-commands_save-module      save-module
+powershell-commands_find-module      find-module
+powershell-commands_publish-module   publish-module
+
+# ----- Security / auth -----
+powershell-commands_get-credential   get-credential
+powershell-commands_convertto-securestring convertto-securestring
+powershell-commands_convertfrom-securestring convertfrom-securestring
+powershell-commands_get-acl          get-acl
+powershell-commands_set-acl          set-acl
+powershell-commands_get-executionpolicy get-executionpolicy
+powershell-commands_set-executionpolicy set-executionpolicy
+
+# ----- JSON / CSV / XML -----
+powershell-commands_convertto-json   convertto-json
+powershell-commands_convertfrom-json convertfrom-json
+powershell-commands_convertto-csv    convertto-csv
+powershell-commands_convertfrom-csv  convertfrom-csv
+powershell-commands_import-csv       import-csv
+powershell-commands_export-csv       export-csv
+powershell-commands_convertto-xml    convertto-xml
+powershell-commands_select-xml       select-xml
+
+# ----- Automatic variables -----
+powershell-commands_$_               $_
+powershell-commands_$args            $args
+powershell-commands_$error           $error
+powershell-commands_$host            $host
+powershell-commands_$home            $home
+powershell-commands_$pwd             $pwd
+powershell-commands_$null            $null
+powershell-commands_$true            $true
+powershell-commands_$false           $false
+powershell-commands_$psitem          $psitem
+powershell-commands_$pscommandpath   $pscommandpath
+powershell-commands_$pwsh            $pwsh
+powershell-commands_$psversiontable  $psversiontable
+powershell-commands_$psscriptroot    $psscriptroot
+powershell-commands_$profile         $profile
+powershell-commands_$myinvocation    $myinvocation
+powershell-commands_$pid             $pid

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "name": "pride-and-prejudice",
+  "label": "Pride and Prejudice",
+  "casualLabel": "Austen",
+  "preview": "It is a truth universally acknowledged, that a single man in possession of a good fortune must be in want of a wife.",
+  "notes": "Pride and Prejudice corpus by Jane Austen: Regency-era social-comedy register with measured, ironic, syntactically balanced sentences. Base block declares the master TWLIST union with vowel augmentation; frequencies=['style'] weights the corpus dict by per-word counts in the source text.",
+  "story": {
+    "style": "pride-and-prejudice",
+    "sentence": "random",
+    "vocabulary": "corpus"
+  },
+  "base": {
+    "sources": [
+      "impf2p",
+      "impkimmo",
+      "mit",
+      "num-form-preserved"
+    ],
+    "frequencies": [
+      "style"
+    ],
+    "tieBreak": "prefer-shorter",
+    "hashedMergedTypes": true
+  },
+  "rewriter": {
+    "xanax": {
+      "enabled": true
+    }
+  },
+  "build": {
+    "corpus": "fixture-src/texts/pride-and-prejudice-curated.txt"
+  }
+}

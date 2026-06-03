@@ -1,0 +1,350 @@
+# proglang-keywords/css.twlist
+#
+# language: CSS (CSS3+ property names + at-rules + pseudo-classes /
+# pseudo-elements + value keywords + the universal length / color
+# function names).
+# source: drafts.csswg.org / developer.mozilla.org/en-US/docs/Web/CSS.
+# notes: hyphenated property and value names (font-family, box-sizing,
+#   space-between) lex as single WORDs. The leading-hyphen vendor
+#   prefixes (-webkit-, -moz-, -ms-, -o-) similarly admit. Underscores
+#   are essentially absent from CSS syntax.
+
+# ----- At-rules -----
+css_@media         @media
+css_@import        @import
+css_@font-face     @font-face
+css_@keyframes     @keyframes
+css_@supports      @supports
+css_@page          @page
+css_@charset       @charset
+css_@namespace     @namespace
+css_@document      @document
+css_@layer         @layer
+css_@scope         @scope
+css_@container     @container
+css_@property      @property
+css_@counter-style @counter-style
+css_@font-feature-values @font-feature-values
+
+# ----- Layout / display / box-model -----
+css_display        display
+css_position       position
+css_top            top
+css_right          right
+css_bottom         bottom
+css_left           left
+css_inset          inset
+css_float          float
+css_clear          clear
+css_z-index        z-index
+css_overflow       overflow
+css_overflow-x     overflow-x
+css_overflow-y     overflow-y
+css_visibility     visibility
+css_opacity        opacity
+css_width          width
+css_height         height
+css_min-width      min-width
+css_min-height     min-height
+css_max-width      max-width
+css_max-height     max-height
+css_margin         margin
+css_margin-top     margin-top
+css_margin-right   margin-right
+css_margin-bottom  margin-bottom
+css_margin-left    margin-left
+css_padding        padding
+css_padding-top    padding-top
+css_padding-right  padding-right
+css_padding-bottom padding-bottom
+css_padding-left   padding-left
+css_box-sizing     box-sizing
+css_box-shadow     box-shadow
+
+# ----- Borders -----
+css_border         border
+css_border-top     border-top
+css_border-right   border-right
+css_border-bottom  border-bottom
+css_border-left    border-left
+css_border-width   border-width
+css_border-style   border-style
+css_border-color   border-color
+css_border-radius  border-radius
+css_outline        outline
+css_outline-width  outline-width
+css_outline-style  outline-style
+css_outline-color  outline-color
+css_outline-offset outline-offset
+
+# ----- Background -----
+css_background     background
+css_background-color background-color
+css_background-image background-image
+css_background-repeat background-repeat
+css_background-position background-position
+css_background-size background-size
+css_background-attachment background-attachment
+css_background-clip background-clip
+css_background-origin background-origin
+css_background-blend-mode background-blend-mode
+
+# ----- Color / typography -----
+css_color          color
+css_font           font
+css_font-family    font-family
+css_font-size      font-size
+css_font-weight    font-weight
+css_font-style     font-style
+css_font-variant   font-variant
+css_font-stretch   font-stretch
+css_line-height    line-height
+css_letter-spacing letter-spacing
+css_word-spacing   word-spacing
+css_text-align     text-align
+css_text-decoration text-decoration
+css_text-decoration-line text-decoration-line
+css_text-decoration-color text-decoration-color
+css_text-decoration-style text-decoration-style
+css_text-transform text-transform
+css_text-indent    text-indent
+css_text-shadow    text-shadow
+css_white-space    white-space
+css_word-break     word-break
+css_word-wrap      word-wrap
+css_overflow-wrap  overflow-wrap
+css_writing-mode   writing-mode
+
+# ----- Flexbox -----
+css_flex           flex
+css_flex-direction flex-direction
+css_flex-wrap      flex-wrap
+css_flex-flow      flex-flow
+css_flex-grow      flex-grow
+css_flex-shrink    flex-shrink
+css_flex-basis     flex-basis
+css_justify-content justify-content
+css_justify-items  justify-items
+css_justify-self   justify-self
+css_align-items    align-items
+css_align-content  align-content
+css_align-self     align-self
+css_gap            gap
+css_row-gap        row-gap
+css_column-gap     column-gap
+css_order          order
+
+# ----- Grid -----
+css_grid           grid
+css_grid-template  grid-template
+css_grid-template-rows grid-template-rows
+css_grid-template-columns grid-template-columns
+css_grid-template-areas grid-template-areas
+css_grid-auto-rows grid-auto-rows
+css_grid-auto-columns grid-auto-columns
+css_grid-auto-flow grid-auto-flow
+css_grid-row       grid-row
+css_grid-column    grid-column
+css_grid-area      grid-area
+css_grid-row-start grid-row-start
+css_grid-row-end   grid-row-end
+css_grid-column-start grid-column-start
+css_grid-column-end grid-column-end
+
+# ----- Transitions / animations -----
+css_transition     transition
+css_transition-property transition-property
+css_transition-duration transition-duration
+css_transition-timing-function transition-timing-function
+css_transition-delay transition-delay
+css_animation      animation
+css_animation-name animation-name
+css_animation-duration animation-duration
+css_animation-timing-function animation-timing-function
+css_animation-delay animation-delay
+css_animation-iteration-count animation-iteration-count
+css_animation-direction animation-direction
+css_animation-fill-mode animation-fill-mode
+css_animation-play-state animation-play-state
+
+# ----- Transforms / filters -----
+css_transform      transform
+css_transform-origin transform-origin
+css_transform-style transform-style
+css_perspective    perspective
+css_perspective-origin perspective-origin
+css_backface-visibility backface-visibility
+css_filter         filter
+css_backdrop-filter backdrop-filter
+
+# ----- Cursor / pointer -----
+css_cursor         cursor
+css_pointer-events pointer-events
+css_user-select    user-select
+css_touch-action   touch-action
+
+# ----- Common value keywords -----
+css_auto           auto
+css_none           none
+css_inherit        inherit
+css_initial        initial
+css_unset          unset
+css_revert         revert
+css_normal         normal
+css_block          block
+css_inline         inline
+css_inline-block   inline-block
+css_inline-flex    inline-flex
+css_inline-grid    inline-grid
+css_table          table
+css_table-row      table-row
+css_table-cell     table-cell
+css_contents       contents
+css_absolute       absolute
+css_relative       relative
+css_fixed          fixed
+css_sticky         sticky
+css_static         static
+css_hidden         hidden
+css_visible        visible
+css_scroll         scroll
+css_solid          solid
+css_dashed         dashed
+css_dotted         dotted
+css_double         double
+css_groove         groove
+css_ridge          ridge
+css_outset         outset
+css_center         center
+css_start          start
+css_end            end
+css_flex-start     flex-start
+css_flex-end       flex-end
+css_space-between  space-between
+css_space-around   space-around
+css_space-evenly   space-evenly
+css_baseline       baseline
+css_stretch        stretch
+css_row            row
+css_row-reverse    row-reverse
+css_column         column
+css_column-reverse column-reverse
+css_wrap           wrap
+css_nowrap         nowrap
+css_wrap-reverse   wrap-reverse
+css_bold           bold
+css_bolder         bolder
+css_lighter        lighter
+css_italic         italic
+css_oblique        oblique
+css_underline      underline
+css_overline       overline
+css_line-through   line-through
+css_uppercase      uppercase
+css_lowercase      lowercase
+css_capitalize     capitalize
+css_pointer        pointer
+css_default        default
+css_text           text
+css_move           move
+css_not-allowed    not-allowed
+css_grab           grab
+css_grabbing       grabbing
+css_zoom-in        zoom-in
+css_zoom-out       zoom-out
+css_ease           ease
+css_ease-in        ease-in
+css_ease-out       ease-out
+css_ease-in-out    ease-in-out
+css_linear         linear
+css_cubic-bezier   cubic-bezier
+css_steps          steps
+
+# ----- Pseudo-classes / pseudo-elements -----
+css_:hover         :hover
+css_:focus         :focus
+css_:active        :active
+css_:visited       :visited
+css_:link          :link
+css_:first-child   :first-child
+css_:last-child    :last-child
+css_:nth-child     :nth-child
+css_:nth-of-type   :nth-of-type
+css_:not           :not
+css_:is            :is
+css_:where         :where
+css_:has           :has
+css_:checked       :checked
+css_:disabled      :disabled
+css_:enabled       :enabled
+css_:required      :required
+css_:optional      :optional
+css_:valid         :valid
+css_:invalid       :invalid
+css_:placeholder-shown :placeholder-shown
+css_:root          :root
+css_:empty         :empty
+css_:target        :target
+css_::before       ::before
+css_::after        ::after
+css_::placeholder  ::placeholder
+css_::selection    ::selection
+css_::first-line   ::first-line
+css_::first-letter ::first-letter
+css_::marker       ::marker
+
+# ----- Functional notation -----
+css_rgb            rgb
+css_rgba           rgba
+css_hsl            hsl
+css_hsla           hsla
+css_hwb            hwb
+css_lab            lab
+css_lch            lch
+css_oklab          oklab
+css_oklch          oklch
+css_calc           calc
+css_clamp          clamp
+css_var            var
+css_url            url
+css_attr           attr
+css_counter        counter
+css_repeat         repeat
+css_minmax         minmax
+css_fit-content    fit-content
+css_translate      translate
+css_rotate         rotate
+css_scale          scale
+css_skew           skew
+css_matrix         matrix
+
+# ----- Units / lengths -----
+css_px             px
+css_em             em
+css_rem            rem
+css_pt             pt
+css_pc             pc
+css_in             in
+css_cm             cm
+css_mm             mm
+css_vh             vh
+css_vw             vw
+css_vmin           vmin
+css_vmax           vmax
+css_dvh            dvh
+css_lvh            lvh
+css_svh            svh
+css_ch             ch
+css_ex             ex
+css_fr             fr
+css_deg            deg
+css_rad            rad
+css_grad           grad
+css_turn           turn
+css_ms             ms
+
+# ----- Vendor prefixes -----
+css_-webkit-       -webkit-
+css_-moz-          -moz-
+css_-ms-           -ms-
+css_-o-            -o-

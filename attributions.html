@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; require-trusted-types-for 'script'">
+  <title>Attributions, NiceText</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/nicetext.css">
+  <script src="js/theme.js"></script>
+  <script src="js/runtime-check.js"></script>
+  <script src="js/matrix-rain.js"></script>
+</head>
+<body class="attributions">
+
+<header class="topbar">
+  <a class="home-link" href="index.html" title="Back to home">
+    <svg class="home-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4V6z"/>
+      <line x1="7" y1="9" x2="15" y2="9"/>
+      <line x1="7" y1="13" x2="17" y2="13"/>
+    </svg>
+    <h1 data-hacker-text="./nicetext/bin/a.out">NiceText</h1>
+  </a>
+  <p class="tagline">Attributions</p>
+  <button type="button" class="theme-toggle" id="theme-toggle"
+          aria-label="Toggle dark mode"
+          title="Toggle dark mode">
+    <svg class="theme-icon theme-icon-sun" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="8" r="3"/>
+      <path d="M8 1.5v1.5M8 13v1.5M1.5 8h1.5M13 8h1.5M3.05 3.05l1.06 1.06M11.9 11.9l1.05 1.05M3.05 12.95l1.06-1.05M11.9 4.1l1.05-1.05"/>
+    </svg>
+    <svg class="theme-icon theme-icon-moon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/>
+    </svg>
+  </button>
+</header>
+
+<main class="about-body">
+  <p>The data behind NiceText comes from the following sources,
+  preserved under <code>fixture-src/</code> and <code>fixtures/</code>.
+  Where a license requires a verbatim notice, the full text is
+  reproduced below.</p>
+
+  <h3 class="about-section">Original NiceText system</h3>
+  <p>NiceText C++ (1995&ndash;2001) by Mark T. Chapman and Dr. George Davida,
+  University of Wisconsin&ndash;Milwaukee. The original C++ archive is a
+  separate sibling project (planned for release at
+  <a href="https://piethrower.github.io/OG-NiceText" target="_blank" rel="noopener">piethrower.github.io/OG-NiceText</a>),
+  not bundled with this JavaScript port. Its <code>COPYRIGHT</code>
+  file documents the original terms (personal and educational use
+  permitted, commercial use prohibited without authorization).</p>
+
+  <h3 class="about-section">Sample texts (corpora)</h3>
+  <p>All from <a href="https://www.gutenberg.org/" target="_blank" rel="noopener">Project
+  Gutenberg</a>, public domain:</p>
+  <ul class="attribution">
+    <li><em>JFK's Inaugural Address</em> (US gov't work, 1961, eBook 3).</li>
+    <li><em>Aesop's Fables</em>, translated by George Fyler Townsend (1887).</li>
+    <li><em>The Wonderful Wizard of Oz</em> by L. Frank Baum (1900).</li>
+    <li><em>The Complete Works of William Shakespeare</em>
+      (Project Gutenberg eBook 100, current public-domain edition).</li>
+    <li><em>A Book of Nonsense</em> by Edward Lear
+      (Project Gutenberg eBook 982). Source for the Limerick card.</li>
+    <li><em>Shakespeare's Sonnets</em> by William Shakespeare
+      (Project Gutenberg eBook 1041). Standalone sonnet sequence,
+      source for the Sonnet card.</li>
+    <li><em>Mother Goose's Nursery Rhymes</em>
+      (Project Gutenberg eBook 39784). Source for the Nursery Rhyme
+      card.</li>
+    <li><em>The Complete Plays of Gilbert and Sullivan</em>
+      (Project Gutenberg eBook 808). Single-volume libretti for
+      <em>H.M.S. Pinafore</em>, <em>The Mikado</em>,
+      <em>The Pirates of Penzance</em>, and the rest of the
+      Savoy operas. Source for the Gilbert &amp; Sullivan card.</li>
+    <li><em>Japanese Literature</em>, edited by Epiphanius Wilson, A.M.
+      (1900; Project Gutenberg eBook 19264). Classical Japanese verse
+      (waka / tanka, 5-7-5-7-7) alongside selections from
+      <em>Genji Monogatari</em>. Source for the Tanka card. Note: PG's
+      metadata attributes this volume to Basil Hall Chamberlain because
+      of his translation contributions; the editorial frame is
+      Wilson's.</li>
+  </ul>
+  <p>All corpora are curated subsets of the original Project Gutenberg
+  eBooks: narrative or verse body is retained, while front-matter
+  (title pages, contents lists, prefaces, dedications, illustration
+  blocks) and back-matter (indexes, glossaries, transcriber's notes,
+  footnotes) are removed so that the corpus-trained sentence model
+  captures the body of each work rather than ambient prose. Each file
+  carries a <code>CURATION NOTE</code> block immediately above its
+  <code>*** START OF THE PROJECT GUTENBERG EBOOK ... ***</code>
+  marker describing exactly what was removed and linking to the
+  complete original eBook on gutenberg.org. The Project Gutenberg
+  preamble and license text remain intact in the file header and
+  footer. The lexer strips both the PG preamble and the curation note
+  at corpus-load time via its <code>GUTENBERG_START</code> /
+  <code>GUTENBERG_END</code> tokens, so neither appears in generated
+  cover text.</p>
+
+  <h3 class="about-section">Word and type/word lists</h3>
+  <ul class="attribution">
+    <li><strong>MIT names and places list</strong>
+      (<code>mitlist/</code>): Bob Baldwin's collection from MIT,
+      augmented by Matt Bishop and Daniel Klein. Distributed under
+      informal academic terms.</li>
+    <li><strong>Morphological part-of-speech tagging</strong>
+      (<code>kimmo.twlist</code>): output of
+      <a href="https://www.sil.org/pckimmo/" target="_blank" rel="noopener">PC-KIMMO</a>
+      with Englex (Antworth, SIL, 1995).</li>
+    <li><strong>Synonym groupings</strong>
+      (<code>f2p.twlist</code>): derived from the Frog2Prince thesis,
+      UW&ndash;Milwaukee.</li>
+    <li id="cmu-pronouncing-dict"><strong>Carnegie Mellon Pronouncing Dictionary</strong>
+      (<code>fixture-src/pron/cmu/cmudict.dict</code>): ARPABET
+      pronunciations for ~135,000 English words, maintained by the
+      Speech Group at
+      <a href="https://github.com/cmusphinx/cmudict" target="_blank" rel="noopener">cmusphinx/cmudict</a>.
+      &copy; 1993&ndash;2015 Carnegie Mellon University; redistributed
+      under the BSD 2-clause license shipped alongside the dictionary
+      in <code>fixture-src/pron/cmu/LICENSE</code>. Source for every
+      pronunciation-derived twlist (rhyme groups, syllable count,
+      stress pattern, alliteration) and for the xanax rewriter's
+      a/an agreement exception list.</li>
+    <li><strong>Rhyming groups</strong>
+      (<code>rhyme.twlist</code>): derived from the CMU Pronouncing
+      Dictionary above.</li>
+    <li><strong>Syllable-count buckets</strong>
+      (<code>cmu-syllable.twlist</code>): derived from CMU by counting
+      vowel phonemes per pronunciation. One type per syllable count
+      (<code>syl_1</code>, <code>syl_2</code>, ...). Build:
+      <code>node fixture-src/twlist/cmu-syllable/derive.js</code>.</li>
+    <li><strong>Stress patterns</strong>
+      (<code>cmu-stress.twlist</code>): derived from CMU by
+      concatenating ARPABET stress digits (0/1/2) across the vowels of
+      each pronunciation. One type per distinct sequence
+      (<code>stress_01</code> = iamb, <code>stress_10</code> = trochee,
+      <code>stress_001</code> = anapest, <code>stress_100</code> =
+      dactyl). Build:
+      <code>node fixture-src/twlist/cmu-stress/derive.js</code>.</li>
+    <li><strong>Alliteration groups</strong>
+      (<code>cmu-alliteration.twlist</code>): derived from CMU by
+      taking each word's first phoneme. One type per phoneme
+      (<code>allit_K</code>, <code>allit_S</code>, <code>allit_TH</code>,
+      ...). Build:
+      <code>node fixture-src/twlist/cmu-alliteration/derive.js</code>.</li>
+    <li><strong>Numeric word lists</strong>: trivially generated, not
+      copyrightable.</li>
+    <li><strong>Modern words supplement</strong>
+      (<code>claude2026/</code>): Claude-authored 2026 vocabulary
+      additions covering actions, collectives, emotions, modifiers,
+      nature, new words, objects, people, semantic-domain, sensory,
+      and time-space categories.</li>
+    <li><strong>Connector words</strong>
+      (<code>cfg-words/</code>): per-grammar singleton entries used
+      by CFG drop-rule semantics.</li>
+    <li><strong>Typo / canonical pairs</strong>
+      (<code>fixture-src/rewriters/typos/</code>): English (typo,
+      canonical) substitution pairs derived from
+      <code>client9/misspell</code>'s DictMain word list. Copyright
+      &copy; 2015-2017 Nick Galbreath; MIT license. Source for the
+      <code>typos</code> cover-transform rewriter
+      (forward / reverse modes).</li>
+    <li><strong>British / American spelling pairs</strong>
+      (<code>fixture-src/rewriters/british/</code>): (source, target,
+      direction) rows derived from <code>client9/misspell</code>'s
+      DictAmerican + DictBritish word lists. Copyright &copy;
+      2015-2017 Nick Galbreath; MIT license. Source for the
+      <code>british</code> cover-transform rewriter (us-uk
+      Britishize / uk-us Americanize modes).</li>
+    <li><strong>Voice opener / closer sample data</strong>
+      (<code>fixture-src/reformatters/voice/</code>): hand-authored
+      sample twlists for the voice reformatter (pirate mode in the
+      MVP). Released as CC0 / public domain. Source for the
+      <code>voice</code> cover-transform reformatter.</li>
+  </ul>
+
+  <h3 class="about-section">Programming-language keywords
+  (<code>proglang-keywords/</code>)</h3>
+  <p>Reserved keywords, language constants, and built-in identifiers
+  across twelve programming languages, three shell dialects, and five
+  command sets. The single-word identifiers in question
+  (<code>if</code>, <code>for</code>, <code>true</code>,
+  <code>printf</code>, <code>grep</code>, ...) are not copyrightable
+  individually; the sources below are the public references each
+  per-language word list was authored against.</p>
+  <ul class="attribution">
+    <li><strong>C</strong> (<code>c.twlist</code>): ISO/IEC 9899
+      keyword list (&sect;6.4.1) and the standard library headers
+      (<code>&lt;stdio.h&gt;</code>, <code>&lt;stdlib.h&gt;</code>,
+      <code>&lt;string.h&gt;</code>, etc.).</li>
+    <li><strong>C++</strong> (<code>c++.twlist</code>): ISO/IEC 14882
+      keyword list (<code>[lex.key]</code>) and the <code>std</code>
+      namespace fundamentals.</li>
+    <li><strong>COBOL</strong> (<code>cobol.twlist</code>): ISO/IEC
+      1989 reserved-word list (COBOL-85 / -2002 / -2014).</li>
+    <li><strong>CSS</strong> (<code>css.twlist</code>): CSS Working
+      Group drafts (<a href="https://drafts.csswg.org/" target="_blank" rel="noopener">drafts.csswg.org</a>)
+      cross-referenced with MDN Web Docs.</li>
+    <li><strong>Fortran</strong> (<code>fortran.twlist</code>): ISO/IEC
+      1539 (Fortran 77 / 90 / 95 / 2003 / 2008 / 2018).</li>
+    <li><strong>HTML</strong> (<code>html.twlist</code>): WHATWG HTML
+      Living Standard (<a href="https://html.spec.whatwg.org/" target="_blank" rel="noopener">html.spec.whatwg.org</a>)
+      cross-referenced with the MDN HTML Elements reference.</li>
+    <li><strong>Java</strong> (<code>java.twlist</code>): Java
+      Language Specification (<a href="https://docs.oracle.com/javase/specs/" target="_blank" rel="noopener">docs.oracle.com/javase/specs/</a>)
+      plus the <code>java.lang</code> package roster.</li>
+    <li><strong>JavaScript</strong> (<code>js.twlist</code>): ECMAScript
+      Language Specification (<a href="https://tc39.es/ecma262/" target="_blank" rel="noopener">tc39.es/ecma262/</a>)
+      and the universally-available global builtins documented by
+      MDN.</li>
+    <li><strong>Perl</strong> (<code>perl.twlist</code>): Perl 5 core
+      documentation (<a href="https://perldoc.perl.org/" target="_blank" rel="noopener">perldoc.perl.org</a>):
+      <code>perlfunc</code>, <code>perlvar</code>, <code>perlop</code>.</li>
+    <li><strong>PHP</strong> (<code>php.twlist</code>): PHP manual
+      (<a href="https://php.net/manual/en/reserved.keywords.php" target="_blank" rel="noopener">reserved.keywords</a>
+      and <a href="https://php.net/manual/en/funcref.php" target="_blank" rel="noopener">core predefined functions</a>).</li>
+    <li><strong>Python</strong> (<code>python.twlist</code>):
+      <a href="https://docs.python.org/3/reference/lexical_analysis.html" target="_blank" rel="noopener">CPython
+      lexical analysis</a>, <a href="https://docs.python.org/3/library/functions.html" target="_blank" rel="noopener">built-in
+      functions</a>, and the <a href="https://docs.python.org/3/reference/datamodel.html" target="_blank" rel="noopener">data
+      model</a> (dunder protocol).</li>
+    <li><strong>SQL</strong> (<code>sql.twlist</code>): ISO/IEC 9075
+      reserved words plus the
+      <a href="https://en.wikipedia.org/wiki/List_of_SQL_reserved_words" target="_blank" rel="noopener">Wikipedia
+      cross-vendor reserved-word list</a> (errs toward the union).</li>
+    <li><strong>POSIX <code>sh</code></strong> (<code>sh.twlist</code>):
+      <a href="https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html" target="_blank" rel="noopener">IEEE
+      Std 1003.1 Shell Command Language</a> + POSIX special built-in
+      utilities.</li>
+    <li><strong>Bash</strong> (<code>bash.twlist</code>):
+      <a href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank" rel="noopener">GNU Bash
+      Reference Manual</a> (4.x / 5.x).</li>
+    <li><strong>csh / tcsh</strong> (<code>csh.twlist</code>): the
+      <code>tcsh(1)</code> manual page and the BSD <code>csh(1)</code>
+      manual.</li>
+    <li><strong>Linux commands</strong>
+      (<code>linux-commands.twlist</code>): GNU coreutils,
+      util-linux, systemd, iproute2 / net-tools manifests, plus the
+      command names shipped by major distro package managers
+      (apt / dnf / yum / rpm / pacman / zypper / snap / flatpak).</li>
+    <li><strong>BSD commands</strong>
+      (<code>bsd-commands.twlist</code>): FreeBSD man-page section 1/8
+      and the OpenBSD base userland set.</li>
+    <li><strong>DOS commands</strong>
+      (<code>dos-commands.twlist</code>): MS-DOS 6.22 command
+      reference and the <code>COMMAND.COM</code> internal-command
+      list, plus standard DOS external utilities.</li>
+    <li><strong>Windows commands</strong>
+      (<code>windows-commands.twlist</code>): the Microsoft Learn
+      Windows Commands reference
+      (<a href="https://learn.microsoft.com/windows-server/administration/windows-commands/windows-commands" target="_blank" rel="noopener">learn.microsoft.com</a>).</li>
+    <li><strong>PowerShell cmdlets</strong>
+      (<code>powershell-commands.twlist</code>): the Microsoft Learn
+      PowerShell documentation
+      (<a href="https://learn.microsoft.com/powershell/" target="_blank" rel="noopener">learn.microsoft.com/powershell/</a>)
+      and the <code>Microsoft.PowerShell.*</code> core module
+      manifests.</li>
+  </ul>
+
+  <h3 class="about-section">Moby Project (Grady Ward, 1996)</h3>
+  <p>Both Moby files were dedicated to the public domain by their
+  author and are distributed via Project Gutenberg:</p>
+  <ul class="attribution">
+    <li><strong>Moby Part-of-Speech II</strong>
+      (<code>fixtures/moby-pos.twlist.json</code>):
+      Project Gutenberg eBook 3203. Single-character POS codes
+      (N, p, h, V, t, i, A, v, C, P, !, r, D, I, o) carried verbatim
+      as <code>moby_&lt;code&gt;</code> types.</li>
+    <li><strong>Moby Thesaurus II</strong>
+      (<code>fixtures/moby-thesaurus.twlist.json</code>):
+      Project Gutenberg eBook 3202. Headwords carried verbatim as
+      <code>moby_&lt;headword&gt;</code> types.</li>
+  </ul>
+
+  <h3 class="about-section">WordNet 3.0 (Princeton)</h3>
+  <p>The full WordNet 3.0 license text follows, reproduced verbatim
+  per the license requirement that the notice "appear on ALL copies
+  of the software, database and documentation, including modifications."
+  This page satisfies that requirement for our derived fixtures:</p>
+  <ul class="attribution">
+    <li><strong>Parts of Speech</strong>
+      (<code>fixtures/wordnet.twlist.json</code>): derived from
+      WordNet's <code>index.&lt;pos&gt;</code> files.
+      Single-character POS codes (n, v, a, r, s) carried verbatim
+      as <code>wordnet_&lt;code&gt;</code> types.</li>
+    <li><strong>Synonyms (synsets)</strong>
+      (<code>fixtures/wordnet-synonyms.twlist.json</code>): derived
+      from WordNet's <code>data.&lt;pos&gt;</code> files. Each synset
+      becomes one type, identified by the synset's 8-digit offset
+      within its data file (<code>wordnet_&lt;pos&gt;_&lt;offset&gt;</code>);
+      every lemma in the synset becomes a word entry under that
+      type.</li>
+  </ul>
+  <pre class="wordnet-license">
+This software and database is being provided to you, the LICENSEE, by
+Princeton University under the following license.  By obtaining, using
+and/or copying this software and database, you agree that you have
+read, understood, and will comply with these terms and conditions.:
+
+Permission to use, copy, modify and distribute this software and
+database and its documentation for any purpose and without fee or
+royalty is hereby granted, provided that you agree to comply with
+the following copyright notice and statements, including the disclaimer,
+and that the same appear on ALL copies of the software, database and
+documentation, including modifications that you make for internal
+use or for distribution.
+
+WordNet 3.0 Copyright 2006 by Princeton University.  All rights reserved.
+
+THIS SOFTWARE AND DATABASE IS PROVIDED "AS IS" AND PRINCETON
+UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PRINCETON
+UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANT-
+ABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE
+OF THE LICENSED SOFTWARE, DATABASE OR DOCUMENTATION WILL NOT
+INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR
+OTHER RIGHTS.
+
+The name of Princeton University or Princeton may not be used in
+advertising or publicity pertaining to distribution of the software
+and/or database.  Title to copyright in this software, database and
+any associated documentation shall at all times remain with
+Princeton University and LICENSEE agrees to preserve same.
+</pre>
+  <p>Source: <a href="https://wordnet.princeton.edu/license-and-commercial-use" target="_blank" rel="noopener">https://wordnet.princeton.edu/license-and-commercial-use</a></p>
+
+  <h3 class="about-section">Unicode® Emoji 16.0 + CLDR 48</h3>
+  <p>Two Unicode Consortium data sources drive the emoji
+  TW-list. Both are © Unicode, Inc.; redistribution is permitted under the
+  Unicode Terms of Use (<a href="https://www.unicode.org/copyright.html" target="_blank" rel="noopener">https://www.unicode.org/copyright.html</a>):</p>
+  <ul class="attribution">
+    <li><strong>Emoji (Unicode 16)</strong>
+      (<code>fixtures/emoji16.twlist.tsv.gz</code>): derived from
+      <code>emoji-test.txt</code> at <a href="https://unicode.org/Public/emoji/16.0/" target="_blank" rel="noopener">unicode.org/Public/emoji/16.0/</a>.
+      Each fully-qualified entry (3,766 admitted of 3,784, including all skin-tone and
+      gender variants) ships as a separate bit-bearing row. Subgroup
+      headers are carried verbatim, snake-cased, as <code>em16_&lt;subgroup&gt;</code>
+      types.</li>
+    <li><strong>Emoji-related Phrases (CLDR 48)</strong>
+      (<code>fixtures/emoji-cldr-names-16.twlist.tsv.gz</code>): multi-word emoji
+      names (the CLDR <code>tts</code> spoken-name field, e.g. "alarm clock",
+      "United States" with the "flag: " prefix stripped from country flags),
+      typed under each emoji's home Unicode subgroup so cross-modal slots
+      compose at runtime. Source:
+      <a href="https://github.com/unicode-org/cldr/tree/release-48/common/annotations" target="_blank" rel="noopener">CLDR 48 English annotations</a>
+      and <a href="https://github.com/unicode-org/cldr/tree/release-48/common/annotationsDerived" target="_blank" rel="noopener">annotationsDerived</a>.</li>
+    <li><strong>CLDR keyword sidecar</strong>
+      (<code>fixtures/emoji16.cldr.json.gz</code>): per-emoji English keyword
+      list ("rose | red | flower | …") used by the cross-modal
+      augmentation passes (Aug A / Aug B / Aug-mix). Same source files
+      as Emoji-related Phrases, but the <code>tts</code> name field is split
+      out into the phrase fixture above and the pipe-separated keyword
+      arrays land here as JSON.</li>
+    <li><strong>Emoji Phrases (hand-curated)</strong>
+      (<code>fixtures/emoji-curated-phrases-16.twlist.tsv.gz</code>): hand-curated
+      multi-emoji and mixed Latin+emoji phrases (e.g. <code>🌹 💐</code>,
+      <code>happy 😀</code>, <code>hello 👋</code>) typed under
+      <code>em16_&lt;subgroup&gt;</code> labels so they compete for cover
+      slots with single-emoji entries from the Emoji source. Phrase
+      content is original to this project; the underlying emoji and
+      subgroup labels derive from Unicode Emoji 16.0 above.</li>
+    <li><strong>Emoji Curated Keywords (CLDR 48)</strong>
+      (<code>fixtures/emoji16.curated-keywords.tsv.gz</code>): AI-curated
+      subset of the CLDR keyword set (3,573 entries from 3,689). When ticked
+      as a BYOS source, the augmentation passes filter their CLDR keyword
+      input to this list (default: full CLDR keyword set, mechanical /
+      noisier). Curation drops non-Latin / multi-word / numeric / symbolic
+      strings plus a small English function-word stoplist whose narrow-
+      phrase emissions ("the 🌹", "for 🌹") read as stilted. Curation
+      method documented inline at
+      <code>fixture-src/twlist/emoji16/curated-keywords.txt</code>.</li>
+  </ul>
+
+  <h3 class="about-section">Unicode® TR39 Confusables 15.1.0</h3>
+  <p>The build-time corpus pre-clean module folds visually-confusable
+  non-Latin code points (Cyrillic <code>а</code>, Greek <code>α</code>,
+  Cherokee letters that mimic Latin caps, &c.) to their Latin look-alikes
+  so words like <code>p&#x430;per</code> don't fragment at the script
+  boundary inside the lexer. The fold table is derived from
+  <a href="https://www.unicode.org/Public/security/15.1.0/confusables.txt" target="_blank" rel="noopener">Unicode TR39
+  <code>confusables.txt</code> v15.1.0</a>, fetched into
+  <code>fixture-src/confusables/raw/</code> and filtered offline into
+  <code>fixture-src/confusables/cooked/confusables-data.js</code> via
+  <code>tools/build-confusables-map.js</code> (deployed to
+  <code>fixtures/confusables-data.js</code>). We redistribute only the
+  filtered fold table, not the upstream file.</p>
+  <p>&copy; 2023 Unicode®, Inc. Distributed under the
+  <a href="https://www.unicode.org/license.txt" target="_blank" rel="noopener">Unicode License v3</a>:
+  use is permitted provided this notice is retained. "Unicode" and the
+  Unicode Logo are registered trademarks of Unicode, Inc. in the U.S.
+  and other countries.</p>
+
+  <h3 class="about-section">Random-secret format references</h3>
+  <p>NiceText's "Make a random secret" feature offers two output
+  shapes designed to be visually indistinguishable from the genuine
+  output of two popular file-encryption tools, so an interceptor who
+  recovers the smuggled payload cannot trivially distinguish it from
+  real ciphertext from those tools. Each shape is derived solely
+  from the tool's <em>publicly documented file format</em>. No code,
+  binaries, libraries, headers, or other intellectual property from
+  either project is included, linked to, or invoked at any point.
+  NiceText is an independent project and is not endorsed by,
+  affiliated with, or sponsored by either organization. The names
+  and marks below are used only to accurately describe which file
+  shape is being mimicked.</p>
+  <ul class="attribution">
+    <li><strong>OpenSSL <code>enc</code> shape</strong>:
+      8-byte ASCII <code>Salted__</code> magic + 8 random salt bytes +
+      AES-CBC body (16-byte aligned), matching the salted output of
+      the openssl(1) <code>enc</code> command. No OpenSSL code runs
+      and no AES encryption is performed; the body bytes are
+      cryptographically random. OpenSSL is a trademark of the
+      OpenSSL Software Foundation. See
+      <a href="https://www.openssl.org/" target="_blank" rel="noopener">openssl.org</a>
+      for the project, documentation, and trademark policy.</li>
+    <li><strong>VeraCrypt container shape</strong>:
+      pure random bytes, sector-aligned to 512 bytes, with a 292 KB
+      minimum, matching the size and layout of a VeraCrypt file
+      container. A real VeraCrypt container's header lives encrypted
+      inside the first 512 bytes; we do not synthesize that header
+      (none is required for the file to be visually indistinguishable
+      from random data, and synthesizing one would require touching
+      VeraCrypt's cryptographic specification rather than just its
+      shape). No VeraCrypt code runs. VeraCrypt is a trademark of
+      its respective owners. See
+      <a href="https://veracrypt.io/" target="_blank" rel="noopener">veracrypt.io</a>
+      for the project and documentation.</li>
+  </ul>
+
+  <h3 class="about-section">Fonts</h3>
+  <ul class="attribution">
+    <li><strong>Apple II Screen Typeface</strong>
+      (<code>fixture-src/font/cooked/AppleIiScreenTypeface-2aP3.ttf</code>,
+      deployed to <code>fixtures/font/</code>) by Trekker,
+      via <a href="https://www.fontspace.com/" target="_blank" rel="noopener">FontSpace</a>.
+      Distributed under Creative Commons Attribution
+      (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>).
+      Used for the hacker-mode display face. The bundled license note
+      lives in <code>fixture-src/font/info.txt</code>.</li>
+  </ul>
+
+  <h3 class="about-section">Code adapted from sibling projects</h3>
+  <p>NiceText shares conventions with a sibling personal project,
+  Span-It! (planned for release at
+  <a href="https://piethrower.github.io/spanit" target="_blank" rel="noopener">piethrower.github.io/spanit</a>).
+  Two specific pieces of NiceText's code are adapted from Span-It!
+  rather than written fresh:</p>
+  <ul class="attribution">
+    <li><strong>Matrix digital rain</strong>
+      (<code>js/matrix-rain.js</code>): canvas-based effect adapted
+      from Span-It!'s file of the same name, with differences in
+      DOM-observation, pause/resume, and z-index handling noted in
+      the file header.</li>
+    <li><strong>Penny tutorial guide</strong>
+      (<code>js/penny.js</code>, <code>css/penny.css</code>,
+      <code>img/penny.svg</code>): tutorial character pattern,
+      typewriter reveal, and snap-to-line bubble sizing ported in
+      spirit from Span-It!'s Penny, then rewritten as a smaller spec
+      for NiceText.</li>
+  </ul>
+  <p>The repo layout convention (HTML pages at the root, sibling
+  <code>css/</code> / <code>js/</code> / <code>img/</code> dirs,
+  tests under <code>tests/node/</code>) also follows Span-It!.</p>
+
+  <h3 class="about-section">Icons and SVG art</h3>
+  <p>Inline SVG icons (favicon, NiceText wordmark logo, theme-toggle
+  sun and moon, chat bubble) were generated for this project using
+  an AI image-generation tool. Not adapted from any third-party icon
+  library.</p>
+
+  <p class="attribution-back-link"><a href="index.html">Back to home</a> &middot;
+  <a href="nicetext.html">Open NiceText</a></p>
+</main>
+
+<div class="bottom-bar">
+  <p class="disclaimer">
+    <strong>Disclaimer:</strong> For entertainment purposes only. No
+    guarantee of privacy, security, secrecy, recoverability, cipher
+    strength, legality, morality, or anything else. Nothing here is
+    legal advice, talk to a real lawyer. Do not use in any
+    circumstance that could cause you or others harm. Use at your own
+    risk.
+  </p>
+</div>
+
+</body>
+</html>

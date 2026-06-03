@@ -1,0 +1,171 @@
+# proglang-keywords/c++.twlist
+#
+# language: C++ (C++98 through C++23 reserved keywords + standard library
+# fundamentals + constants).
+# source: ISO/IEC 14882 (C++ standard) — keyword list per [lex.key], plus
+#   the fundamental types/identifiers (size_t, ptrdiff_t, etc., lowercased
+#   without the `_t` suffix), the std namespace's stream + container
+#   tokens that lex as single WORDs.
+# notes: type prefix is literal `c++_` per developer spec. Standalone:
+#   words shared with C (return, void, int, ...) get a parallel
+#   c++_return tag — sortDict merges to a comma-joined singleton with
+#   both c_return and c++_return, still zero-bit. `std::cout` is two
+#   tokens after the `::` PUNCT split, so we list `cout`, `cin`, `cerr`
+#   bare; the `std` prefix appears as its own `c++_std` entry.
+
+# ----- C++ keywords (superset of C; including C++ additions) -----
+c++_alignas        alignas
+c++_alignof        alignof
+c++_and            and
+c++_asm            asm
+c++_auto           auto
+c++_bitand         bitand
+c++_bitor          bitor
+c++_bool           bool
+c++_break          break
+c++_case           case
+c++_catch          catch
+c++_char           char
+c++_char8          char8
+c++_char16         char16
+c++_char32         char32
+c++_class          class
+c++_compl          compl
+c++_concept        concept
+c++_const          const
+c++_consteval      consteval
+c++_constexpr      constexpr
+c++_constinit      constinit
+c++_continue       continue
+c++_co             co
+c++_decltype       decltype
+c++_default        default
+c++_delete         delete
+c++_do             do
+c++_double         double
+c++_dynamic        dynamic
+c++_else           else
+c++_enum           enum
+c++_explicit       explicit
+c++_export         export
+c++_extern         extern
+c++_false          false
+c++_float          float
+c++_for            for
+c++_friend         friend
+c++_goto           goto
+c++_if             if
+c++_inline         inline
+c++_int            int
+c++_long           long
+c++_mutable        mutable
+c++_namespace      namespace
+c++_new            new
+c++_noexcept       noexcept
+c++_not            not
+c++_nullptr        nullptr
+c++_operator       operator
+c++_or             or
+c++_private        private
+c++_protected      protected
+c++_public         public
+c++_register       register
+c++_reinterpret    reinterpret
+c++_requires       requires
+c++_return         return
+c++_short          short
+c++_signed         signed
+c++_sizeof         sizeof
+c++_static         static
+c++_struct         struct
+c++_switch         switch
+c++_template       template
+c++_this           this
+c++_thread         thread
+c++_throw          throw
+c++_true           true
+c++_try            try
+c++_typedef        typedef
+c++_typeid         typeid
+c++_typename       typename
+c++_union          union
+c++_unsigned       unsigned
+c++_using          using
+c++_virtual        virtual
+c++_void           void
+c++_volatile       volatile
+c++_wchar          wchar
+c++_while          while
+c++_xor            xor
+
+# ----- Constants and predefined identifiers -----
+c++_null           null
+c++_endl           endl
+c++_npos           npos
+
+# ----- std namespace fundamentals -----
+# `std::*` qualified forms are rule-2-rejected (`::` PUNCTs split); the
+# build synthesizes c++_split_<word> fragments. The bare unqualified
+# identifiers are also listed below as standalone admitted rows.
+c++_std::cout      std::cout
+c++_std::cin       std::cin
+c++_std::cerr      std::cerr
+c++_std::endl      std::endl
+c++_std::string    std::string
+c++_std::vector    std::vector
+c++_std::map       std::map
+c++_std::pair      std::pair
+c++_std::move      std::move
+c++_std::forward   std::forward
+c++_std::shared_ptr std::shared_ptr
+c++_std::unique_ptr std::unique_ptr
+c++_std::make_shared std::make_shared
+c++_std::make_unique std::make_unique
+c++_std            std
+c++_cout           cout
+c++_cin            cin
+c++_cerr           cerr
+c++_clog           clog
+c++_string         string
+c++_vector         vector
+c++_map            map
+c++_set            set
+c++_pair           pair
+c++_tuple          tuple
+c++_list           list
+c++_deque          deque
+c++_array          array
+c++_queue          queue
+c++_stack          stack
+c++_iterator       iterator
+c++_size           size
+c++_begin          begin
+c++_end            end
+c++_emplace        emplace
+c++_emplace_back   emplace_back
+c++_push_back      push_back
+c++_pop_back       pop_back
+c++_front          front
+c++_back           back
+c++_at             at
+c++_data           data
+c++_clear          clear
+c++_empty          empty
+c++_insert         insert
+c++_erase          erase
+c++_find           find
+c++_count          count
+c++_sort           sort
+c++_swap           swap
+c++_move           move
+c++_forward        forward
+
+# ----- C++ stream manipulators (single-WORD identifiers) -----
+c++_setw           setw
+c++_setprecision   setprecision
+c++_fixed          fixed
+c++_scientific     scientific
+c++_hex            hex
+c++_oct            oct
+c++_dec            dec
+c++_boolalpha      boolalpha

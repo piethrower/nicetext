@@ -1,0 +1,221 @@
+# proglang-keywords/c.twlist
+#
+# language: C (C89/C99/C11/C17 reserved keywords + standard constants
+# + universally-available built-in functions/macros).
+# source: ISO/IEC 9899 (C standard) — keyword list per §6.4.1; built-ins
+#   limited to functions/macros declared by <stdio.h>, <stdlib.h>,
+#   <string.h>, <ctype.h>, <math.h>, <time.h>, <assert.h>, <stddef.h>.
+# notes: no underscore-bearing identifiers (the lexer punctuates `_`),
+#   so the C89 `printf`/`scanf` family admits but POSIX `pthread_create`
+#   etc. would reject. Library names beyond the C standard library are
+#   not included.
+
+# ----- C reserved keywords -----
+c_auto             auto
+c_break            break
+c_case             case
+c_char             char
+c_const            const
+c_continue         continue
+c_default          default
+c_do               do
+c_double           double
+c_else             else
+c_enum             enum
+c_extern           extern
+c_float            float
+c_for              for
+c_goto             goto
+c_if               if
+c_inline           inline
+c_int              int
+c_long             long
+c_register         register
+c_restrict         restrict
+c_return           return
+c_short            short
+c_signed           signed
+c_sizeof           sizeof
+c_static           static
+c_struct           struct
+c_switch           switch
+c_typedef          typedef
+c_union            union
+c_unsigned         unsigned
+c_void             void
+c_volatile         volatile
+c_while            while
+
+# ----- C constants and predefined identifiers -----
+c_null             null
+c_true             true
+c_false            false
+c_eof              eof
+c_stdin            stdin
+c_stdout           stdout
+c_stderr           stderr
+
+# ----- Standard library types/macros (header-defined identifiers) -----
+# `_t` and `_tag` suffixed forms below are rule-2-rejected by today's
+# lexer (underscore PUNCTs); the build's split transform synthesizes
+# c_split_<word> fragments. Authored in full so a future lexer loosening
+# admits them as singleton-type rows automatically.
+c_size_t           size_t
+c_ssize_t          ssize_t
+c_ptrdiff_t        ptrdiff_t
+c_wchar_t          wchar_t
+c_intmax_t         intmax_t
+c_uintmax_t        uintmax_t
+c_intptr_t         intptr_t
+c_uintptr_t        uintptr_t
+c_int8_t           int8_t
+c_int16_t          int16_t
+c_int32_t          int32_t
+c_int64_t          int64_t
+c_uint8_t          uint8_t
+c_uint16_t         uint16_t
+c_uint32_t         uint32_t
+c_uint64_t         uint64_t
+c_time_t           time_t
+c_clock_t          clock_t
+c_off_t            off_t
+c_pid_t            pid_t
+c_uid_t            uid_t
+c_gid_t            gid_t
+c_mode_t           mode_t
+c_fpos_t           fpos_t
+c_va_list          va_list
+
+# ----- POSIX / common extensions (underscore-bearing; admitted via split) -----
+c_pthread_create   pthread_create
+c_pthread_join     pthread_join
+c_pthread_mutex_lock   pthread_mutex_lock
+c_pthread_mutex_unlock pthread_mutex_unlock
+c_pthread_cond_wait    pthread_cond_wait
+c_pthread_cond_signal  pthread_cond_signal
+c_clock_gettime    clock_gettime
+c_inet_addr        inet_addr
+c_inet_ntoa        inet_ntoa
+c_getaddrinfo      getaddrinfo
+c_freeaddrinfo     freeaddrinfo
+
+# ----- <stdio.h> built-ins -----
+c_printf           printf
+c_fprintf          fprintf
+c_sprintf          sprintf
+c_snprintf         snprintf
+c_scanf            scanf
+c_fscanf           fscanf
+c_sscanf           sscanf
+c_puts             puts
+c_fputs            fputs
+c_gets             gets
+c_fgets            fgets
+c_putchar          putchar
+c_fputc            fputc
+c_getchar          getchar
+c_fgetc            fgetc
+c_fopen            fopen
+c_fclose           fclose
+c_fread            fread
+c_fwrite           fwrite
+c_fseek            fseek
+c_ftell            ftell
+c_rewind           rewind
+c_fflush           fflush
+c_remove           remove
+c_rename           rename
+c_perror           perror
+
+# ----- <stdlib.h> built-ins -----
+c_malloc           malloc
+c_calloc           calloc
+c_realloc          realloc
+c_free             free
+c_abort            abort
+c_exit             exit
+c_atexit           atexit
+c_atoi             atoi
+c_atol             atol
+c_atof             atof
+c_strtol           strtol
+c_strtoul          strtoul
+c_strtod           strtod
+c_rand             rand
+c_srand            srand
+c_qsort            qsort
+c_bsearch          bsearch
+c_abs              abs
+c_labs             labs
+c_div              div
+c_ldiv             ldiv
+c_getenv           getenv
+c_system           system
+
+# ----- <string.h> built-ins -----
+c_memcpy           memcpy
+c_memmove          memmove
+c_memset           memset
+c_memcmp           memcmp
+c_memchr           memchr
+c_strcpy           strcpy
+c_strncpy          strncpy
+c_strcat           strcat
+c_strncat          strncat
+c_strcmp           strcmp
+c_strncmp          strncmp
+c_strchr           strchr
+c_strrchr          strrchr
+c_strstr           strstr
+c_strlen           strlen
+c_strtok           strtok
+c_strerror         strerror
+
+# ----- <ctype.h> built-ins -----
+c_isalpha          isalpha
+c_isdigit          isdigit
+c_isalnum          isalnum
+c_isspace          isspace
+c_isupper          isupper
+c_islower          islower
+c_isprint          isprint
+c_ispunct          ispunct
+c_iscntrl          iscntrl
+c_isxdigit         isxdigit
+c_tolower          tolower
+c_toupper          toupper
+
+# ----- <math.h> built-ins -----
+c_sin              sin
+c_cos              cos
+c_tan              tan
+c_asin             asin
+c_acos             acos
+c_atan             atan
+c_atan2            atan2
+c_sinh             sinh
+c_cosh             cosh
+c_tanh             tanh
+c_exp              exp
+c_log              log
+c_log10            log10
+c_pow              pow
+c_sqrt             sqrt
+c_ceil             ceil
+c_floor            floor
+c_fabs             fabs
+c_fmod             fmod
+
+# ----- <time.h> built-ins -----
+c_time             time
+c_clock            clock
+c_difftime         difftime
+c_mktime           mktime
+c_localtime        localtime
+c_gmtime           gmtime
+c_strftime         strftime
+
+# ----- assertion / utility -----
+c_assert           assert
+c_offsetof         offsetof
+c_va               va
