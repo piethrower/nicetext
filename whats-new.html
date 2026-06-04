@@ -41,27 +41,61 @@
   <nav class="paper-toc" aria-label="Section navigation">
     <h2 class="toc-title">Contents</h2>
     <ol class="toc-list">
-      <li><a href="#motivation">1. Motivation</a></li>
-      <li><a href="#entertainment-vs-stego-strength">2. Steganographic strength vs. entertainment value</a></li>
-      <li><a href="#huffman-coding">3. Coding: Fixed Length vs. Huffman</a></li>
-      <li><a href="#eof-streaming">4. Streamability: Size Prefix vs. EOF Marker</a></li>
-      <li><a href="#round-trip-validation">5. Encode-time round-trip validation</a></li>
-      <li><a href="#phrases-emoji">6. Beyond ASCII: phrases and emoji</a></li>
-      <li><a href="#pre-cleaning">7. Corpus pre-cleaning</a></li>
-      <li><a href="#redaction">8. Redaction</a></li>
-      <li><a href="#aug-pipeline">9. Emoji augmentations</a></li>
-      <li><a href="#cover-transforms">10. Cover transforms (rewriters, reformatters, envelopes, wrappers)</a></li>
-      <li><a href="#cpp-to-js-port">11. C++ to JS port</a></li>
-      <li><a href="#pipeline-mode">12. Pipeline mode: workers, SAB dicts, and the SW save-stream</a></li>
-      <li><a href="#deniability-secrets">13. Plausible-deniability random secrets</a></li>
-      <li><a href="#byos-and-cards">14. BYOS and cards</a></li>
-      <li><a href="#fixtures">15. Fixtures</a></li>
-      <li><a href="#eve">16. Eve: what an eavesdropper sees</a></li>
-      <li><a href="#considered-and-rejected">17. Considered and rejected</a></li>
-      <li><a href="#command-reference">18. Command reference</a></li>
-      <li><a href="#claude-corpora">19. Claude-authored corpora and dictionaries</a></li>
-      <li><a href="#future-directions">20. Future directions</a></li>
-      <li><a href="#bibliography">21. Bibliography</a></li>
+      <li class="toc-part"><a href="#part-1">1. Introduction</a>
+        <ol class="toc-sub">
+          <li><a href="#motivation">1.1 Motivation</a></li>
+          <li><a href="#metrics">1.2 Metrics</a></li>
+        </ol>
+      </li>
+      <li class="toc-part"><a href="#part-2">2. Vocabulary</a>
+        <ol class="toc-sub">
+          <li><a href="#phrases">2.1 Phrases</a></li>
+          <li><a href="#aug-pipeline">2.2 Emoji</a></li>
+          <li><a href="#i18n">2.3 Internationalization</a></li>
+        </ol>
+      </li>
+      <li class="toc-part"><a href="#part-3">3. Cover transforms</a>
+        <ol class="toc-sub">
+          <li><a href="#wrappers">3.1 Envelopes and Wrappers</a></li>
+          <li><a href="#rewriters">3.2 Rewriters</a></li>
+          <li><a href="#reformatters">3.3 Reformatters</a></li>
+        </ol>
+      </li>
+      <li class="toc-part"><a href="#part-4">4. Deniability &amp; the adversary</a>
+        <ol class="toc-sub">
+          <li><a href="#eve">4.1 Eve the Eavesdropper</a></li>
+          <li><a href="#deniability-secrets">4.2 Fake Ciphertext</a></li>
+          <li><a href="#redaction">4.3 Redaction</a></li>
+        </ol>
+      </li>
+      <li class="toc-part"><a href="#part-5">5. Building your own style</a>
+        <ol class="toc-sub">
+          <li><a href="#byos-and-cards">5.1 BYOS (style)</a></li>
+          <li><a href="#pre-cleaning">5.2 Sample text pre-cleaning</a></li>
+        </ol>
+      </li>
+      <li class="toc-part"><a href="#part-6">6. Natural output</a>
+        <ol class="toc-sub">
+          <li><a href="#poetry">6.1 Poetry</a></li>
+          <li><a href="#a-an-agreement">6.2 A/An agreement</a></li>
+        </ol>
+      </li>
+      <li class="toc-part"><a href="#part-7">7. Engine: encoding &amp; runtime</a>
+        <ol class="toc-sub">
+          <li><a href="#huffman-coding">7.1 Huffman coding</a></li>
+          <li><a href="#eof-streaming">7.2 Streamability</a></li>
+          <li><a href="#pipeline-mode">7.3 Pipeline mode</a></li>
+          <li><a href="#cpp-to-js-port">7.4 Old tricks, new runtime</a></li>
+        </ol>
+      </li>
+      <li class="toc-part"><a href="#part-8">8. Considered and rejected</a></li>
+      <li class="toc-part"><a href="#part-9">9. References</a>
+        <ol class="toc-sub">
+          <li><a href="#fixtures">9.1 Fixtures Reference</a></li>
+          <li><a href="#command-reference">9.2 Command reference</a></li>
+          <li><a href="#bibliography">9.3 Bibliography</a></li>
+        </ol>
+      </li>
     </ol>
   </nav>
 
@@ -69,16 +103,28 @@
     <article>
 
       <h1 class="paper-title">NiceText: Smuggling Secrets in Plain English, 30 Years Later</h1>
+      <p class="paper-author">Mark T. Chapman</p>
+      <p class="paper-date">June 2026</p>
+      <h2 class="paper-abstract-label">Abstract</h2>
       <p class="paper-lede">
         NiceText is software that takes encrypted bytes and reshapes
-        them into English prose, then losslessly recovers the
-        original ciphertext. The 2026 JavaScript port introduces new
-        features, retires obsolete ones, and documents alternatives
-        that were tried and rejected.
+        them into English prose, then losslessly recovers the original
+        ciphertext. The original version was a command-line C++ program
+        with static dictionaries and limited flexibility. The new version
+        runs in a standard browser or from the command line, and adds
+        intuitive, flexible options that generate entertaining cover
+        stories with phrases, emoji, poetry, and even pirate-speak.
+      </p>
+      <p class="paper-ai-note">
+        Author's note: this paper and the software it describes were
+        prepared with the assistance of AI tools (Anthropic's Claude). All
+        content was driven by the author.
       </p>
 
+      <h2 class="paper-part" id="part-1">1. Introduction</h2>
+
       <section id="motivation">
-        <h2>1. Motivation</h2>
+        <h2>1.1 Motivation</h2>
         <p>
           Go back to 1995. The U.S. government classified strong
           cryptography as a munition. Phil Zimmermann was sweating
@@ -112,562 +158,624 @@
         </p>
       </section>
 
-      <section id="entertainment-vs-stego-strength">
-        <h2>2. Steganographic strength vs. entertainment value</h2>
+      <section id="metrics">
+        <h2>1.2 Metrics</h2>
         <p>
-          NiceText's primary purpose is entertainment, a reason to
-          send randomness. The pre-encrypted secret (§1) carries
-          actual secrecy, the cover text carries social cover.
+          Judging the quality of the cover stories generated by NiceText is
+          almost entirely subjective. While there are many statistical ways
+          to evaluate text, the only question that really matters is whether
+          a cover story is entertaining enough that a person finds it cool to
+          read and wants to pass it along.
         </p>
         <p>
-          NiceText has three potential design targets. Only the
-          first is the priority.
-        </p>
-        <ul class="notes-list">
-          <li><strong>Entertainment value.</strong> A reason to send
-            the generated artifact at all.</li>
-          <li><strong>Convincing text.</strong> Output
-            indistinguishable from natural human writing.</li>
-          <li><strong>Steganographic strength.</strong> A covert
-            channel resistant to adversarial analysis.</li>
-        </ul>
-        <p>
-          Convincing text is a nice bonus when the corpus and
-          grammar cooperate. Steganographic strength is explicitly
-          not the priority. The methods NiceText uses are public
-          and easy for an analyst to identify, by design.
+          Those statistical metrics are well-known and easy to implement.
+          Anything measurable is tempting to optimize. The challenge is to
+          recognize when concrete metrics are the wrong target. Text tuned to
+          look statistically ordinary comes out flat and averaged. Call that
+          the textual equivalent of AI slop. Average prose is the one thing
+          nobody shares.
         </p>
         <p>
-          N-gram statistical analysis and the other standard
-          adversarial-detection metrics could in principle drive
-          engine choices. They don't. Natural-language word
-          frequencies follow a steep power-law (Zipf's law,
-          <a href="#bib-zipf-1949" class="cite-ref">[Zipf 1949]</a>).
-          N-gram models built on that structure produce tractable
-          per-passage perplexity scores (Shannon's framing,
-          <a href="#bib-shannon-1948" class="cite-ref">[Shannon 1948]</a>,
-          smoothed in practice by
-          <a href="#bib-chen-goodman-1999" class="cite-ref">[Chen &amp; Goodman 1999]</a>).
-          Distributional anomaly tests measure how far a cover
-          drifts from the reference. Optimizing for any of these
-          would shape the cover toward statistical averageness,
-          which is the opposite of what makes one worth sharing.
-          Stylistic specificity (an Aesop fable, a Holmesian
-          deduction, a sommelier's tasting note) is detectable on
-          those measures by construction, and that is fine. The
-          aim is a cover the recipient will actually read, not one
-          that hides among generic English.
+          The statistical side did get a deep look. Word frequencies in natural
+          language follow a steep power law known as the Zipf distribution
+          <a href="#bib-zipf-1949" class="cite-ref">[Zipf 1949]</a>. We also
+          pulled Google's published n-gram dataset, a free corpus recording
+          how often every run of up to five words appears across millions of
+          books, enough to estimate how likely a word is given the one or two
+          before it <a href="#bib-shannon-1948" class="cite-ref">[Shannon 1948]</a>,
+          with the usual smoothing for combinations never seen
+          <a href="#bib-chen-goodman-1999" class="cite-ref">[Chen &amp; Goodman 1999]</a>.
+          Run any of these against a NiceText cover story and it stands out
+          at once. That is by design.
+        </p>
+        <p>
+          The rest of this paper is largely a catalogue of choices made in
+          the other direction. It runs through voices that recast a story
+          from pirate to valley girl (§3.2), emoji that smuggle real bits
+          (§2.2), poetry with meter and rhyme (§6.1), and cover stories that
+          pass for PDFs, emails, or compilable source code (§3.1). Each
+          entertaining feature might fail a statistical-averageness test
+          outright. That is the point.
         </p>
       </section>
 
-      <section id="huffman-coding">
-        <h2>3. Coding: Fixed Length vs. Huffman</h2>
-        <p>
-          The original NiceText used a fixed-length code which
-          discarded every word beyond a power-of-two cap per type. The 2026 port
-          replaces that with Huffman coding. Two benefits follow.
-          No words are discarded, and the codes can match real
-          word frequency within a type.
-        </p>
-        <p>
-          Users can opt into one or more open citable frequency
-          tables (Norvig, Google Books 1-grams, a PD-Gutenberg
-          derivation) when building a session-base dictionary,
-          replacing uniform Huffman with weighted Huffman driven
-          by combined real-English statistics.
-        </p>
-        <p>
-          Each source is
-          normalized to a per-word probability before averaging,
-          so sources of vastly different sizes contribute equally
-          per word. Words present in some sources but not others
-          use present-source-only averaging. Words in the
-          vocabulary but absent from every selected source get a
-          floor weight which is the longest code in their type. 
-        </p>
-        <p>
-          An alternative encoding was considered: power-of-2
-          subtype partitioning. It splits each type into
-          power-of-2 subtypes, letting the cover-style picker
-          match any target frequency distribution exactly, at the
-          cost of bandwidth Huffman would have spent choosing
-          among words. That trade-off only pays when
-          frequency-distribution fidelity is the priority.
-          Matching a reference distribution is the steganographic
-          concern §2 explicitly does not optimize for. Huffman is
-          the better fit for the entertainment-first design.
-        </p>
-      </section>
+      <h2 class="paper-part" id="part-2">2. Vocabulary</h2>
 
-      <section id="eof-streaming">
-        <h2>4. Streamability: Size Prefix vs. EOF Marker</h2>
+      <section id="phrases">
+        <h2>2.1 Phrases</h2>
         <p>
-          The original NiceText prefixed every cover with a
-          fixed-width 32-bit length, which meant the encoder had
-          to know the total payload size before it could emit a
-          single byte. The 2026 port replaces that with an EOF
-          marker. Encoding is now fully streamable end to end.
+          The original version handled one word at a time. The new version
+          handles words and phrases. That means multi-word units like
+          <em>a la carte</em>, <em>United States</em>, and
+          <em>rock and roll</em> stay whole. The payoff is a more
+          entertaining cover story.
         </p>
         <p>
-          Secondarily, the original length prefix left its
-          high-order bytes near zero for any reasonable payload,
-          biasing low-numbered words to appear disproportionately
-          at the start of every cover. The EOF marker removes
-          that bias too.
-        </p>
-      </section>
-
-      <section id="round-trip-validation">
-        <h2>5. Encode-time round-trip validation</h2>
-        <p>
-          The streamability work in §4 made round-trip validation
-          cheap. The engine pipes a copy of every encoded byte
-          into a concurrent decoder pass in real time, so by the
-          time the encoder finishes, the decoder has too. A
-          fingerprint of the recovered bytes is compared against
-          the pre-encrypted secret's fingerprint, and a match
-          proves lossless recoverability for this exact encoding.
-        </p>
-        <p>
-          Validation can be turned off for benchmarks or impatient
-          users. Otherwise, the check exercises every combination
-          of dict, model, augs, rewriters, reformatters, envelope,
-          and wrapper that the byos can produce. A new transform
-          that breaks round-trip in some corner case gets caught
-          the first cover that triggers it, not the first time
-          someone notices.
-        </p>
-      </section>
-
-      <section id="phrases-emoji">
-        <h2>6. Beyond ASCII: phrases and emoji</h2>
-        <p>
-          The original NiceText was strictly ASCII single-word: one
-          whitespace-separated word per emission, no multi-token entries,
-          no non-Latin characters. The 2026 port relaxes both axes.
-          Full design in
-          <code>docs/phrase-and-charset-spec.md</code>. The
-          paper-relevant beats:
+          Concealing is the interesting direction. The phrase
+          <em>a la carte</em> can come out as a single dictionary entry, but
+          <em>a</em>, <em>la</em>, and <em>carte</em> are also perfectly good
+          words on their own. The catch is that the greedy decoder will fuse
+          any <em>a la carte</em> it sees back into the one phrase, so it
+          reads a single Huffman code where three separate words would have
+          carried three. Since the secret is recovered from exactly those
+          codes, the encoder must never let the three words line up by
+          accident. As it emits <em>a</em>, it watches what follows. If
+          <em>la</em> comes next it watches again, because <em>carte</em>
+          would complete <em>a la carte</em> and <em>mode</em> would complete
+          <em>a la mode</em>. Either accidental phrase would hand the decoder
+          the wrong code, so the encoder rewinds and re-picks a word that
+          finishes nothing. The same look-ahead lets it place
+          <em>a la carte</em> deliberately when the secret calls for the
+          phrase. Nested phrases and longer overlaps make the bookkeeping
+          harder. The new version handles all of it with phrase buffers and
+          lookup trees.
         </p>
         <p>
-          <strong>UTF-8 end-to-end.</strong> The cover-side lexer's
-          word class is <code>\p{Script=Latin}</code> plus the
-          existing word-extenders, so accented Latin words
-          (<em>caf&eacute;</em>, <em>na&iuml;ve</em>,
-          <em>Dvo&#345;&aacute;k</em>) round-trip natively.
-          Non-Latin scripts (CJK, Cyrillic, Greek, Arabic) lex as
-          punctuation, ride along verbatim through the model, and
-          emit unchanged into cover, preserving foreign-
-          language paragraphs in any corpus without contaminating the
-          dictionary.
+          Revealing is easy by comparison. The decoder is a greedy,
+          longest-match lexer
+          <a href="#bib-maximal-munch" class="cite-ref">[Maximal munch]</a>,
+          fusing the longest run of words that forms a known phrase and
+          falling back to single words when none does.
         </p>
         <p>
-          <strong>Emoji as bit-bearing words.</strong> A dedicated
-          TW-list (<code>Emoji16</code>, ~1900 entries derived from
-          Unicode 16.0) ships emoji organized by Unicode subgroup
-          (<code>em16_face_smiling</code>,
-          <code>em16_plant_flower</code>, <code>em16_flag</code>,
-          ...). Cross-modal augmentations pull each emoji's keywords
-          from the Common Locale Data Repository (CLDR) into every
-          word type the keyword inhabits (Aug A:
-          <em>cloud</em> &rarr; &#9729;&#65039; in noun, verb, ...)
-          and inversely pull words into emoji types (Aug B:
-          &#9729;&#65039;'s subgroup absorbs the word
-          <em>cloud</em>). A <code>mixedPhrases</code> integer knob
-          folded into both passes emits chat-register variants
-          (<em>omg &#128128;&#128128;&#128128;</em>) at scaled levels.
-        </p>
-        <p>
-          <strong>Phrases as first-class entries.</strong> Any TW-list
-          row whose word column contains internal whitespace is a
-          phrase, typed by the phrase's own part of speech rather
-          than any constituent's type. The decoder builds a phrase
-          index keyed by first word and greedily fuses multi-word
-          covers back to single phrase tokens. The encoder is the
-          interesting half: it peek-buffers each candidate, and when
-          two independently chosen emissions would form an accidental
-          phrase in the cover, it rewinds the bits and re-picks. The
-          same buffer logic handles both intentional emission of a
-          phrase entry and defensive prevention of accidental fusion
-          across consecutive emissions.
-        </p>
-        <p>
-          Mixed-modal phrases (<em>happy &#128512;</em>,
+          Because the mechanism never inspects what its pieces are made of,
+          mixed-modal phrases (<em>happy &#128512;</em>,
           <em>hello &#128075;</em>) and emoji-only phrases
-          (&#127801;&#128144;) fall out for free, the phrase
-          mechanism doesn't inspect the modality of its constituents.
-        </p>
-      </section>
-
-      <section id="pre-cleaning">
-        <h2>7. Corpus pre-cleaning</h2>
-        <p>
-          A dedicated pre-clean pass runs over corpus text before
-          <code>genmodel</code> (the sentence-model builder, §18)
-          and the word-counter see it. Seven
-          rules, run in order, looped to fixed point: (1)
-          non-printable bytes &rarr; space, (2) curly quotes &rarr;
-          straight ASCII, (3) NBSP / thin / figure spaces &rarr;
-          regular space, (4) em / en dashes &rarr; space, (5)
-          mixed-script confusables (Cyrillic-<em>&#1072;</em>-
-          in-<em>paper</em>) &rarr; Latin via Unicode TR39, (6) stray
-          ZWJ / ZWNJ outside emoji clusters, (7) long period-EXT
-          chains (<code>1.2.3.4.5</code> &rarr; <code>1 2 3 4 5</code>).
-        </p>
-        <p>
-          The framing is round-trip-first: every rule exists because
-          the un-cleaned shape could cause the lexer to round-trip a
-          word as one bit-bearing token in one place and as several
-          PUNCT tokens elsewhere. Believability impact is the
-          tiebreaker, never the deciding factor (see §20 future-
-          directions framing and <code>docs/research-notes.md</code>
-          §19).
-        </p>
-        <p>
-          Rule 5 is the interesting one. A word like
-          <code>p&#1072;per</code> with a Cyrillic
-          <em>&#1072;</em> splits at the script boundary in the
-          Latin-only word class. Folding via the TR39 confusables
-          table (filtered to source in a real non-Latin script,
-          target entirely word-class, 520 entries after filtering)
-          preserves the visible word while making it lex
-          consistently. Common-script confusables like
-          <code>|&rarr;l</code> and <code>&times;&rarr;x</code> are
-          deliberately excluded, those marks carry intentional
-          meaning in plain text and folding them would merge tokens
-          that weren't meant to merge.
-        </p>
-        <p>
-          A rule explicitly considered and dropped: collapsing long
-          punctuation runs (<code>!!!!!!!!!</code>,
-          <code>**********</code>, <code>==========</code>). The
-          lexer's EOS regex has no length cap, so a 100-char
-          terminator run lexes cleanly as one token and round-trips.
-          The rule would have saved model-literal size at a cost in
-          stylistic fidelity, and aesthetic gains don't clear the
-          round-trip-only bar.
-        </p>
-        <p>
-          A neat consequence of the seven rules: arbitrary
-          <em>binary</em> files can be fed to <code>genmodel</code>
-          as if they were corpora. The stress harness
-          (<code>tests/node/stress/run.mjs</code>) does exactly
-          this. Its default mode snips random byte ranges out of
-          fixtures, gzipped dicts, raw TSVs, ELF binaries,
-          <code>.deb</code> packages, and runs them through
-          pre-clean, lex, and build. Non-printable bytes collapse to
-          spaces (rule 1), confusable code points fold, the lexer
-          accepts what survives, and a workable model emerges.
-          Round-trip succeeds on the synthesized model. The
-          interesting framing isn't "the harness is clever". It's
-          that the pre-clean pipeline carries the system from "needs
-          clean prose" to "ingests any bytes." Anything that survives
-          pre-cleaning is, by definition, lexically well-formed for
-          NiceText's purposes.
-        </p>
-      </section>
-
-      <section id="redaction">
-        <h2>8. Redaction</h2>
-        <p>
-          NiceText generates text intended to be shared. A small,
-          deliberately-public list of uncharitable vocabulary is
-          removed from any corpus or TW-list during the build,
-          before genmodel and the dictionary builder see it. Cover
-          output therefore reflects the corpus's voice without
-          inheriting words a recipient would not want to read.
-        </p>
-        <p>
-          The irony is not lost on us. Drawing any line in a tool
-          whose entire purpose is concealment is paradoxical on its
-          face. The line stays because the cover artifact's purpose
-          is to be <em>shared</em>, and a generated artifact that
-          surfaces uncharitable language by accident isn't nice.
-          The clue is in the name.
-        </p>
-        <p>
-          A parallel editorial choice: no sacred texts ship as
-          built-in corpora. In the original NiceText days the King
-          James Bible produced some of the most entertaining covers
-          in the whole catalogue, gravely-cadenced paragraphs that
-          read like a TV evangelist mid-sermon. They were genuinely
-          funny. They were also, depending on the recipient,
-          genuinely uncomfortable. The 22 cards that ship now cover
-          the same comic range without taking that particular swing.
-        </p>
-        <p>
-          Scope is narrow and structural. Redaction runs at build
-          time only, against corpus and TW-list inputs. It never
-          touches the secret payload (opaque bytes the engine
-          doesn't read) and never touches the decoder's output
-          (whatever the recipient encoded). NiceText polices what
-          it <em>generates</em>, not what users move through it.
-        </p>
-        <p>
-          Both choices are defaults, not moats. The redaction list
-          lives in <code>fixture-src/</code> as a TW-list-shaped
-          file. A self-host who wants different choices can edit
-          it and rebuild fixtures with one command (§15). Anyone
-          who misses the TV-evangelist register can upload a King
-          James as a custom corpus and have it back. The redaction
-          list itself is trivially circumventable by anyone who
-          reads it, which is fine: the discipline is about the
-          default cover, not about preventing motivated workarounds.
+          (&#127801;&#128144;) fall out for free.
         </p>
       </section>
 
       <section id="aug-pipeline">
-        <h2>9. Emoji augmentations</h2>
+        <h2>2.2 Emoji</h2>
         <p>
-          Two build-time augmentations bridge emoji and Latin words
-          in the dictionary, so an encoder can swap a word for an
-          emoji of the same meaning and vice versa without leaving
-          the bit stream.
-        </p>
-        <ul class="notes-list">
-          <li><strong>Aug A (emojiIntoWords).</strong> For each emoji
-            in the bundled Emoji16 TW-list (§6), pull the emoji's
-            CLDR keywords into every word type the keyword inhabits.
-            The cloud emoji joins the noun bag, the verb bag, the
-            weather bag.</li>
-          <li><strong>Aug B (wordsIntoEmoji).</strong> Inverse: every
-            word that matches an emoji's CLDR keyword joins that
-            emoji's subgroup type.</li>
-        </ul>
-        <p>
-          Both passes can also emit phrase variants at a configurable
-          chat-register intensity (the <code>mixedPhrases</code>
-          knob, integer 0 to N). At higher intensity, phrases like
-          <em>omg &#128128;&#128128;&#128128;</em> become first-class
-          bit-bearing entries the encoder can land on.
+          The original version predates emoji. The closest it came was
+          ASCII art like :) and :(. The new version supports individual
+          emoji like &#128512;, strings of emoji like &#127881;&#127874;,
+          and emoji phrases like <em>oh &#128169;</em>. An additional
+          benefit is that the emoji libraries are a wonderful source of the
+          most common phrases people write, <em>happy birthday</em>,
+          <em>I love you</em>, <em>thumbs up</em>. The new version exploits
+          these databases to provide additional phrase sources and other
+          benefits, even when a cover story contains no actual emoji.
         </p>
         <p>
-          The two augs are not commutative. Run A first then B: B
-          sees the cross-type pairings A introduced and emits phrase
-          variants that pair words against emoji-subgroup types A
-          would not have surfaced. Run B first: A never sees the
-          phrase entries B introduced. Hand-curating a chain order
-          works for two augs and breaks the moment a third lands.
+          The Story Style panel's Pro tab gathers all of this under an Emoji
+          section, a set of options to mix and match:
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>Option</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Emoji</strong></td><td>Adds emoji glyphs to the dictionary, sorted into 97 categories, where any emoji can stand in for another in its category.</td></tr>
+            <tr><td><strong>Emoji inspired word-only phrases</strong></td><td>Adds the written-out emoji names as multi-word phrases in those same categories, so a cover can stay all text or mix glyphs and phrases.</td></tr>
+            <tr><td><strong>Common emoji combinations</strong></td><td>A small library of combos people actually use (<em>love &#128525;</em>, <em>&#127801; &#128144;</em>, <em>coffee &#9749;</em>), recognized and swapped as whole phrases.</td></tr>
+            <tr><td><strong>Emoji into word types</strong></td><td>Lets an emoji turn up anywhere a word of the same meaning could, at an adjustable intensity.</td></tr>
+            <tr><td><strong>Words into emoji types</strong></td><td>The reverse, letting a word turn up anywhere its emoji could.</td></tr>
+            <tr><td><strong>Filter weird emoji matches</strong></td><td>Keeps the two augmentations to sensible matches. Without it, &#128169; carries the keyword <em>face</em>, so "his face turned red" can become "his &#128169; turned red."</td></tr>
+          </tbody>
+        </table>
+        <p>
+          The interesting part is that the two augmentations feed each
+          other, so the build runs them in repeated passes. Picture the
+          dictionary holding the word <em>smile</em> and the emoji
+          &#128516;, which the library tags <em>smile</em>. On the first
+          pass, "Emoji into word types" adds &#128516; to the word category
+          that holds <em>smile</em>, and "Words into emoji types" adds
+          <em>smile</em> to &#128516;'s category. Each has made a single
+          substitution possible, nothing more. On the second pass, "Emoji
+          into word types" now sees that <em>smile</em> has joined an emoji
+          category and can build the chat-style phrase
+          <em>smile &#128516;</em>, pairing the word with the very emoji it
+          was matched to. That phrase was invisible to both passes until
+          each had run once. A third pass might stretch it to
+          <em>smile &#128516;&#128516;</em>, so the build keeps re-running
+          the augmentations until a pass adds nothing new.
         </p>
         <p>
-          The chosen design sidesteps order entirely with a
-          snapshot-based fixed-point loop. At each iteration
-          <em>i</em>, every aug reads the same snapshot of the bag
-          (the union of the original TW-list and all prior
-          iterations' contributions) and emits its own contribution.
-          Iteration <em>i</em>'s emissions merge at the end and feed
-          iteration <em>i</em>+1. The loop exits when an iteration
-          emits nothing new, capped at
-          <code>|selectedAugs|+1</code> iterations as a defense
-          against misbehaving augs. The loop has three properties:
-        </p>
-        <ul class="notes-list">
-          <li><strong>Order-independent.</strong> All augs at
-            iteration <em>i</em> see the same input.</li>
-          <li><strong>Convergent.</strong> The emission universe is
-            finite, and each aug dedups internally.</li>
-          <li><strong>Compositional.</strong> A new aug drops in
-            without surgery to existing ones.</li>
-        </ul>
-        <p>
-          At full-English-vocabulary scale, the in-memory implementation hits
-          real ceilings: the JS engine's <code>Map</code> and
-          <code>Set</code> size cap (~2<sup>24</sup> entries) and
-          the cost of rebuilding per-aug indexes on every call. The
-          shipped architecture packs each iteration's snapshot into
-          a SharedArrayBuffer, runs the augs in parallel as worker
-          tasks against the shared snapshot, and writes each aug's
-          contribution into pre-allocated SAB output regions.
-          Workers communicate by reference, not by
-          <code>postMessage</code> clone. The fixed-point semantics
-          above are unchanged. Multi-worker execution is purely how
-          it runs. Full discussion in
-          <code>docs/research-notes.md</code> §18.
-        </p>
-
-        <h3 class="cli-name">The retired vowel aug</h3>
-        <p>
-          The original aug list had a third entry,
-          <code>vowel</code>, which tagged every word starting with
-          a vowel-class character (A, E, I, O, U, plus H to catch
-          <em>honest</em> and <em>hour</em>) so that grammars
-          emitting the article <em>an</em> could constrain the
-          following word to vowel-onset words. It was retired before
-          public release. The a/an problem moved out of the dict
-          and into the encoder as a rewriter (§10), which consults
-          phonology, not orthography, and is right far more often.
-        </p>
-        <p>
-          The retirement was not just a quality upgrade. The vowel
-          aug was structurally costly. By tagging an estimated
-          14,000+ words across the full-English bundled vocabulary
-          (rough estimate, based on the fraction of English starting
-          with the A E I O U H letter class, we don't have the
-          original dict to count exactly) with a parallel
-          <code>begins_with_a_vowel</code> type, it created a
-          dict-wide mega-type whose entries already lived in other
-          source types (noun, verb, adjective, name). At
-          <code>sortDict</code> time, every word in the
-          <code>begins_with_a_vowel</code> bucket also appeared in
-          its natural source type, and the merge pass had to break
-          the tie on every collision. Removing the aug let sortDict
-          converge on a clean word-to-single-type assignment for
-          the entire dict and shrank the build's worst-case
-          combinatorial cost.
+          All told, the new emoji support opens many more ways to raise the
+          entertainment value of a generated cover story.
         </p>
       </section>
 
-      <section id="cover-transforms">
-        <h2>10. Cover transforms (rewriters, reformatters, envelopes, wrappers)</h2>
+      <section id="i18n">
+        <h2>2.3 Internationalization</h2>
         <p>
-          Four categories of operation transform the encoder's
-          output on its way to the final cover artifact, ordered
-          from innermost (closest to the bit stream) to outermost
-          (closest to the recipient):
+          The original version supported English characters with no
+          international support. It was strictly ASCII
+          <a href="#bib-ascii" class="cite-ref">[ASCII]</a>. The new
+          version has full international support, following the UTF-8
+          standard <a href="#bib-utf8" class="cite-ref">[UTF-8]</a>. Now,
+          words like <em>Caf&eacute;</em>, <em>na&iuml;ve</em>, and
+          <em>Dvo&#345;&aacute;k</em> all work as ordinary words. There is
+          also limited contextual support for Chinese and other non-Latin
+          scripts, and full support for emoji (&#167;2.2).
         </p>
-        <ol class="notes-list">
-          <li><strong>Rewriter:</strong> per-emission word-level
-            mutation during encoding. Implemented inside the encoder
-            with full access to the dict and the phrase buffer.</li>
-          <li><strong>Reformatter:</strong> model-layer enhancer
-            (model to model) applied between the model stream and
-            the encoder's consumption loop. Surface-level and
-            dict-blind.</li>
-          <li><strong>Envelope:</strong> semantic container that
-            wraps the cover in a real-looking artifact (fake email,
-            fake HTML page, fake source file).</li>
-          <li><strong>Wrapper:</strong> byte-level transport
-            encoding stacked over the envelope output (gzip, base64,
-            uuencode).</li>
-        </ol>
         <p>
-          All four share a single contract: round-trip preservation.
-          Each operation must leave the decode side able to recover
-          the original bit stream byte-for-byte. The categories
-          satisfy that contract in different ways. Envelopes and
-          wrappers have explicit strip transforms run on decode.
-          Rewriters and reformatters require no decode hooks. Every
-          rewriter variant is a 0-bit unique-type singleton that
-          looks up to the same 0 bits regardless of which variant
-          was emitted. Case is normalized at dict lookup. lineBreak
-          is invisible at lookup.
+          Languages like Chinese and Cantonese do not break into words the
+          way Latin scripts do. The spaces and sentence boundaries a parser
+          leans on are not there. The engine treats every non-Latin script
+          as punctuation rather than impose a segmentation that does not
+          exist. Admitting them as words was the tempting alternative, but
+          it would blur a real word the dictionary happens to lack with a
+          run that was never a word at all. So the line is drawn at Latin
+          letters and emoji. Those are the only scripts that carry bits.
         </p>
+        <p>
+          That non-Latin text rides through the pipeline verbatim and reappears
+          in the cover story exactly as written, paragraph breaks and all.
+          It carries no bits, but it is preserved perfectly. That is just
+          what you want for keeping a foreign name or a short passage intact.
+        </p>
+        <p>
+          Push that everything-rides-through philosophy to its limit and
+          something odd falls out. You can pour a binary file in and watch
+          it come back out the far side of a natural-language parse. It is
+          stranger and more fun than it has any right to be. That works
+          because the pre-cleaning pass (&#167;5.2) first folds the rough
+          edges, such as a Cyrillic letter hiding inside an otherwise-Latin
+          word, into something the lexer can read.
+        </p>
+        <p>
+          NiceText does not yet ship codebooks for other languages. For
+          Latin-script languages like Spanish, French, and German, the
+          approach makes it an easy gap to fill. The Pro tab takes a TW-list,
+          a type-word list that pairs each word with its part of speech, so
+          any such language supplied that way gets basic support with no code
+          changes. The harder part is grammatical agreement,
+          like matching Spanish articles to noun gender in <em>el perro</em>
+          and <em>la ni&ntilde;a</em>. A purpose-built rewriter (&#167;3.2)
+          could handle that the way the a/an rewriter already does for
+          English, and with a few of those another Latin language could
+          reach full support.
+        </p>
+      </section>
 
-        <h3 class="cli-name">The four safety guidelines</h3>
+      <h2 class="paper-part" id="part-3">3. Cover transforms</h2>
+
+      <p>
+        Four kinds of operation can reshape a cover story as it is
+        concealed, ordered from innermost (closest to the bit stream) to
+        outermost (closest to the recipient):
+      </p>
+      <ul class="notes-list">
+        <li>A <strong>rewriter</strong> mutates words during concealing,
+          with full access to the dictionary.</li>
+        <li>A <strong>reformatter</strong> is a surface-level pass that is
+          blind to it.</li>
+        <li>An <strong>envelope</strong> wraps the result in a real-looking
+          artifact.</li>
+        <li>A <strong>wrapper</strong> packs that into a byte-level transport
+          encoding.</li>
+      </ul>
+      <p>
+        All four share one contract, round-trip preservation. Each must
+        leave the reveal side able to recover the original bytes exactly.
+        Envelopes and wrappers carry explicit strip transforms that run on
+        reveal. Rewriters and reformatters need none, because every variant
+        they emit is a zero-bit choice that looks up to the same bits no
+        matter which form was used. Order is fixed. Concealing runs the
+        reformatters, then the conceal step itself, then the rewriters, then
+        the envelope, then the wrapper stack. On reveal the stack is peeled
+        outermost-first and the envelope stripped before the rest is
+        revealed.
+      </p>
+
+      <section id="wrappers">
+        <h2>3.1 Envelopes and Wrappers</h2>
         <p>
-          A transform is safe iff every change it makes leaves the
-          lexer and the phrase-fuser producing the same token
-          sequence the encoder originally emitted. The full
-          guidelines live at <code>docs/cover-transforms.md</code>.
-          Distilled:
+          The new version introduces a layer of envelopes and wrappers that
+          dress the cover story up as a real artifact and pack it for
+          transport. An envelope makes it a genuine file of some type,
+          openable in the natural tool without ever touching NiceText.
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>File type</th><th>Extension</th><th>Open with</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>EML</td><td><code>.eml</code></td><td>a mail client</td></tr>
+            <tr><td>HTML page</td><td><code>.html</code></td><td>a web browser</td></tr>
+            <tr><td>HTML page (active)</td><td><code>.html</code></td><td>a web browser (renders itself)</td></tr>
+            <tr><td>Markdown</td><td><code>.md</code></td><td>a Markdown viewer or text editor</td></tr>
+            <tr><td>nroff / man</td><td><code>.7</code></td><td><code>man -l cover.7</code></td></tr>
+            <tr><td>PDF</td><td><code>.pdf</code></td><td>a PDF viewer</td></tr>
+            <tr><td>Plain Text</td><td><code>.txt</code></td><td>any text editor</td></tr>
+            <tr><td>XML</td><td><code>.xml</code></td><td>a web browser</td></tr>
+            <tr><td>Bash</td><td><code>.sh</code></td><td><code>bash cover.sh</code></td></tr>
+            <tr><td>C++</td><td><code>.cpp</code></td><td><code>g++ cover.cpp -o cover &amp;&amp; ./cover</code></td></tr>
+            <tr><td>Go</td><td><code>.go</code></td><td><code>go run cover.go</code></td></tr>
+            <tr><td>Java</td><td><code>.java</code></td><td><code>java cover.java</code></td></tr>
+            <tr><td>JavaScript (Node)</td><td><code>.js</code></td><td><code>node cover.js</code></td></tr>
+            <tr><td>Perl</td><td><code>.pl</code></td><td><code>perl cover.pl</code></td></tr>
+            <tr><td>PHP</td><td><code>.php</code></td><td><code>php cover.php</code></td></tr>
+            <tr><td>Python</td><td><code>.py</code></td><td><code>python cover.py</code></td></tr>
+            <tr><td>Ruby</td><td><code>.rb</code></td><td><code>ruby cover.rb</code></td></tr>
+          </tbody>
+        </table>
+        <p>
+          Wrappers then pack that file into a transport encoding, stackable
+          up to five layers, each reversible with one standard command.
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>Wrapper</th><th>Extension</th><th>Unwrap with</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>gzip</td><td><code>.gz</code></td><td><code>gunzip cover.gz</code></td></tr>
+            <tr><td>base64</td><td><code>.b64</code></td><td><code>base64 -d cover.b64 &gt; cover</code></td></tr>
+            <tr><td>uuencode</td><td><code>.uue</code></td><td><code>uudecode cover.uue</code></td></tr>
+          </tbody>
+        </table>
+        <p>
+          Stacked together, the layers are half the fun. You can hand a
+          friend a file they have to gunzip and then compile and run as a
+          C++ program, all just to read a perfectly innocent little cover
+          story.
+        </p>
+      </section>
+
+      <section id="rewriters">
+        <h2>3.2 Rewriters</h2>
+        <p>
+          The new version introduces rewriters. Each is a per-word change
+          made while concealing that alters how the cover story reads
+          without touching the secret underneath. Four ship today, run in a
+          fixed order:
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>Rewriter</th><th>What it does</th><th>Order</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>british</code></td><td>Swaps US and UK spellings, like color/colour and organize/organise.</td><td>1</td></tr>
+            <tr><td><code>typos</code></td><td>Inserts canonical typos, or repairs them.</td><td>2</td></tr>
+            <tr><td><code>voice</code></td><td>Recasts the prose in a register, one of brooklynese, cat, cockney, dog, flapper, neutral, pirate, surfer, or valleygirl.</td><td>3</td></tr>
+            <tr><td><code>xanax</code></td><td>Fixes a/an agreement, rewriting <em>a apple</em> into <em>an apple</em> (&#167;6.2).</td><td>4</td></tr>
+          </tbody>
+        </table>
+        <p>
+          Each rewriter takes an intensity from 0 to 100, the fraction of
+          eligible words it actually changes. At 100 it hits every one, so
+          the cover reads fully British or full pirate. Lower settings just
+          sprinkle the effect in, a few colour spellings or the odd
+          <em>arr</em>. Zero turns it off. The order is deliberate.
+          Agreement runs last so <code>xanax</code> can match <em>a</em> or
+          <em>an</em> to the final word, after <code>british</code>,
+          <code>typos</code>, and <code>voice</code> have each had their turn
+          at it.
+        </p>
+        <p>
+          The payoff is personality for free. The same secret can come out
+          prim and British, peppered with typos, or talking like a pirate,
+          and not one hidden bit changes.
+        </p>
+      </section>
+
+      <section id="reformatters">
+        <h2>3.3 Reformatters</h2>
+        <p>
+          The new version introduces reformatters. Each is a surface-level
+          pass that reshapes the sentence model before concealing, blind to
+          the dictionary. Four ship today, run in a fixed order:
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>Reformatter</th><th>What it does</th><th>Order</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>voice</code></td><td>Injects words in a chosen voice (pirate, valley girl, and seven more). It adds an opener to start a sentence, a closer to end it, an aside after a comma, and a sprinkle between random words.</td><td>1</td></tr>
+            <tr><td><code>lineBreak</code></td><td><em>expand</em> turns every line break into a paragraph break, and <em>collapse</em> does the reverse.</td><td>2</td></tr>
+            <tr><td><code>sentenceEnd</code></td><td>Swaps the period that ends a sentence for a <em>?</em> (uptalk) or a <em>!</em> (excitement).</td><td>3</td></tr>
+            <tr><td><code>case</code></td><td>Recases the whole cover, in allCaps, allLowercase, titleCase, sentenceCase, or a random variant.</td><td>4</td></tr>
+          </tbody>
+        </table>
+        <p>
+          Like rewriters, each reformatter takes an intensity from 0 to 100
+          that gates its optional moves, the voice sprinkle, the sentence-end
+          swap, the case flips. The structural voice inserts, opener, closer,
+          and aside, fire every time. The order is deliberate. Case runs last
+          so it can recase whatever voice and the others added.
+        </p>
+        <p>
+          The voice modes are the heart of the fun. The same character works
+          at both layers. As a rewriter it swaps individual words, and as a
+          reformatter it opens, closes, and peppers whole sentences in that
+          voice. None of it costs a single hidden bit.
+        </p>
+      </section>
+
+      <h2 class="paper-part" id="part-4">4. Deniability &amp; the adversary</h2>
+
+      <section id="eve">
+        <h2>4.1 Eve the Eavesdropper</h2>
+        <p>
+          Eve is the eavesdropper from Alice, Bob, and Eve, and the new
+          version gives her a job. Handed a suspected cover story, she tries
+          to answer two questions without ever decoding it. Was this made
+          by NiceText at all, and if so, which card or BYOS settings
+          (§5.1) produced it? Crucially, Eve is a feature, not a
+          threat. Every tool built to help her also helps a legitimate
+          recipient who was sent a cover story but forgot which style made
+          it.
+        </p>
+        <p>
+          That follows from what Eve can and cannot do. She identifies the
+          codebook, not the secret. NiceText ships no cipher (§1.1).
+          The payload is pre-encrypted by whatever upstream tool the sender
+          chose. An analyst who names the exact card still faces that
+          encryption, exactly as if NiceText were never in the picture.
+          Building Eve is a way of thinking about the cryptanalyst out loud,
+          in code, and shipping the same tools to the people who need them.
+        </p>
+        <p>
+          Eve runs a handful of cover-only detectors, each emitting a
+          <em>likely</em>, <em>unlikely</em>, or <em>unknown</em> verdict
+          against one style knob with a one-line reason, never decoding and
+          never asking for a password. Short or genuinely ambiguous cover
+          stories come back "unknown," which is the honest answer. In the
+          browser the verdicts flow straight into the Story Style tab,
+          lighting each option green, red, or neutral. From there the work
+          is manual. Read Eve's hints, pick the plausible settings, and
+          re-run reveal by hand.
+        </p>
+      </section>
+
+      <section id="deniability-secrets">
+        <h2>4.2 Fake Ciphertext</h2>
+        <p>
+          The 2002 deniability framing
+          <a href="#bib-chapman-davida-2002" class="cite-ref">[Chapman &amp; Davida 2002]</a>
+          argues that a cover story should be a plausible artifact in its
+          own right. The new version extends the idea to the other end. The
+          <em>recovered secret</em> should also look plausible, not like raw
+          bytes shouting "this was the payload." A panel in the browser
+          generates secret bytes shaped to resemble real ciphertext, so a
+          recovered payload is indistinguishable from a wrong-password
+          decrypt of the same tool.
+        </p>
+        <p>
+          Three shapes ship (<code>js/src/random-secret-formats.js</code>):
         </p>
         <ul class="notes-list">
-          <li><strong>0-bit unique-type words.</strong> A word whose
-            dict type has exactly one entry encodes
-            log<sub>2</sub>(1) = 0 bits. Inserting, removing, or
-            swapping such a word is safe in isolation, but only if
-            the change doesn't create or destroy a phrase-fusion
-            match in the surrounding word sequence.</li>
-          <li><strong>Whitespace.</strong> One bare space between
-            two WORDs is the only whitespace shape the lexer
-            doesn't tokenize. Any other shape (two or more spaces,
-            tabs, newlines, vertical tabs) becomes a WHITESPACE
-            token and acts as a phrase-fusion barrier. Safe
-            transforms swap one tokenized shape for another. Unsafe
-            transforms cross the "exactly one bare space" line.</li>
-          <li><strong>Case.</strong> Dicts are stored lowercase, the
-            phrase index is keyed by <code>.toLowerCase()</code>,
-            and the decoder normalizes at lookup. Any case change
-            to any Latin-script WORD or sequence of WORDs (allCaps,
-            allLowercase, titleCase, sentenceCase, random) is safe
-            by construction.</li>
-          <li><strong>Punctuation.</strong> Punct doesn't carry
-            bits. The phrase-fusion rule: between two WORDs, at
-            least one tokenized barrier (punct or tokenized
-            whitespace) must remain. Safe transforms swap punct for
-            punct or change punct counts while preserving at least
-            one barrier. Unsafe transforms flip whether any barrier
-            exists at all.</li>
-        </ul>
-
-        <h3 class="cli-name">Pipeline order</h3>
-        <p>
-          Encode: model stream &rarr; reformatter chain (case,
-          lineBreak) &rarr; encoder &rarr; rewriter chain (british,
-          typos, voice, xanax in that order) &rarr; envelope &rarr;
-          wrapper stack (innermost first) &rarr; final output.
-        </p>
-        <p>
-          Decode: outermost wrapper peeled first, inward through
-          the stack, envelope strip, then the standard dict-blind
-          decode. Rewriters and reformatters need no decode hooks
-          (see safety contract above).
-        </p>
-
-        <h3 class="cli-name">What ships</h3>
-        <p>
-          <strong>Rewriters (4):</strong>
-        </p>
-        <ul class="notes-list">
-          <li><code>british</code>, mode <code>us-uk</code> or
-            <code>uk-us</code>: swaps spelling pairs like
-            color/colour and organize/organise.</li>
-          <li><code>typos</code>, mode <code>forward</code> or
-            <code>reverse</code>: inserts canonical typos, or
-            repairs them.</li>
-          <li><code>voice</code>, nine modes today:
-            <code>brooklynese</code>, <code>cat</code>,
-            <code>cockney</code>, <code>dog</code>,
-            <code>flapper</code>, <code>neutral</code>,
-            <code>pirate</code>, <code>surfer</code>,
-            <code>valleygirl</code>. More modes to follow.</li>
-          <li><code>xanax</code>: a/an article agreement. Case
-            study below.</li>
+          <li><strong>Pure random.</strong> N bytes from
+            <code>crypto.getRandomValues</code>. The baseline.</li>
+          <li><strong>OpenSSL <code>enc</code>.</strong> The
+            <code>Salted__</code> magic, a random salt, and a body padded to
+            an AES-CBC block, matching
+            <code>openssl enc -aes-256-cbc</code> on disk. Any password
+            yields garbage or a padding error, just like a real wrong key.</li>
+          <li><strong>VeraCrypt container.</strong> No magic at all. Uniform
+            random data sized to VeraCrypt's 292&nbsp;KB minimum and aligned
+            to 512-byte sectors. A real mountable container that small
+            really is this shape.</li>
         </ul>
         <p>
-          <strong>Reformatters (2).</strong> <code>case</code> has
-          four modes: allCaps, allLowercase, titleCase, sentenceCase.
-          <code>lineBreak</code> has two: <em>expand</em> turns every
-          <code>\n</code> into <code>\n\n</code>, <em>collapse</em>
-          turns every <code>\n\n</code> into <code>\n</code>.
+          In every shape the bytes <em>are</em> the secret being concealed,
+          not anything decryptable. The point sits one layer up. An
+          adversary who recovers the payload finds what looks like an
+          OpenSSL or VeraCrypt blob they lack the password for, not a "your
+          secret is here" signal. Real use already feeds NiceText a
+          pre-encrypted secret (§1.1). These formats just let demos and
+          tests exercise that same surface without standing up a live
+          cipher.
         </p>
-        <p>
-          <strong>Envelopes (16):</strong> <code>eml</code>,
-          <code>html</code>, <code>htmlActive</code>,
-          <code>markdown</code>, <code>pdf</code>,
-          <code>nroff</code>, <code>xml</code>,
-          <code>python</code>, <code>javascript</code>,
-          <code>cpp</code>, <code>java</code>, <code>perl</code>,
-          <code>php</code>, <code>ruby</code>, <code>bash</code>,
-          <code>go</code>. Each wraps the cover in a real artifact
-          of that type. The recipient can open it in any tool that
-          understands the format.
-        </p>
-        <p>
-          <strong>Wrappers (3):</strong> <code>gzip</code>,
-          <code>base64</code>, <code>uuencode</code>. Stackable up
-          to five layers per the byos.
-        </p>
+      </section>
 
-        <h3 class="cli-name">Xanax case study: replacing the vowel aug with phonology</h3>
+      <section id="redaction">
+        <h2>4.3 Redaction</h2>
         <p>
-          The old begins-with-a-vowel aug (§9) used English
-          orthography as a proxy for phonology: a word starts with
-          a vowel letter, so emit <em>an</em>. That proxy is wrong
-          on the words readers notice. <em>A united front</em>, not
-          <em>an united</em>. <em>An hour</em>, not <em>a hour</em>.
-          <em>An honest mistake</em>, not <em>a honest</em>.
-          Building the rule around orthography bakes the error into
-          the dictionary structure.
+          NiceText generates text meant to be shared, so a small,
+          deliberately public list of uncharitable vocabulary is stripped
+          from any sample text or TW-list at build time, before the
+          dictionary builder sees it. The cover story keeps the source's
+          voice without inheriting words a recipient would not want to read.
         </p>
         <p>
-          The xanax rewriter consults phonology instead. Source:
-          the Carnegie Mellon Pronouncing Dictionary, with 135,000
-          pronunciations written in ARPABET (the Advanced Research
-          Projects Agency phonetic alphabet), at build time only. A three-phase
-          study against 128,000 real article occurrences in 18
-          shipped corpora plus 50 random Project Gutenberg books
-          measured both rules:
+          The irony is not lost on us. Drawing any line in a concealment
+          tool is paradoxical on its face. It stays because the cover story
+          exists to be <em>shared</em>, and an artifact that surfaces ugly
+          language by accident isn't nice. The clue is in the name.
+        </p>
+        <p>
+          There is a parallel choice. No sacred texts ship as built-in sample texts.
+          In the original version's day the King James Bible produced some
+          of the funniest cover stories in the catalogue, gravely-cadenced
+          paragraphs that read like a TV evangelist mid-sermon. They were
+          also, depending on the recipient, genuinely uncomfortable. The 22
+          cards that ship now cover the same comic range without taking that
+          swing.
+        </p>
+        <p>
+          Both are defaults, not moats. Redaction runs at build time only,
+          against sample-text and TW-list inputs. It never touches the
+          secret payload or the decoder's output. NiceText polices what it
+          <em>generates</em>, not what users move through it. The list lives
+          in <code>fixture-src/</code> and is trivially editable, so a
+          self-host who wants different choices, or the King James register
+          back, can rebuild with one command (§9.1).
+        </p>
+      </section>
+
+      <h2 class="paper-part" id="part-5">5. Building your own style</h2>
+
+      <section id="byos-and-cards">
+        <h2>5.1 BYOS (style)</h2>
+        <p>
+          The original version shipped a single dictionary and a single
+          grammar and called it done. The new version replaces both with a
+          Build-Your-Own-Style model. A BYOS is one declarative file
+          describing an entire cover-generation build, so no hidden state
+          lives in the engine. The Story Style Pro tab lays its options out
+          in five groups:
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>Group</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Sentence model</strong></td><td>The cover story mimics the sentence shapes of a chosen sample text. You set the sample, whether to keep its original sentence order or mix and match shapes, and whether words stay within the sample or expand into the codebook.</td></tr>
+            <tr><td><strong>Codebook</strong></td><td>The TW-list sources that supply the available vocabulary, plus the emoji augmentations (&#167;2.2). Built-in sources cover general English, and a custom list adds jargon, names, or slang.</td></tr>
+            <tr><td><strong>Word frequencies</strong></td><td>Frequency tables that weight the Huffman codes (&#167;7.1) so common words turn up more often.</td></tr>
+            <tr><td><strong>Rewriters</strong></td><td>Per-word changes made while concealing, run in a fixed order (&#167;3.2).</td></tr>
+            <tr><td><strong>Reformatters</strong></td><td>Voice and structure passes over the sentence model (&#167;3.3).</td></tr>
+          </tbody>
+        </table>
+        <p>
+          A byos.json can also carry its own sample text and TW-list
+          inline, as compressed embedded payloads, so the file is
+          self-contained. A recipient loads it and the engine has every byte
+          it needs, with nothing to upload separately.
+        </p>
+        <p>
+          Two conveniences sit on top. A <strong>byos.id</strong> is a short
+          deterministic string that captures the common settings in a single
+          filename-safe identifier
+          (<code>v=1__sty=aesop__sen=r__voc=c</code>), canonicalizing
+          "absent" and "explicitly at default" to the same value so two
+          files that mean the same build produce the same id. It does not
+          embed custom sample-text or TW-list data, which travels with the
+          file. A <strong>card</strong> is a byos.json shipped in the repo
+          with prebuilt fixtures (§9.1) for speed, surfaced in the Story
+          Style tab as a one-click preset. There is no separate "use the
+          Aesop card" code path. When a Pro-tab configuration's byos.id
+          matches a shipped card's, the UI simply aliases it to the card's
+          name. The id match is the alias.
+        </p>
+      </section>
+
+      <section id="pre-cleaning">
+        <h2>5.2 Sample text pre-cleaning</h2>
+        <p>
+          The original version fed sample text straight to the lexer. The
+          new version's lexer is far more capable, UTF-8-aware and
+          Latin-script-precise, and that very capability makes it pickier
+          about messy input. A curly apostrophe in <em>don&#8217;t</em>, a
+          character the old ASCII lexer never even saw, no longer matches the
+          straight-quote contraction pattern and splits the word in two. A
+          Cyrillic <em>&#1072;</em> sitting inside an otherwise-Latin word
+          does the same. The old version could ignore such things because
+          they could not occur. The new one cannot. So the new version runs
+          a pre-clean pass before the lexer ever sees the text.
+        </p>
+        <p>
+          The guiding rule is round-trip-first. Each cleanup exists because
+          some raw shape could make the lexer read a word as one bit-bearing
+          token in one place and several throwaway tokens in another, which
+          would break recovery. Believability is only ever the tiebreaker.
+          Seven rules run in order, looped to a fixed point:
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>Rule</th><th>What it normalizes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Non-printable bytes</td><td>Replaced with a space.</td></tr>
+            <tr><td>Curly quotes</td><td>Folded to straight ASCII quotes.</td></tr>
+            <tr><td>Exotic spaces</td><td>NBSP, thin, and figure spaces collapse to a regular space.</td></tr>
+            <tr><td>Em and en dashes</td><td>Replaced with a space.</td></tr>
+            <tr><td>Mixed-script confusables</td><td>Folded to Latin via the Unicode TR39 table (a Cyrillic <em>&#1072;</em> becomes a Latin <em>a</em>).</td></tr>
+            <tr><td>Stray zero-width joiners</td><td>Dropped when they sit outside an emoji cluster.</td></tr>
+            <tr><td>Long dotted runs</td><td>Split apart, so 1.2.3.4.5 becomes 1 2 3 4 5.</td></tr>
+          </tbody>
+        </table>
+        <p>
+          The surprising payoff is that anything surviving pre-cleaning is,
+          by definition, something the lexer can read. So you can feed the
+          engine arbitrary binary. The stress harness pours ELF binaries and
+          <code>.deb</code> packages in as sample texts and builds working,
+          round-tripping models out of the rubble. Pre-cleaning quietly
+          carries the system from needing clean prose to swallowing anything
+          you throw at it.
+        </p>
+      </section>
+
+      <h2 class="paper-part" id="part-6">6. Natural output</h2>
+
+      <section id="poetry">
+        <h2>6.1 Poetry</h2>
+        <p>
+          The original version could already produce rhyme. The new version
+          turns that into a proper toolkit.
+          The Story Style Pro tab exposes four TW-list sources built from
+          the Carnegie Mellon Pronouncing Dictionary, a free database of
+          English pronunciations. Each tags words by a phonetic property a
+          grammar can ask for:
+        </p>
+        <table class="cli-table">
+          <thead>
+            <tr><th>Source</th><th>What it tags</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Rhymes</strong></td><td>Groups words that share an end-rhyme.</td></tr>
+            <tr><td><strong>Syllable Count</strong></td><td>Tags each word by its number of syllables.</td></tr>
+            <tr><td><strong>Stress Pattern</strong></td><td>Tags each word by its pattern of stressed and unstressed syllables.</td></tr>
+            <tr><td><strong>Alliteration</strong></td><td>Groups words by their opening sound.</td></tr>
+          </tbody>
+        </table>
+        <p>
+          With those handles, structured verse stops being a special case
+          and becomes an ordinary grammar. Rhyme plus stress covers sonnets
+          and limericks, and syllable counts give tankas and haiku. The
+          shipped Shakespeare and Gilbert &amp; Sullivan cards already draw
+          on them, the latter leaning on its syllable and rhyme tags to keep
+          its patter-song lines in shape.
+        </p>
+        <p>
+          The payoff is pure entertainment. A secret that once came back as a
+          paragraph of prose can now come back as a limerick, a haiku, or a
+          passable sonnet, and it still decodes byte-for-byte.
+        </p>
+      </section>
+
+      <section id="a-an-agreement">
+        <h2>6.2 A/An agreement</h2>
+        <p>
+          The original version handled a/an with a begins-with-a-vowel
+          augmentation. It tagged every word starting with a vowel letter, and
+          let grammars emitting <em>an</em> require one next. The new
+          version replaces it with the <code>xanax</code> rewriter, which
+          consults phonology rather than spelling and is right far more
+          often. Retiring the old augmentation also simplified the build,
+          since it had tagged tens of thousands of words with a parallel
+          type that collided with their natural one.
+        </p>
+        <p>
+          Orthography is the wrong proxy on exactly the words readers
+          notice. <em>A united front</em>, not <em>an united</em>.
+          <em>An hour</em>, not <em>a hour</em>. The letter h alone sinks
+          the spelling rule. Of the Carnegie Mellon Pronouncing
+          Dictionary's 6,103 h-leading words, only 74 are vowel-onset
+          (<em>hour</em>, <em>honor</em>, <em>heir</em>, <em>herb</em>) and
+          the rest are consonant-onset (<em>happy</em>, <em>historic</em>,
+          <em>hand</em>). Any rule that buckets h with vowels is wrong
+          almost always. Any rule that excludes h misses the high-frequency
+          wins. Per-word phonology is the only correct answer.
+        </p>
+        <p>
+          That is what CMU provides, at build time only. A study against
+          128,000 real article occurrences across 18 shipped sample texts
+          plus 50 random Project Gutenberg books measured both rules:
         </p>
         <table class="data-table">
           <thead>
@@ -680,71 +788,186 @@
           </tbody>
         </table>
         <p>
-          When the two rules disagree, the author sides with
-          phonology 89 % of the time. The h-letter alone explains
-          why the orthographic rule fails. Of CMU's 6,103 h-leading
-          words, only 74 (1.2 %) are vowel-onset (hour, honor,
-          heir, herb). The other 98.8 % are consonant-onset (happy,
-          historic, hand). Any rule that buckets h-words with
-          vowels for article purposes is wrong essentially always.
-          Any rule that excludes h entirely misses the
-          high-frequency wins. Per-word phonology is the only
-          correct answer, and that is what CMU provides.
+          When the two disagree, the author sides with phonology 89% of the
+          time. The encoder never loads CMU at runtime. The build
+          precomputes two small exception lists (463 words orthography would
+          call consonant-onset but phonology says <em>an</em>, like
+          <em>hour</em> and <em>honest</em>, and 226 the other way, like
+          <em>united</em> and <em>useful</em>), and at encode time
+          <code>xanax</code> checks the next word against both and falls
+          back to the leading letter if neither hits. CMU covers 96.9% of
+          observed article positions. The gap is archaic and proper-noun
+          vocabulary the fallback handles anyway.
         </p>
         <p>
-          The encoder does not load CMU at runtime. Two small
-          precomputed exception wlists fall out at build time: 463
-          <em>an</em>-exceptions (words orthography would call
-          consonant-onset but phonology says <em>an</em>:
-          <em>hour</em>, <em>honest</em>) and 226
-          <em>a</em>-exceptions (words orthography would call
-          vowel-onset but phonology says <em>a</em>:
-          <em>united</em>, <em>one</em>, <em>useful</em>). At
-          encode time, xanax checks the next word against both
-          sets in sequence and falls back to leading-letter
-          orthography if neither hits. Two set lookups and a
-          string swap per article.
+          The whole advantage rides on a short list. Of the cases where the
+          two rules disagree, <em>hour</em> alone accounts for 132, with
+          <em>one</em>, <em>honest</em>, <em>union</em>, <em>useful</em>,
+          <em>united</em>, <em>uniform</em>, and <em>european</em> making up
+          most of the rest. Modern voices and even Shakespeare side with
+          phonology 90 to 100 percent of the time. The only holdouts are
+          three mid-19th-century authors. Dickens, Melville, and Darwin wrote
+          <em>an european</em> and <em>an union</em>, going by spelling over
+          sound the way their era did.
         </p>
         <p>
-          CMU coverage of the 128K observed article positions is 96.88 %. The
-          3.12 % gap is archaic vocabulary (assagai, kraal,
-          harpooneer) and 19th-century proper nouns the
-          orthographic fallback handles correctly anyway. The gap
-          is self-handling. The wins concentrate on a handful of
-          high-frequency words: <em>hour</em> (132&times;),
-          <em>one</em> (26&times;), <em>honest</em> (13&times;),
-          <em>union</em> (8&times;), <em>useful</em>. The full
-          research lives at
-          <code>fixture-src/rewriters/xanax/research.md</code>.
-          The CMU dict will also feed planned alliteration,
-          syllable-count, and rhyme-refresh TW-lists.
+          The same CMU data also drives the Stress Pattern, Syllable Count,
+          and Alliteration TW-lists behind the verse styles in §6.1. The
+          result is that the grammatical slip a careful reader notices most is
+          the one the cover story almost never makes.
+        </p>
+      </section>
+
+      <h2 class="paper-part" id="part-7">7. Engine: encoding &amp; runtime</h2>
+
+      <section id="huffman-coding">
+        <h2>7.1 Huffman coding</h2>
+        <p>
+          The original version used a fixed-length code that discarded every
+          word beyond a power-of-two cap per type. The new version replaces
+          it with Huffman coding, which buys two things at once. No words
+          are discarded, and the codes can track real word frequency within
+          a type.
+        </p>
+        <p>
+          When building a session-base dictionary, users can opt into one or
+          more open, citable frequency tables (Norvig, Google Books
+          1-grams, a PD-Gutenberg derivation), trading uniform Huffman for
+          weighted Huffman driven by combined real-English statistics. Each
+          source is normalized to a per-word probability before averaging,
+          so sources of wildly different sizes count equally. Words missing
+          from every selected source fall to a floor weight, the longest
+          code in their type.
+        </p>
+        <p>
+          One alternative was considered and rejected. Power-of-2 subtype
+          partitioning would let the style picker match any target
+          frequency distribution exactly, at the cost of the bandwidth
+          Huffman spends choosing among words. That trade only pays when
+          distribution fidelity is the goal, and matching a reference
+          distribution is precisely the steganographic concern §1.2 sets
+          aside. Huffman is the better fit for an entertainment-first
+          design.
+        </p>
+        <p>
+          The result is a dictionary that wastes nothing. Every word in a
+          source stays reachable, and the common ones surface at the rate a
+          reader expects, so a larger source buys both capacity and
+          naturalness instead of trading one for the other.
+        </p>
+      </section>
+
+      <section id="eof-streaming">
+        <h2>7.2 Streamability</h2>
+        <p>
+          The original version prefixed every cover story with a fixed
+          32-bit length, so it had to know the whole secret's size before
+          emitting a single byte. The new version replaces that with an EOF
+          marker, making concealment fully streamable end to end. That one
+          change pays off four ways.
+        </p>
+        <ul class="notes-list">
+          <li><strong>Large files.</strong> Streaming is what makes pipeline
+            mode (§7.3) possible. Inputs far bigger than a textarea flow
+            through without ever being held whole in memory.</li>
+          <li><strong>Cheap round-trip validation.</strong> The engine
+            pipes a copy of every encoded byte into a concurrent decoder, so
+            by the time the encoder finishes the decoder has too. A
+            fingerprint of the recovered bytes is checked against the
+            secret's, proving lossless recovery for this exact encoding.
+            Left on (it can be switched off for benchmarks), it catches any
+            transform that breaks round-trip on the first cover story that
+            triggers it, not the first time someone notices.</li>
+          <li><strong>Streaming transforms.</strong> Rewriters,
+            reformatters, envelopes, and wrappers run on the stream instead
+            of buffering the whole cover story.</li>
+          <li><strong>No positional bias.</strong> The old length prefix
+            left its high-order bytes near zero for any reasonable secret,
+            over-representing low-numbered words at the start of every cover
+            story. The EOF marker removes that bias too.</li>
+        </ul>
+        <p>
+          Each of the four follows from one small decision, marking where the
+          secret ends instead of declaring up front how long it is. The
+          smaller wire format is also the more capable one.
+        </p>
+      </section>
+
+      <section id="pipeline-mode">
+        <h2>7.3 Pipeline mode</h2>
+        <p>
+          The new version's streamability (§7.2) opens up efficient
+          processing models the original version could not reach. Several
+          pieces combine to handle inputs far larger than a paste buffer:
+        </p>
+        <ul class="notes-list">
+          <li><strong>Workers.</strong> Encoding and decoding never run on
+            the main thread, which stays UI-only. Each conceal or reveal job
+            gets its own streaming engine worker, and several jobs run at
+            once, one worker apiece, capped near the machine's core count. A
+            cross-runtime shim wraps the browser <code>Worker</code> and
+            Node's <code>worker_threads</code> behind one API.</li>
+          <li><strong>SAB-resident dictionaries.</strong> A shared pool of
+            loader workers fetches, decompresses, and packs each read-only
+            artifact (dictionary, model table, grammar, and the transform
+            tables) into a <code>SharedArrayBuffer</code> once per session.
+            The parent caches it, and every later job reuses it zero-copy.
+            Lookup is a single allocation-free walk, with every worker seeing
+            the same backing store.</li>
+          <li><strong>Service-Worker save-stream.</strong> Cover stories and
+            recovered files need not fit in memory. A service worker turns a
+            fetch into a <code>ReadableStream</code> the encoder pipes into,
+            and the browser writes chunks to disk as they arrive. Multi-file
+            loads run as a concurrency-capped queue, with backpressure all
+            the way from disk back into the engine.</li>
+        </ul>
+        <p>
+          None of this is forked per runtime. The same worker code runs
+          unchanged in the browser and in Node. A single shim constructs a
+          native <code>Worker</code> in one and wraps
+          <code>worker_threads</code> in the other. The design takes
+          advantage of modern machine architecture, scaling across as many
+          cores as the host provides. The same test files cover both paths,
+          so a fix in one is a fix in both.
+        </p>
+        <p>
+          The result is scale. A multi-threaded machine can process several
+          large files at once, in the browser or at the command line, with
+          one read-only dictionary shared behind all of them and the data
+          flowing through small buffers. The two halves need each other.
+          Workers without shared memory would each carry their own parsed
+          dictionary, tens of megabytes times the worker count, and shared
+          memory without workers would have nothing to share.
         </p>
       </section>
 
       <section id="cpp-to-js-port">
-        <h2>11. C++ to JS port</h2>
+        <h2>7.4 Old tricks, new runtime</h2>
         <p>
-          Many original C++ classes (<code>raof</code>, <code>rbt</code>,
-          <code>bst</code>, <code>mstring</code>,
-          <code>mmstring</code>, <code>list</code>,
-          <code>strlst</code>, <code>heap</code>,
-          <code>initfile</code>) were just disk-backed containers
-          and lifecycle wrappers. Replaced wholesale by built-in
-          JS <code>Map</code>, <code>Array</code>,
-          <code>String</code>, <code>Uint8Array</code>. Two classes
-          survived (<code>BitReader</code>, <code>BitWriter</code>)
-          and earned their keep.
+          Most of the original C++ classes (<code>raof</code>,
+          <code>rbt</code>, <code>bst</code>, <code>mstring</code>,
+          <code>mmstring</code>, <code>list</code>, <code>strlst</code>,
+          <code>heap</code>, <code>initfile</code>) were just disk-backed
+          containers and lifecycle wrappers, replaced wholesale by built-in
+          JS <code>Map</code>, <code>Array</code>, <code>String</code>, and
+          <code>Uint8Array</code>. Only two survived and earned their keep,
+          <code>BitReader</code> and <code>BitWriter</code>. They read and
+          write an arbitrary number of bits from a stream, the one operation
+          the byte-oriented built-ins cannot do.
         </p>
         <p>
-          The <code>raof</code> legacy is more interesting. The
-          1990s on-disk B-tree shape, originally a hack to fit
-          dictionaries on small disks, wins again in the worker / SAB
-          era for opposite reasons: a flat binary tree in a
-          <code>SharedArrayBuffer</code> is faster to walk and lighter
-          than a <code>Map</code> rebuilt per worker. Static
-          measurements: a master-style base dict as a parsed JS
-          <code>Map</code> vs. as the SAB binary tree. Bytes
-          resident, lookup ns, worker startup ms.
+          One of those retired classes left its idea behind.
+          <code>raof</code>, short for Random Access Object Format, was the
+          project's own term for variable-length arrays indexed by multiple
+          binary search trees. It was a solution for fast, space-efficient
+          dictionary storage when hard drives were a few megabytes and RAM
+          was measured in kilobytes. The class itself is gone, but its
+          on-disk B-tree layout is reborn in the worker era for the opposite
+          reason. A flat binary tree in a <code>SharedArrayBuffer</code> is
+          lighter than a JS <code>Map</code> and, packed once by the parent,
+          is shared by every worker with no rebuild. It gives up raw lookup
+          speed to do it. The measurements below compare the same
+          master-style base dictionary held both ways.
         </p>
         <figure class="paper-figure-wrap">
           <table class="paper-table">
@@ -753,19 +976,32 @@
               <tr><th scope="col">Metric</th><th scope="col">JS Map</th><th scope="col">SAB-BST</th><th scope="col">Notes</th></tr>
             </thead>
             <tbody>
-            <tr><th scope="row">Startup (parse / build)</th><td>~37 ms</td><td>~990 ms</td><td class="paper-table-note">SAB includes pack + wrap; Map iterates <code>json.words</code>.</td></tr>
-            <tr><th scope="row">Memory (retained)</th><td>~13.8 MB heap</td><td>~9.1 MB SAB</td><td class="paper-table-note">Map: V8 heap. SAB: the buffer itself (shareable across workers).</td></tr>
-            <tr><th scope="row">Lookup throughput</th><td>~0.07 &micro;s/op</td><td>~1.07 &micro;s/op</td><td class="paper-table-note">50,000 random words.</td></tr>
+            <tr><th scope="row">Startup (parse / build)</th><td>~37 ms<br><span class="paper-table-note">(plus load time, per worker instantiation. Workers are not persistent, so paid on every spawn.)</span></td><td>~990 ms<br><span class="paper-table-note">(once per session, with no added time per worker.)</span></td><td class="paper-table-note">SAB includes pack + wrap.</td></tr>
+            <tr><th scope="row">Memory (retained)</th><td>~13.8 MB heap<br><span class="paper-table-note">(per worker instantiation. 24 live workers is about 330 MB.)</span></td><td>~9.1 MB SAB<br><span class="paper-table-note">(one shared buffer for all workers.)</span></td><td class="paper-table-note">Map on the V8 heap. SAB shareable across workers.</td></tr>
+            <tr><th scope="row">Lookup throughput</th><td>~0.07 &micro;s/op<br><span class="paper-table-note">(per lookup only. Excludes the build and load above.)</span></td><td>~1.07 &micro;s/op<br><span class="paper-table-note">(per lookup. No per-worker setup.)</span></td><td class="paper-table-note">50,000 random words.</td></tr>
             </tbody>
           </table>
           <figcaption>
             <strong>Figure 2.</strong> Two ways to hold the same
-            data, two different trade-offs: the Map is faster to look
+            data, two different trade-offs. The Map is faster to look
             up but lives on the V8 heap and must be rebuilt in every
             worker. The SAB version is one shareable buffer the parent
             packs once and every worker wraps with zero parse cost.
           </figcaption>
         </figure>
+        <p>
+          Taken alone, the lookup row reads like a loss, the SAB walk about
+          fifteen times slower per word. The other two rows overturn that. A
+          JS <code>Map</code> pays its startup and memory in every worker,
+          since each one builds and holds its own copy. The SAB pays both
+          once. The parent packs it, and every worker wraps the same buffer
+          for free. On the 24-core machine these numbers came from, a Map per
+          worker would build the dictionary two dozen times over and retain
+          around 330 MB of it, 13.8 MB times 24, before counting the cost of
+          copying one into each worker. The shared SAB is 9.1 MB, packed
+          once. Against that, an extra microsecond per lookup is a rounding
+          error, and the case only strengthens as cores multiply.
+        </p>
         <figure class="paper-figure-wrap">
 <svg class="paper-figure" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 578" role="img" aria-label="C++ module surface vs JS module surface, side by side.">
 <text x="184" y="24" font-size="13" font-weight="600" text-anchor="middle" fill="currentColor">OG C++ (1995–2001)</text>
@@ -833,7 +1069,7 @@
             <strong>Figure 3.</strong> Module surface comparison.
             Each row maps a C++ subsystem (left) to the JS module
             group that absorbed it (right). Dashed boxes are
-            placeholder lanes: the C++ <code>gnu/</code> and
+            placeholder lanes. The C++ <code>gnu/</code> and
             <code>nttpd/</code> roles are handled by V8 and the
             browser itself (no equivalent module needed). The JS
             <code>worker/</code> and <code>grammar/</code> groups
@@ -843,280 +1079,83 @@
             <code>tools/paper-figure-module-surface.js</code>.
           </figcaption>
         </figure>
-      </section>
-
-      <section id="pipeline-mode">
-        <h2>12. Pipeline mode: workers, SAB dicts, and the SW save-stream</h2>
         <p>
-          Three architectural pieces let the system handle inputs
-          larger than a textarea full of paste.
-        </p>
-        <p>
-          <strong>Workers.</strong> The browser page dispatches every
-          encode and decode through a worker pool sized to
-          <code>navigator.hardwareConcurrency</code>. The main thread
-          is UI-only, Penny's typewriter, button responsiveness,
-          and the inbound paste / drag-drop streams share it. Engine
-          work runs elsewhere. A pool of 1 is still a worker (same
-          code path, no inline fallback). A cross-runtime shim wraps
-          the native browser <code>Worker</code> on the web and
-          <code>node:worker_threads</code> in Node tests, so the
-          engine has one parent-side API across both environments.
-        </p>
-        <p>
-          <strong>SAB-resident dictionaries.</strong> The original C++ used
-          a custom B-tree (<code>raof</code>) to keep dictionaries on
-          small disks. The 2026 port reaches the same shape from the
-          opposite direction: a flat binary tree packed into a
-          <code>SharedArrayBuffer</code> is faster to walk and lighter
-          than a JS <code>Map</code> rebuilt per worker. Each shared
-          read-only artifact (dictionary, sentence-model table,
-          grammar) is parsed once by a designated worker, packed into
-          a SAB, and shared by reference with the worker pool.
-          Lookup is a single allocation-free walk over the SAB bytes.
-          Workers see the same backing store with zero copy.
-        </p>
-        <p>
-          <strong>Service-Worker save-stream.</strong> Cover and
-          recovered files don't have to fit in memory. The page
-          registers a service worker that, on a fetch matching a
-          pre-registered streaming URL, returns the corresponding
-          <code>ReadableStream</code> as the response body. The
-          encoder or decoder pipes its output into a paired writable,
-          the SW serves the readable, and the browser writes chunks
-          to disk as they arrive. Multi-file loads (Your Secret
-          accepts a list) run as a concurrency-capped queue: one
-          worker per file, each with its own SW save-stream, with
-          backpressure flowing all the way from disk back into the
-          engine.
-        </p>
-        <p>
-          Full discussions in
-          <code>docs/architecture-workers.md</code> and
-          <code>docs/architecture-sab.md</code>.
+          That is the shape of the whole port. The C++ worth keeping encoded
+          a real idea, like packing bits tightly or laying a tree out flat.
+          The rest was container plumbing, the strings, lists, sets, maps,
+          and heaps a 1995 C++ program had to roll by hand and a modern
+          runtime simply provides. Old tricks, new runtime.
         </p>
       </section>
 
-      <section id="deniability-secrets">
-        <h2>13. Plausible-deniability random secrets</h2>
+      <section id="future-directions">
+        <h2 class="paper-part" id="part-8">8. Considered and rejected</h2>
         <p>
-          The 2002 deniability framing
-          <a href="#bib-chapman-davida-2002" class="cite-ref">[Chapman &amp; Davida 2002]</a>
-          argues that a steganographic cover should be a plausible
-          artifact in its own right. The 2026 port extends that
-          thinking one step further: the <em>recovered secret</em>
-          should also be a plausible artifact, not raw bytes that
-          shout "this was the hidden payload." A Make-a-random-secret
-          panel in the browser UI generates secret bytes shaped to
-          look like real ciphertext from popular tools, so a recovered
-          payload is indistinguishable from a genuine wrong-password
-          decrypt of the same tool.
+          Not everything that was designed got built. Two directions were
+          mapped end to end and deliberately left on the table.
+        </p>
+
+        <h3 class="cli-name">BYOS optimizer</h3>
+        <p>
+          The Build-Your-Own-Style space runs to millions of buildable
+          styles, so an automated search that scored each one and returned a
+          leaderboard looked obvious. It dissolved on inspection. The one
+          objective that is easy to compute, expansion rate (cover bytes per
+          secret byte), is the wrong goal. NiceText is not a compression
+          system, and a 100&times; expansion that reads like Aesop beats a
+          6&times; one that reads like word salad. The goal that matters, a
+          cover story a human would actually want to send, has no scalar
+          fitness function. Every believability proxy is gameable, and an
+          optimizer is by construction the thing that games it.
         </p>
         <p>
-          Three shapes ship today (<code>js/src/random-secret-formats.js</code>):
+          The product already has the right ergonomic. The Conceal button is
+          a one-click human filter. Don't like this cover story? Click
+          again. Three or four cheap re-rolls beat a search over millions of
+          styles for the one whose first attempt happens to read well. The
+          genuinely useful idea hiding here was different, scaling human
+          judgment by pre-filtering candidates down to a few dozen for
+          pairwise comparison, which is a BYOS browser, not an optimizer.
+          Full discussion in <code>docs/research-notes.md</code> §16.
         </p>
-        <ul class="notes-list">
-          <li>
-            <strong>Pure random.</strong> N bytes from
-            <code>crypto.getRandomValues</code>. The baseline.
-          </li>
-          <li>
-            <strong>OpenSSL <code>enc</code>.</strong> Eight bytes
-            ASCII <code>Salted__</code> magic, eight bytes random
-            salt, then a body rounded to a 16-byte AES-CBC block.
-            The body is at least one block. Matches the on-disk
-            shape of
-            <code>openssl enc -aes-256-cbc -salt -pbkdf2</code>.
-            Attempting to decrypt with any password yields garbage
-            or a padding error, the same outcome as a real
-            wrong-keyed OpenSSL ciphertext.
-          </li>
-          <li>
-            <strong>VeraCrypt container.</strong> No magic bytes; a
-            real VeraCrypt header is encrypted into the first 512
-            bytes, so the file is uniform random data over its
-            entire length. Sized to VeraCrypt's stated minimum for
-            non-system file containers (292 KB) and aligned to
-            512-byte sectors. A real VeraCrypt container small
-            enough to mount really is this size.
-          </li>
-        </ul>
+
+        <h3 class="cli-name">Reconceal</h3>
         <p>
-          Inside each wrapper, every byte except the OpenSSL magic
-          is cryptographic random, the bytes <em>are</em> the
-          secret being concealed, not anything decryptable. The
-          deniability claim sits one layer above: an adversary who
-          recovers the steganographic payload sees what looks like
-          an OpenSSL or VeraCrypt blob they don't have the password
-          for, not a clean "your secret is here" signal. Real use
-          feeds NiceText a pre-encrypted secret (§1), so the
-          recovered payload already looks like a wrong-password
-          decrypt result. The random-secret formats let demos and
-          tests exercise the same recovered-payload surface
-          without standing up a live cipher.
+          Since every other transport layer (gzip, an HTML or PDF envelope,
+          a source-file wrapper) can be undone with an ordinary external
+          tool, the tempting next step was to run a cover story back through
+          NiceText with a different style, nesting cover inside cover for
+          Russian-doll deniability. The size math even works. A
+          gzip-then-reconceal hybrid keeps three or four layers inside
+          attachment range.
+        </p>
+        <p>
+          Two things sank it. First, the entropy is impressive but not
+          cryptographic. Stacking style choices reaches perhaps
+          2<sup>100</sup> at five layers, still short of AES-128, and anyone
+          who needs real confidentiality should encrypt the secret upstream
+          rather than trust nested cover stories. Second, and decisively, a
+          reconceal layer is the one transport step with no external-tool
+          payoff. It is NiceText-only by construction. The recipient runs
+          our software anyway, the strip pipeline already unwinds everything
+          in one pass, and the intermediate layers are never even seen. The
+          recursive-cover effect remains available by hand, feeding a
+          wrapped artifact back in as the next secret, with no new feature
+          and no coupling between the transport pipeline and the core.
         </p>
       </section>
 
-      <section id="byos-and-cards">
-        <h2>14. BYOS and cards</h2>
-        <p>
-          The original NiceText shipped a single dictionary, a
-          single grammar, and called it done. The 2026 port replaces
-          both with a Build-Your-Own-Style (BYOS) composition model.
-          A BYOS is a declarative JSON that lists, for any one
-          cover-generation pass, every knob the engine needs: which
-          TW-lists feed the base dictionary, which frequency tables
-          drive the Huffman weights, which augs run during build,
-          which sentence model and vocabulary scope the encoder
-          draws from, and which cover transforms shape the output
-          (§10). A complete byos.json fully describes the build. No
-          hidden state lives in the engine.
-        </p>
-
-        <h3 class="cli-name">byos.json schema</h3>
-        <p>
-          Top-level fields. Optional unless marked required.
-        </p>
-        <table class="cli-table">
-          <thead>
-            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>version</code></td><td>integer</td><td>Schema version. Currently <code>1</code>. Required.</td></tr>
-            <tr><td><code>name</code></td><td>string</td><td>Non-empty identifier. Used as the build's output stem. Required.</td></tr>
-            <tr><td><code>label</code></td><td>string</td><td>Display label in the UI.</td></tr>
-            <tr><td><code>casualLabel</code></td><td>string</td><td>Short, casual UI label.</td></tr>
-            <tr><td><code>preview</code></td><td>string</td><td>One-line preview of the card's output style, shown next to its UI chip.</td></tr>
-            <tr><td><code>notes</code></td><td>string</td><td>Developer notes. Inert at build and runtime.</td></tr>
-            <tr><td><code>chipId</code></td><td>string</td><td>UI chip identifier.</td></tr>
-            <tr><td><code>story</code></td><td>object</td><td>Story-layer config. See below.</td></tr>
-            <tr><td><code>base</code></td><td>object</td><td>Base-dictionary config. See below.</td></tr>
-            <tr><td><code>build</code></td><td>object</td><td>Build-time config. See below.</td></tr>
-            <tr><td><code>rewriter</code></td><td>object</td><td>Per-rewriter config. See below.</td></tr>
-            <tr><td><code>reformatter</code></td><td>object</td><td>Per-reformatter config. See below.</td></tr>
-            <tr><td><code>customCorpusData</code></td><td>object</td><td>Embedded custom-corpus payload. See below.</td></tr>
-            <tr><td><code>customTwlistData</code></td><td>object</td><td>Embedded custom-TW-list payload. See below.</td></tr>
-          </tbody>
-        </table>
-
-        <p><code>story</code> block:</p>
-        <table class="cli-table">
-          <thead>
-            <tr><th>Field</th><th>Type or Values</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>style</code></td><td>string</td><td>Sentence-model name. Special values: <code>flat</code> for no story layer, <code>custom</code> for a user-supplied model.</td></tr>
-            <tr><td><code>sentence</code></td><td><code>random</code> or <code>sequential</code></td><td>Playback mode for the sentence model.</td></tr>
-            <tr><td><code>vocabulary</code></td><td><code>corpus</code> or <code>base</code></td><td>Encoder vocabulary scope. <code>corpus</code> restricts to the source text's word set. <code>base</code> uses the full vocabulary the base block's sources produce.</td></tr>
-          </tbody>
-        </table>
-
-        <p><code>base</code> block:</p>
-        <table class="cli-table">
-          <thead>
-            <tr><th>Field</th><th>Type or Values</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>sources</code></td><td>array of strings</td><td>TW-list source names that feed the base dictionary.</td></tr>
-            <tr><td><code>augment</code></td><td>object</td><td>Per-aug intensities. Fields: <code>emojiIntoWords</code> and <code>wordsIntoEmoji</code>, each integer 1..10.</td></tr>
-            <tr><td><code>customTwlist</code></td><td>string</td><td>Reference to a user-uploaded TW-list, resolved at load.</td></tr>
-            <tr><td><code>frequencies</code></td><td>array of strings</td><td>Frequency-table source names that weight Huffman codes. <code>style</code> means weight by the corpus's own counts.</td></tr>
-            <tr><td><code>customWordfreq</code></td><td>string</td><td>Reference to a user-uploaded word-frequency table.</td></tr>
-            <tr><td><code>tieBreak</code></td><td><code>alpha-asc</code> or <code>prefer-shorter</code></td><td>How sortDict resolves equal-weight Huffman merges.</td></tr>
-            <tr><td><code>hashedMergedTypes</code></td><td>boolean</td><td>Whether merged type names are hashed for fixture compactness.</td></tr>
-            <tr><td><code>generateHashmap</code></td><td>boolean</td><td>Whether to emit the type-hash to name sidecar.</td></tr>
-          </tbody>
-        </table>
-
-        <p><code>build</code> block:</p>
-        <table class="cli-table">
-          <thead>
-            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>corpus</code></td><td>relative path</td><td>Path to the corpus text file used to build the corpus dict and sentence-model table.</td></tr>
-          </tbody>
-        </table>
-
-        <p>
-          <code>rewriter</code> and <code>reformatter</code> blocks
-          are objects keyed by per-transform field name. Every field
-          shares the same universal shape:
-        </p>
-        <table class="cli-table">
-          <thead>
-            <tr><th>Field</th><th>Type or Values</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>enabled</code></td><td>boolean</td><td><code>true</code> activates the transform. <code>false</code> omits it from the byos.id and the encoder skips it entirely.</td></tr>
-            <tr><td><code>intensity</code></td><td>integer 0..100</td><td>Replacement probability percent. <code>0</code> disables. When omitted, schema defaults apply.</td></tr>
-            <tr><td><code>mode</code></td><td>string</td><td>Required when the transform has a mode catalog and <code>enabled</code> is true. Unimodal transforms like <code>xanax</code> reject this field. Per-transform mode catalogs live in <code>docs/cover-transforms.md</code>.</td></tr>
-          </tbody>
-        </table>
-        <p>
-          Available rewriter fields: <code>british</code>,
-          <code>typos</code>, <code>voice</code>, <code>xanax</code>.
-          Available reformatter fields: <code>case</code>,
-          <code>lineBreak</code>, <code>sentenceEnd</code>,
-          <code>voice</code>.
-        </p>
-
-        <p>
-          <code>customCorpusData</code> and
-          <code>customTwlistData</code> are optional embedded
-          payloads. Each carries
-          <code>{ encoding: 'gzip+base64', name?: string, data: string }</code>.
-          When present, the byos is self-contained. The recipient
-          loads the file and the engine has every byte it needs to
-          build, with no separate corpus or TW-list upload. The
-          payload is the post-clean form, the bytes the sender's
-          engine actually consumed. Preclean (§7) is idempotent on
-          its own output, so re-cleaning on load is a no-op.
-        </p>
-
-        <h3 class="cli-name">byos.id</h3>
-        <p>
-          A byos.id is a deterministic short string that encodes
-          the most common byos.json settings into a single
-          identifier suitable for filenames, URLs, and stable
-          cross-instance references. Example:
-          <code>v=1__sty=aesop__sen=r__voc=c</code>. The encoder
-          canonicalizes "absent" and "explicit-at-default" to the
-          same output, so two byos files that mean the same build
-          produce the same byos.id.
-        </p>
-        <p>
-          Caveat: byos.id does <em>not</em> contain embedded custom
-          corpus or custom TW-list data. A byos.json carrying
-          <code>customCorpusData</code> or
-          <code>customTwlistData</code> can still be summarized by a
-          byos.id, but the id alone is not enough to reproduce the
-          build. The custom-data payload travels with the byos.json
-          file, not with the id.
-        </p>
-
-        <h3 class="cli-name">Cards</h3>
-        <p>
-          A card is a byos.json shipped in the repo with prebuilt
-          fixtures (§15) for performance. The Story Style tab in
-          the browser surfaces cards as one-click presets. Pro-tab
-          configuration produces a byos.json, and if its byos.id
-          matches any shipped card's byos.id, the UI aliases the
-          configuration to the card's nickname automatically. There
-          is no separate "use the Aesop card" code path. The
-          byos.id match is the alias.
-        </p>
-      </section>
+      <h2 class="paper-part" id="part-9">9. References</h2>
 
       <section id="fixtures">
-        <h2>15. Fixtures</h2>
+        <h2>9.1 Fixtures Reference</h2>
         <p>
-          The original NiceText was one master dictionary plus
-          swap-out grammars. The 2026 port turns every card into a
+          The original version was one master dictionary plus
+          swap-out grammars. The new version turns every card into a
           composition over typed artifacts, and every artifact is
           built from raw source through a deterministic pipeline.
           The repo layout makes the distinction structural.
-          <code>fixture-src/</code> holds the raw inputs (corpus
+          <code>fixture-src/</code> holds the raw inputs (sample
           texts, TW-list source data, pronunciation dictionaries,
           rewriter source materials, frequency-table raw files).
           <code>fixtures/</code> holds the cooked derivatives the
@@ -1163,10 +1202,10 @@
             exception sets.</li>
           <li><code>&lt;name&gt;.freq.sab.gz</code>, pruned
             frequency tables sized for runtime use. Sources include
-            Norvig, Google Books 1-grams, and corpus-derived
+            Norvig, Google Books 1-grams, and sample-text-derived
             counts.</li>
-          <li><code>&lt;name&gt;.txt.gz</code>, original corpus
-            text, gzipped. Kept around so a corpus can be re-curated
+          <li><code>&lt;name&gt;.txt.gz</code>, original sample
+            text, gzipped. Kept around so a sample text can be re-curated
             and the rest of the chain rebuilds deterministically.</li>
           <li><code>cards.data.js</code>, the lone JS-module
             artifact. The card registry the browser imports via
@@ -1175,12 +1214,12 @@
         </ul>
         <p>
           Source materials in <code>fixture-src/</code> mirror the
-          artifact types: <code>fixture-src/texts/</code> for
-          corpora, <code>fixture-src/twlist/</code>,
+          artifact types. <code>fixture-src/texts/</code> holds the
+          sample texts, with <code>fixture-src/twlist/</code>,
           <code>fixture-src/wlist/</code>,
           <code>fixture-src/rewriters/&lt;name&gt;/</code> per
-          rewriter, <code>fixture-src/pron/cmu/</code>,
-          <code>fixture-src/freq/</code>. Each subdir is the input
+          rewriter, <code>fixture-src/pron/cmu/</code>, and
+          <code>fixture-src/freq/</code> alongside. Each subdir is the input
           contract for one builder.
         </p>
         <p>
@@ -1188,320 +1227,26 @@
           fixture-src means same fixtures. Type-name hashes and
           revision numbers travel with the built dict so a runtime
           artifact can be tied back to the byos that produced it.
-          When the redaction list (§8) changes, or a rewriter
-          source-data file changes, or a corpus is re-curated, only
+          When the redaction list (§4.3) changes, or a rewriter
+          source-data file changes, or a sample text is re-curated, only
           the affected outputs rebuild.
         </p>
       </section>
 
-      <section id="eve">
-        <h2>16. Eve: what an eavesdropper sees</h2>
-        <p>
-          Eve is the canonical eavesdropper from Alice / Bob / Eve.
-          The NiceText port gives her a job: given a suspected
-          NiceText cover story, study it and try to answer two
-          questions. Was this generated by NiceText at all? And if
-          so, which card or BYOS settings (§14) were likely used?
-          The motivation is partly ergonomic and partly self-honest.
-          The ergonomic case: a sender who shares "I encoded this
-          with one of the shipped cards but I do not remember which"
-          benefits when Eve narrows the candidate set quickly. The
-          self-honest case: an experienced cryptanalyst could ignore
-          NiceText altogether and approach a cover as a simple
-          substitution cipher whose codebook lives in the public
-          dictionary. Building Eve forces us to think about that
-          cryptanalyst out loud, in code, and to ship the same tools
-          to the legitimate recipient.
-        </p>
-        <p>
-          Eve has two phases. Phase 1 has a decent start and ships
-          today. Phase 2 is designed and not yet built.
-        </p>
-        <p>
-          Phase 1 analyzes a suspected NiceText cover story to
-          decide whether it likely came from NiceText, and if so,
-          to narrow the style settings that may have produced it.
-          The input is the suspected itself in any form: raw bytes,
-          wrapped, enveloped, whatever the recipient received. The
-          approach uses only the suspected and the standard
-          fixtures that ship with the project: bundled TW-lists,
-          sentence models, and per-card sentence-shape references.
-          Phase 1 never decodes the suspected and never asks for a
-          password. It runs a handful of detectors that each emit a
-          likely, unlikely, or unknown verdict against one BYOS
-          knob, with a one-line "why" string attached. The output
-          is a <code>byos-eve.json</code>: a parameterized verdict
-          per knob that Phase 2 or a person can use to skip
-          combinations Phase 1 already ruled out. This is
-          heuristic, not a guarantee. Most knobs honestly come back
-          "unknown" on first pass, which is the right answer when
-          the suspected is short or the signal is genuinely
-          ambiguous.
-        </p>
-        <p>
-          Today's Phase 1 detector set covers the "is this NiceText
-          at all" sanity check, an emoji probe that distinguishes
-          the two cross-modal augmentations from §9, per-TW-list
-          source membership, the custom-corpus and custom-TW-list
-          inputs, and a sentence-shape comparator that asks whether
-          the suspected's sentence shapes match any shipped card.
-          The sentence-shape comparator required one engine change
-          to work: sequential playback mode now walks the corpus in
-          a single monotonic pass, skipping past non-bit-bearing
-          entries when needed, instead of branching into a separate
-          cursor for the dynamic case. That gives Eve a clean "the
-          suspected walks the corpus in order" signal she could not
-          have read off the previous two-cursor walk. The change is
-          gated to sequential mode. Random mode is untouched. In
-          the browser, the Eve tab feeds verdicts directly into the
-          Story Style tab, where each card's per-knob options light
-          up green for likely, red for unlikely, and neutral for
-          unknown. Many more detectors and heuristics are possible:
-          frequency-distribution fingerprinting, n-gram drift
-          against the source corpus, rare-word concentration,
-          others. All are left as future work.
-        </p>
-        <p>
-          Phase 2 is designed but not implemented. The goal is to
-          take the <code>byos-eve.json</code> from Phase 1 and
-          iterate through the surviving BYOS settings, building
-          each candidate dictionary and running the decoder against
-          the suspected. Each candidate yields a decode attempt
-          that downstream "recognizers" inspect for known file
-          shapes: gzip header, PNG magic, OpenSSL
-          <code>Salted__</code>, printable text, UTF-8 text, or a
-          developer-supplied pattern. The output is a ranked list
-          of candidates, or just a directory of attempted decodes
-          the user can hand to anyone else's recognizer. A
-          CLI-based Phase 2 could pipe each decode straight into an
-          external recognizer of the user's choice. A browser-based
-          Phase 2 could offer the same directory as a download.
-          Until either ships, the manual workflow lives in
-          the Story Style tab: a user looks at Phase 1's colored
-          hints, picks plausible settings by hand, and re-runs
-          decoding from <code>nicetext.html</code>.
-        </p>
-        <p>
-          Eve is a feature, not a threat. Engine changes that help
-          her, like the sequential-stream monotonic walk above,
-          also help legitimate recipients who forgot which card
-          they used. Eve is a card identifier, not a cipher break.
-          NiceText itself ships no cipher (§1). The input is a
-          pre-encrypted secret, opaque to the engine, encrypted by
-          whatever upstream tool the user chose. An analyst who
-          identifies the card via Eve still has to break that
-          upstream cipher to read the payload, exactly as if
-          NiceText were not in the picture. The deniability framing
-          (§2) leans on that distinction.
-        </p>
-      </section>
-
-      <section id="considered-and-rejected">
-        <h2>17. Considered and rejected</h2>
-        <p>
-          Two design directions we mapped end-to-end and decided
-          not to ship.
-        </p>
-
-        <h3 class="cli-name">BYOS optimizer</h3>
-        <p>
-          The Build-Your-Own-Style panel exposes ~2<sup>23</sup>
-          buildable styles (source toggles, frequency-table
-          selections, vocabulary scope, augmentation knobs, custom
-          corpus, custom TW-list, tie-break choice). The obvious
-          next move, following the sibling Span-It! project's
-          personality optimizer, was to scope a search over that
-          space: score each candidate BYOS, return a ranked
-          leaderboard or a Pareto frontier, drive a worker pool,
-          ship a <code>byos-optimizer.html</code> page.
-        </p>
-        <p>
-          The concept dissolved on inspection. Four arguments
-          killed it.
-        </p>
-        <p>
-          <strong>Expansion rate is closed-form.</strong> The
-          obvious single-scalar objective, cover bytes per secret
-          byte. But it is analytically computable from artifacts
-          the build pipeline already produces: the dictionary's
-          per-type Huffman code lengths, weighted by the model
-          table's type-frequency distribution, divided into
-          expected characters per token from the word-length
-          distribution. An optimizer running real conceals to
-          measure expansion is slow Monte Carlo for a number the
-          build could emit as a stat. The cover-stats panel already
-          surfaces the observed expansion post-conceal.
-        </p>
-        <p>
-          <strong>Expansion isn't the goal anyway.</strong>
-          NiceText is not a compression system. Nobody runs it to
-          save bytes. A 100&times; expansion producing readable
-          Aesop is a success. A 6&times; expansion producing word
-          salad is a failure. Optimizing expansion alone optimizes
-          the axis we don't care about.
-        </p>
-        <p>
-          <strong>Believability needs a proxy that isn't believability.</strong>
-          Three were considered. <em>Literal-token rate</em>
-          (fraction of cover tokens emitted as <code>^foo^</code>
-          escapes) measures engine fallback frequency, not
-          coherence. Covers with zero literals still read like word
-          salad. <em>Bigram log-probability</em> under a bundled
-          reference n-gram model is blind to subject-verb mismatch,
-          narrative incoherence, and topic drift, the failures that
-          actually break believability. <em>LLM-as-judge</em> fails
-          the zero-deps rule outright and is calibration-poor
-          across models. Every proxy is gameable, and the optimizer
-          is by construction the thing that games it. A few
-          thousand evaluations of "maximize proxy P" is a few
-          thousand chances to find the BYOS that best exploits
-          whatever P misses about real believability.
-        </p>
-        <p>
-          <strong>The actual metric is unmeasurable.</strong> What
-          NiceText needs from a cover is <em>plausible-deniability
-          cover</em>: prose a human might write, that a human would
-          want to share, in character with the chosen style. Both
-          axes are subjective, vary per secret length and per
-          style, and depend on reader expectations. There is no
-          scalar fitness function that captures them, and any
-          approximation is a different metric wearing the same
-          name.
-        </p>
-        <p>
-          The product already has the right ergonomic. The Conceal
-          button is a one-click human filter: if a developer doesn't
-          like the cover the engine produced, they click again, and
-          the engine produces a different one (random sentence-model
-          selection, bit-aligned alternatives when ties exist).
-          Three or four re-rolls usually produce something worth
-          shipping. For a domain whose metric is subjective, the
-          right shape is "defer to the human at the only point that
-          matters, and make re-rolling cheap." An automated
-          optimizer searching 2<sup>23</sup> combinations to find
-          the one whose <em>first</em> cover happens to read well
-          is solving the wrong problem.
-        </p>
-        <p>
-          The one piece of plumbing that would have been genuinely
-          useful is <strong>scaling human evaluation</strong>: run
-          cheap proxies to shrink the candidate set from thousands
-          to ~50, then surface those 50 through a pairwise-comparison
-          UI. That is a different feature (a BYOS browser with
-          cheap pre-filtering). It isn't what an optimizer would
-          have shipped. Full discussion in
-          <code>docs/research-notes.md</code> §16.
-        </p>
-
-        <h3 class="cli-name">Reconceal</h3>
-        <p>
-          The post-processor stack (gzip / base64 / uuencode plus
-          envelopes for HTML / PDF / EML / Python / Java / ...)
-          handles every layer with a well-known external tool on
-          the receive side: <code>gunzip</code>,
-          <code>base64 -d</code>, a browser, a C++ compiler, a
-          Python interpreter. The natural next move was a
-          "reconceal" layer that runs cover text through the
-          NiceText engine a second (or third, or fourth) time with
-          a different style, turning a cover into another cover.
-          Russian-doll plausible deniability: each layer is plain
-          natural-language text in a different idiom.
-        </p>
-        <p>
-          We mapped the design end-to-end, then decided not to
-          ship it. Three arguments killed the feature.
-        </p>
-        <p>
-          <strong>The size economics work, but only with help.</strong>
-          A naive reconceal multiplies bytes by the cover-to-secret
-          ratio (~10&times; for master-style dictionaries,
-          ~50&times; for smaller corpus dictionaries) per layer.
-          Two layers already pushes a 12-byte secret to several
-          kilobytes. Four layers reaches multi-megabyte.
-          Pre-compressing the cover before each reconceal (a "gzip
-          then reconceal" hybrid) roughly halves the per-layer
-          multiplier, which makes 3-4 layers fit comfortably in
-          any attachment-class channel. The economics are fine.
-          They are not the blocking issue.
-        </p>
-        <p>
-          <strong>Combinatorics are real but not cryptographic.</strong>
-          22 baked cards plus the BYOS combinatorial space (~900K
-          buildable styles, counting custom corpus and custom
-          TW-list as binary toggles) gives each reconceal layer
-          roughly 2<sup>20</sup> bits of "which style was used"
-          entropy. The stacking is multiplicative: <em>N</em>
-          layers reaches 2<sup>20<em>N</em></sup>. Five layers
-          approaches 2<sup>100</sup>, still below AES-128. The
-          number stacks impressively in the bit-count but does not
-          constitute cryptographic strength. If actual
-          confidentiality matters, the recipe is
-          <code>openssl enc</code> (or <code>gpg</code>, or
-          <code>age</code>) applied to the secret <em>before</em>
-          the NiceText pipeline sees it. Reconceal on top of that
-          is an aesthetic effect, not a security property, and we
-          should not encourage anyone to substitute it for real
-          encryption.
-        </p>
-        <p>
-          <strong>No external-tool benefit.</strong> The other
-          format and envelope layers carry their weight by being
-          usable <em>without</em> NiceText: a recipient can render
-          an HTML cover in any browser, decompress a gzip cover
-          with any archiver, compile a C++ cover with any C++
-          compiler, view a PDF cover in any PDF reader. A reconceal
-          layer is NiceText-only by construction. The recipient
-          has to run our software anyway, and our software's strip
-          pipeline already auto-unwinds every layer in one pass.
-          The user never sees the intermediate cover-of-cover
-          forms. Adding wrap layers around a buried reconceal
-          serves no observable purpose. Only the
-          <em>outermost</em> envelope is visible to the recipient
-          before they reach for the tool. Everything interior is
-          invisible.
-        </p>
-        <p>
-          <strong>The fun-mode workaround already exists.</strong>
-          A user who wants the recursive-cover effect for its own
-          sake can already get it without a new feature: take any
-          wrapped NiceText artifact (a <code>.html.gz</code>, a
-          <code>.eml</code>, a <code>.pdf</code>), feed it back
-          into the source panel as Your Secret, and conceal it
-          again with a different style. The result is a cover
-          whose recovered bytes are themselves a cover. Repeating
-          the cycle, with or without third-party encryption
-          between turns, gives the Russian-doll property with no
-          engine changes and no architectural coupling between the
-          post-processor pipeline and the encode/decode core.
-        </p>
-        <p>
-          What stays: the post-processor remains a pure
-          <code>TransformStream</code> composer, decoupled from
-          <code>nicetext</code> and <code>scramble</code>. The "Wrap
-          your cover story" modal exposes one envelope choice and
-          a format-layer stack. Nothing more. Recursive concealment
-          is available as a manual workflow, not as a baked layer
-          type. Full design discussion in
-          <code>docs/research-notes.md</code> when added. The
-          rejection is what the paper records.
-        </p>
-      </section>
-
       <section id="command-reference">
-        <h2>18. Command reference</h2>
+        <h2>9.2 Command reference</h2>
         <p>
-          The browser is the primary interface, but the engine is
-          pure JavaScript with no third-party dependencies, so every
-          piece of it runs under Node. The three CLIs below cover the
-          round-trip and the dictionary build pipeline. Format follows
-          the thesis's command-reference appendix
+          The browser is the primary interface, but the engine is pure
+          JavaScript with no third-party dependencies, so every piece of it
+          also runs under Node. This is the authoritative inventory of that
+          command-line surface, covering the round-trip pair, the cover
+          post-processor, the dictionary builder, and the build pipeline
+          behind the shipped fixtures. Format follows the thesis's
+          command-reference appendix
           <a href="#bib-chapman-thesis-1997" class="cite-ref">[Chapman thesis 1997]</a>.
-          Full inventory of every CLI in the repo (including the
-          fixture builders under <code>tools/</code>, the test runners,
-          and the dev server) lives at <code>docs/cli.md</code>.
         </p>
 
-        <h3 class="cli-name"><code>node js/bin/nicetext.js</code>, encode (bits to cover text)</h3>
+        <h3 class="cli-name"><code>node js/bin/nicetext.js</code>, encode (bits to cover story)</h3>
         <table class="cli-table">
           <thead>
             <tr><th>Flag</th><th>Type</th><th>Default</th><th>Description</th></tr>
@@ -1514,11 +1259,11 @@
             <tr><td><code>--seed</code></td><td>int</td><td><code>0xC0FFEE</code></td><td>PRNG seed for SIZER's random tail.</td></tr>
             <tr><td><code>--stream-seed</code></td><td>int</td><td><code>0xBEEF</code></td><td>PRNG seed for the grammar / type stream.</td></tr>
             <tr><td><code>--max-length</code></td><td>int</td><td>1024</td><td>Skip and retry sentence models longer than N words.</td></tr>
-            <tr><td><code>--no-validate</code></td><td>flag</td><td>off</td><td>Skip the round-trip self-check. Default on: the encoder runs the cover through a concurrent decoder and aborts if the recovered bytes don't fingerprint-match the source.</td></tr>
+            <tr><td><code>--no-validate</code></td><td>flag</td><td>off</td><td>Skip the round-trip self-check. Default on. The encoder runs the cover through a concurrent decoder and aborts if the recovered bytes don't fingerprint-match the source.</td></tr>
           </tbody>
         </table>
 
-        <h3 class="cli-name"><code>node js/bin/scramble.js</code>, decode (cover text to bits)</h3>
+        <h3 class="cli-name"><code>node js/bin/scramble.js</code>, decode (cover story to bits)</h3>
         <table class="cli-table">
           <thead>
             <tr><th>Flag</th><th>Type</th><th>Default</th><th>Description</th></tr>
@@ -1541,130 +1286,80 @@
             <tr><th>Subcommand</th><th>Inputs</th><th>Output</th></tr>
           </thead>
           <tbody>
-            <tr><td><code>listword [--counts] &lt;text-file&gt;</code></td><td>raw text</td><td>unique words on stdout; with <code>--counts</code>, <code>count&#x21e5;word</code> sorted by frequency.</td></tr>
+            <tr><td><code>listword [--counts] &lt;text-file&gt;</code></td><td>raw text</td><td>unique words on stdout. With <code>--counts</code>, <code>count&#x21e5;word</code> sorted by frequency.</td></tr>
             <tr><td><code>txt2dct &lt;type=file&gt; [...]</code></td><td>one word-list per type</td><td>TWLIST (<code>type&#x21e5;word</code> per line) on stdout.</td></tr>
             <tr><td><code>sortdct &lt;twlist-file&gt;</code></td><td>TWLIST</td><td>MTWLIST on stdout. Sorts and merges duplicate words into the same Huffman code (preserves the one-word-one-code invariant).</td></tr>
             <tr><td><code>dct2mstr [--name=NAME] &lt;mtwlist-file&gt;</code></td><td>MTWLIST</td><td>Final dictionary JSON on stdout.</td></tr>
             <tr><td><code>build --name=NAME --out=FILE &lt;type=file&gt; [...]</code></td><td>one word-list per type</td><td>Writes the final dictionary JSON to <code>--out</code>. One-line stats summary on stderr.</td></tr>
           </tbody>
         </table>
-      </section>
 
-      <section id="claude-corpora">
-        <h2>19. Claude-authored corpora and dictionaries</h2>
+        <h3 class="cli-name">Cover post-processor</h3>
         <p>
-          Three Claude-authored corpora were drafted section by
-          section across multiple sessions: <em>claude-magical</em>
-          (medieval bestiary register), <em>claude-tasting</em>
-          (sommelier and tea-master notes),
-          <em>claude-oratory</em> (civic ceremonial register).
-          Each section was authored against an explicit voice
-          criterion (pattern-rich shapes, self-contained at
-          sentence and paragraph level, drone-friendly, register
-          survives a bundled-vocabulary swap), dropped into
-          <code>fixture-src/texts/claude-&lt;name&gt;-NN.txt</code>,
-          then concatenated and run through
-          <code>build-corpus-dict.js</code> and
-          <code>build-model-table.js</code>. The result is six new
-          artifacts: three dicts and three model tables.
+          Two standalone transforms sit outside the encode/decode core.
+          <code>node js/bin/cover-wrap.js</code> escapes a cover story and
+          applies a comma-separated stack of format and envelope layers
+          (<code>--layers=html,gzip</code>), and
+          <code>node js/bin/cover-unwrap.js</code> reverses it,
+          auto-detecting and stripping each layer at the head of the stream
+          until the bare cover remains. Both read stdin and write stdout.
         </p>
-        <p>
-          Model-table size at about 2,700 unique sentence shapes
-          per corpus is large enough to feel non-repetitive on
-          typical secrets, while small enough that the encoder
-          reaches every shape. Adding more sections shrinks that
-          ratio without adding new style range, which is why the
-          corpora stopped where they did.
-        </p>
-      </section>
 
-      <section id="future-directions">
-        <h2>20. Future directions</h2>
+        <h3 class="cli-name">Build pipeline (<code>tools/</code>)</h3>
         <p>
-          Several items previously planned as future work have
-          since landed. They are covered in the appropriate
-          section rather than re-described here:
+          The shipped fixtures are produced by a set of build tools that
+          read byos.json card specs from <code>tools/byos/</code> and emit
+          gzipped artifacts under <code>fixtures/</code>.
+          <code>build-all-fixtures.js</code> rebuilds everything in one
+          idempotent pass. The rest are the individual stages it
+          orchestrates:
         </p>
         <ul class="notes-list">
-          <li>
-            <strong>More corpora and style packs, landed.</strong>
-            The three Claude-authored corpora (§19) plus ~15
-            Project Gutenberg packs (Aesop, Frankenstein, Huck Finn,
-            JFK speeches, Leaves of Grass, Moby Dick, Origin of
-            Species, Pride and Prejudice, Shakespeare, Sherlock
-            Holmes, Tale of Two Cities, texting-teen, Walden, War of
-            the Worlds, Wizard of Oz) ship as built-in cards.
-          </li>
-          <li>
-            <strong>External word-frequency sources, landed.</strong>
-            The freq-source design in
-            <code>docs/research-notes.md</code> §11 is implemented:
-            <code>tools/build-freq-fixtures.js</code> emits pruned
-            per-source fixtures (Norvig, Google Books 1-grams,
-            corpus-derived), and the Build-Your-Own-Style modal
-            exposes a frequency-table picker for session-base dicts.
-            Open decisions in §11.9 remain.
-          </li>
-          <li>
-            <strong>Browser-based research toolkit, landed.</strong>
-            The Build-Your-Own-Style panel covers upload-your-own-
-            corpus, upload-your-own-TWLIST, source / augmentation /
-            frequency-source selection, and byos-spec export/import.
-            <code>localStorage</code> is used only for ephemeral UI
-            state. Secrets and generated covers never persist.
-          </li>
-          <li>
-            <strong>Capability-bounded write surface, codified.</strong>
-            What was sketched as a "security flag" is now structural:
-            every public page carries a CSP with Trusted Types
-            (<code>require-trusted-types-for 'script'</code>), no
-            user-supplied content reaches the DOM as markup, and no
-            secret or generated cover is persisted to cookies /
-            storage / IndexedDB. A future local-node-service write-
-            back path inherits that stance by default.
-          </li>
-          <li>
-            <strong>Worker pool, SAB-resident dicts, and the SW save-stream, landed.</strong>
-            Covered in §11 and §12.
-          </li>
+          <li><code>build-base-dict.js</code> and
+            <code>build-corpus-dict.js</code> build a flat-style dictionary, or
+            one whose vocabulary is restricted to a sample text's own
+            words.</li>
+          <li><code>build-model-table.js</code> builds the sentence-model table
+            for a sample-text card.</li>
+          <li><code>build-twlist-fixtures.js</code> and
+            <code>build-freq-fixtures.js</code> produce the per-source TW-list and
+            word-frequency fixtures for session-base dictionaries.</li>
+          <li><code>build-confusables-map.js</code> and
+            <code>build-font.js</code> refresh the committed confusables
+            table and bundled font from their raw sources (no-ops until a
+            Unicode or font bump).</li>
+          <li>The wordlist sources feeding the above are
+            <code>build-master-wlist.js</code>,
+            <code>build-corpus-wlist.js</code>,
+            <code>build-twlist-wlist.js</code>,
+            <code>build-englex-wlist.js</code>,
+            <code>build-redacted-wlist.js</code>,
+            <code>build-rewriter-fixtures.js</code>,
+            <code>build-monotyped-models.js</code>, and
+            <code>run-impkimmo2026.js</code>.</li>
         </ul>
-
         <p>
-          <strong>Still future.</strong> What remains genuinely open:
+          The remaining scripts under <code>tools/</code> are not feature
+          CLIs. <code>sab.js</code> and <code>sab-fixtures-guard.js</code>
+          guard the SAB-packed fixtures. The three
+          <code>paper-figure-*.js</code> scripts regenerate this paper's
+          figures and tables. <code>test-suite-failures.js</code> and
+          <code>test-suite-hang.js</code> triage the test run.
+          <code>byos-build-helpers.js</code> and
+          <code>load-corpus.js</code> are imported by the builders rather
+          than run directly.
         </p>
-        <ol class="notes-list">
-          <li>
-            <strong>In-page Project Gutenberg fetch.</strong> Today,
-            adding a built-in style pack means dropping the corpus
-            into the repo and rebuilding fixtures. An in-page
-            fetch-and-build path would let users pull a PG text and
-            build a session dictionary without round-tripping
-            through the repo. The fetch could go through the PG API
-            or a mirror, and would carry a license and attribution
-            surface in either case.
-          </li>
-          <li>
-            <strong>Synonym and antonym definition axes.</strong>
-            Master already carries PC-KIMMO morphological tags and
-            rhyme tags, which the grammar layer can address by
-            type. Synonym / antonym sets are the unfinished
-            axis, once present, grammars can express
-            synonym-substitution covers and antonym-pair shapes that
-            the 1995 system could not.
-          </li>
-          <li>
-            <strong>Local-node-service write-back for self-hosters.</strong>
-            A capability-bounded sidecar so a self-hosted instance
-            can write builds and exports to a single allowed
-            directory under explicit per-write confirmation. Out of
-            scope for the page itself, sketched here so the
-            architectural seam stays visible.
-          </li>
-        </ol>
+        <p>
+          The full Node test suite runs with
+          <code>node --test 'tests/node/**/*.test.js'</code>, and a static
+          dev server (the one non-Node tool,
+          <code>tools/serve.sh</code>) serves the browser UI and test pages
+          over HTTP.
+        </p>
       </section>
 
       <section id="bibliography">
-        <h2>21. Bibliography</h2>
+        <h2>9.3 Bibliography</h2>
 
         <p class="bib-note">
           The Springer LNCS papers below are publisher-copyrighted. We
@@ -1678,7 +1373,7 @@
           Zipf, G.K. <em>Human Behavior and the Principle of Least
           Effort.</em> Addison-Wesley, 1949.
           The empirical word-frequency power-law that
-          frequency-weighted Huffman coding (§3) exploits and that
+          frequency-weighted Huffman coding (§7.1) exploits and that
           any n-gram perplexity model implicitly assumes.
         </p>
 
@@ -1704,6 +1399,32 @@
           scoring tractable on finite training corpora.
         </p>
 
+        <p class="bib-entry" id="bib-maximal-munch">
+          <span class="bib-id">[Maximal munch]</span>
+          "Maximal munch." <em>Wikipedia.</em>
+          <a href="https://en.wikipedia.org/wiki/Maximal_munch" rel="noopener" target="_blank">en.wikipedia.org/wiki/Maximal_munch</a>.
+          The longest-match lexing rule the phrase decoder follows,
+          fusing the longest run of words that forms a known phrase before
+          falling back to single words.
+        </p>
+
+        <p class="bib-entry" id="bib-ascii">
+          <span class="bib-id">[ASCII]</span>
+          "ASCII." <em>Wikipedia.</em>
+          <a href="https://en.wikipedia.org/wiki/ASCII" rel="noopener" target="_blank">en.wikipedia.org/wiki/ASCII</a>.
+          The American Standard Code for Information Interchange, the
+          English-only 7-bit character set the original version was limited
+          to.
+        </p>
+
+        <p class="bib-entry" id="bib-utf8">
+          <span class="bib-id">[UTF-8]</span>
+          "UTF-8." <em>Wikipedia.</em>
+          <a href="https://en.wikipedia.org/wiki/UTF-8" rel="noopener" target="_blank">en.wikipedia.org/wiki/UTF-8</a>.
+          The variable-width Unicode encoding the new version uses end to
+          end, covering every script and emoji.
+        </p>
+
         <p class="bib-entry" id="bib-chapman-davida-1997">
           <span class="bib-id">[Chapman &amp; Davida 1997]</span>
           Chapman, M. and Davida, G. "Hiding the Hidden: A Software
@@ -1725,7 +1446,7 @@
           pp. 156&ndash;165. Lecture Notes in Computer Science, vol.
           2200. Springer, 2001.
           <a href="https://doi.org/10.1007/3-540-45439-X_11" rel="noopener" target="_blank">DOI: 10.1007/3-540-45439-X_11</a>.
-          Scaling NiceText to large corpora and automated dictionary
+          Scaling NiceText to large sample texts and automated dictionary
           construction.
         </p>
 
@@ -1737,7 +1458,7 @@
           Bristol, October 2002, pp. 276&ndash;287. Lecture Notes in
           Computer Science, vol. 2437. Springer, 2002.
           <a href="https://doi.org/10.1007/3-540-45831-X_19" rel="noopener" target="_blank">DOI: 10.1007/3-540-45831-X_19</a>.
-          The deniability framing that motivates §3 (Huffman coding
+          The deniability framing that motivates §7.1 (Huffman coding
           within types).
         </p>
 
