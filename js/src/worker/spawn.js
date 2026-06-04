@@ -38,13 +38,79 @@ function trustWorkerUrl(url) {
   return workerUrlPolicy.createScriptURL(url.toString());
 }
 
+// Hard cap on how long we'll wait for a freshly-spawned worker to
+// signal {type:'ready'}. Long enough to absorb cold-start + module
+// graph fetch over a slow network (the SW-mediated case can spend a
+// few seconds on first load); short enough to surface a real hang
+// rather than wedging the caller forever.
+const WORKER_READY_TIMEOUT_MS = 15000;
+
+// Wait for the spawned worker to post {type:'ready'} as its first
+// message. Every worker entry file MUST do this as the last statement
+// after its top-level imports/init, so the parent can be sure the
+// worker is fully wired before postMessage'ing real work.
+//
+// Why this exists: on iOS Safari, when multiple workers spawn
+// concurrently and each pulls a deep module graph through the Service
+// Worker, one or more of them silently stall. Forcing each worker to
+// announce ready before createWorker resolves serializes module load
+// across concurrent spawns and eliminates the race.
+function awaitWorkerReady(w, isBrowser) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error(`worker did not signal ready within ${WORKER_READY_TIMEOUT_MS}ms`));
+    }, WORKER_READY_TIMEOUT_MS);
+    let onMsg, onErr, cleanup;
+    if (isBrowser) {
+      onMsg = (e) => {
+        if (e && e.data && e.data.type === 'ready') {
+          cleanup();
+          resolve();
+        }
+      };
+      onErr = (e) => {
+        cleanup();
+        reject(e && e.error ? e.error : new Error('worker error before ready'));
+      };
+      cleanup = () => {
+        clearTimeout(timer);
+        w.removeEventListener('message', onMsg);
+        w.removeEventListener('error', onErr);
+      };
+      w.addEventListener('message', onMsg);
+      w.addEventListener('error', onErr);
+    } else {
+      onMsg = (data) => {
+        if (data && data.type === 'ready') {
+          cleanup();
+          resolve();
+        }
+      };
+      onErr = (err) => {
+        cleanup();
+        reject(err || new Error('worker error before ready'));
+      };
+      cleanup = () => {
+        clearTimeout(timer);
+        w.off('message', onMsg);
+        w.off('error', onErr);
+      };
+      w.on('message', onMsg);
+      w.on('error', onErr);
+    }
+  });
+}
+
 export async function createWorker(url) {
   if (HAS_NATIVE_WORKER) {
     const w = new Worker(trustWorkerUrl(url), { type: 'module' });
+    await awaitWorkerReady(w, true);
     return wrapBrowserWorker(w);
   }
   const { Worker: NodeWorker } = await import('node:worker_threads');
   const w = new NodeWorker(url);
+  await awaitWorkerReady(w, false);
   return wrapNodeWorker(w);
 }
 

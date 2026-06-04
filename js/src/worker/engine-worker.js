@@ -148,3 +148,8 @@ async function handleDecode(msg) {
   const output = portWritable(msg.outputPort, { transfer: true });
   await decode(input, output, dict, { onProgress });
 }
+
+// Ready protocol (see js/src/worker/spawn.js). Last statement after
+// all imports + handler registration; createWorker() awaits this
+// before resolving. Forgetting this line will hang createWorker().
+parentPort.postMessage({ type: 'ready' });

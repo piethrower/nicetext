@@ -33,3 +33,7 @@ parentPort.onMessage((msg) => {
   }
   parentPort.postMessage({ type: 'error', reason: `unknown msg type ${msg.type}` });
 });
+
+// Ready protocol (see js/src/worker/spawn.js). Last statement after
+// handler registration; createWorker() awaits this before resolving.
+parentPort.postMessage({ type: 'ready' });

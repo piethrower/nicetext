@@ -239,3 +239,10 @@ parentPort.onMessage(async (msg) => {
     });
   }
 });
+
+// Ready protocol (see js/src/worker/spawn.js). Posted as the last
+// statement after all top-level imports + handler registration so the
+// parent's createWorker() Promise resolves only after this worker is
+// fully wired and capable of handling real jobs. Forgetting this line
+// will cause createWorker() to time out after 15 s.
+parentPort.postMessage({ type: 'ready' });

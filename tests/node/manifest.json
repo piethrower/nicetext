@@ -67,7 +67,8 @@
     "typehash.test.js",
     "worker-shim.test.js",
     "worker-jobs.test.js",
-    "worker-streams.test.js"
+    "worker-streams.test.js",
+    "worker-ready-protocol.test.js"
   ],
   "fixtures": [
     "../../fixtures/cards.data.js",
@@ -81,6 +82,13 @@
     "../../fixtures/xanax.rewriter.sab.gz",
     "../../grammars/mit-names.def",
     "../../tools/byos/random.byos.json",
-    "../../tools/byos/aesop.byos.json"
+    "../../tools/byos/aesop.byos.json",
+    "../../js/src/worker/resource-worker.js",
+    "../../js/src/eve/job-worker-entry.js",
+    "../../js/src/worker/aug-worker.js",
+    "../../js/src/worker/engine-worker.js",
+    "../../js/src/worker/preclean-worker.js",
+    "../../js/src/worker/build-session-worker.js",
+    "../../js/eve-worker.js"
   ]
 }
