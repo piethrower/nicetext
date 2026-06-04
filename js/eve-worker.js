@@ -126,3 +126,10 @@ function stemForCorpus(corpusPath) {
   const base = corpusPath.split('/').pop();
   return base.replace(/\*/g, '').replace(/\.txt$/i, '');
 }
+
+// Ready protocol (see js/src/worker/spawn.js). Last statement after
+// all imports + handler registration; createWorker() awaits this
+// before resolving. This worker uses self.postMessage directly
+// (no parent-port shim), so the ready signal goes through self.
+// Forgetting this line will hang createWorker().
+self.postMessage({ type: 'ready' });
