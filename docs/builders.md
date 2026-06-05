@@ -75,11 +75,13 @@ discipline lives in `tools/sab-fixtures-guard.js`.
   story.style='flat'. Replaces the pre-byos `build-master-dict.js`
   and `build-mit-dict.js`. Source names map 1:1 to twlists.
 - `tools/build-corpus-dict.js <byos.json>`: builds a distribution
-  dictionary D' = master ∩ vocab(corpus) for any byos with a non-flat
-  story. Master TWLIST is loaded via `tools/byos/master.byos.json`'s
-  base block (the canonical base for every corpus dict). Corpus path
-  comes from byos.build.corpus. Self-defined `(word, word)` entries
-  are emitted for vocab words not covered by master.
+  dictionary D' = base ∩ vocab(corpus) for any byos with a non-flat
+  story. The base TWLIST is loaded from the byos's own `base` block via
+  `loadBaseTwlist(byos)` (each corpus byos names its own base sources,
+  typically the master set, but there is no shared canonical
+  `master.byos.json` file driving this). Corpus path comes from
+  byos.build.corpus. Self-defined `(word, word)` entries are emitted
+  for vocab words not covered by the base.
 - `tools/build-model-table.js <byos.json>`: emits the native
   `fixtures/{byos.name}.model.json.gz` by tokenizing byos.build.corpus
   against the byos's already-built corpus dict. byos.story.sentence
@@ -87,12 +89,14 @@ discipline lives in `tools/sab-fixtures-guard.js`.
   `sequential`→dedupe=false).
 - `tools/build-all-fixtures.js`: orchestrator. Iterates every byos in
   `tools/byos/`, dispatches to the right per-card builder, then emits
-  `fixtures/cards.json` (the runtime nickname registry).
+  `fixtures/cards.data.js` (the runtime nickname registry).
 - Shared algorithm helpers in `js/src/builder/sources.js`:
   `parseTwlistLines`, `expandMitlist` (bare flatten only; the
   pos/posplr possessive augmentor was vestigial and is gone),
-  `expandNumeric`, `applyVowelAugmentation`, `restrictToVocab`.
-  Browser-safe.
+  `expandNumeric`, `restrictToVocab`, `restrictToVocabAsync`.
+  Browser-safe. (The begins-with-a-vowel augmentation is a retired
+  artifact, no longer wired into the byos flow, and is not a
+  sources.js helper.)
 - Shared Node-side helpers in `tools/byos-build-helpers.js`:
   `loadByosFile`, `loadFixtureTwlist`, `loadBaseTwlist`, `buildBaseDict`,
   `reportDictStats`.
@@ -102,14 +106,19 @@ discipline lives in `tools/sab-fixtures-guard.js`.
 `buildDictionary(mtwlist, opts)` (in `js/src/builder/dct2mstr.js`) is
 called from three sites with two different `opts` shapes:
 
-- `tools/build-base-dict.js` (via `byos-build-helpers.buildBaseDict`):
-  `{ name: byos.name, frequencies: null, tieBreak: byos.base.tieBreak }`.
-  Phase 1: byos.base.frequencies is informational metadata; Phase 2 will
-  wire it to load named freq fixtures.
+- `js/bin/gendict.js`: `{ name: flags.name ?? 'unnamed' }`.
+- `tools/byos-build-helpers.js` (in `buildBaseDict`, which
+  `tools/build-base-dict.js` calls): `{ name: byos.name, frequencies:
+  null, tieBreak: byos.base.tieBreak }`. Phase 1: byos.base.frequencies
+  is informational metadata. Phase 2 will wire it to load named freq
+  fixtures.
 - `tools/build-corpus-dict.js`: `{ name, frequencies: corpusWordCounts }`.
-- `js/src/worker/build-session-worker.js` (BYOS): passes `frequencies`
-  built from the user's checked freq sources or the corpus
-  word-counts.
+
+The session worker (`js/src/worker/build-session-worker.js`, BYOS) does
+**not** call `buildDictionary`. It calls the yielding
+`buildDictionaryAsync` variant (same return shape, cooperatively
+chunked for the browser), passing `frequencies` built from the user's
+checked freq sources or the corpus word-counts.
 
 **Invariant: every new option in `buildDictionary` must default to
 the existing behavior, and consumers opt in explicitly.**
@@ -131,15 +140,19 @@ tools don't, the engine handles both paths from one code surface.
 
 ## Sentence-model-table tool
 
-- `tools/build-model-table.js <corpus.txt> <dict.json> <out.json>`,
-  uses `js/src/builder/genmodel.js` to walk the corpus, tokenize via
-  the shared lexer, and emit one model per sentence. Model tokens are
-  either type-indices (integers into `typeNames[]`) or punct strings.
+- `tools/build-model-table.js <corpus-byos.json>` (byos-driven,
+  single arg), uses `js/src/builder/genmodel.js` to walk the corpus,
+  tokenize via the shared lexer, and emit one model per sentence. Model
+  tokens are either type-indices (integers into `typeNames[]`) or punct
+  strings.
 
-`tools/build-model-table.js` accepts `--ordered` to skip dedupe, every
-sentence becomes its own entry in document order with weight=1,
-enabling true sequential replay (vs. the dedupe-then-replay-by-frequency
-approximation). Used by `story.sentence=sequential` cards.
+The dedupe behavior is driven by `byos.story.sentence`, not a CLI flag.
+`random` sets dedupe=true (weighted-random replay, sentences collapse
+to unique shapes carrying a weight). `sequential` sets dedupe=false, so
+every sentence becomes its own entry in document order, enabling true
+sequential replay (vs. the dedupe-then-replay-by-frequency
+approximation). There is no positional-args form and no `--ordered`
+flag.
 
 Tables use a compact token format on disk: each token is either a
 number (typeIndex into the dict) or a string (punct value).
@@ -179,13 +192,21 @@ carrying 0 bits). The thesis acknowledges this tradeoff (Ch. 4.3-4.4).
 Future work: optional `--sources=` flag on the master builder to let
 users dial in the kimmo-only subset for higher density.
 
-## GUTENBERG_END handling (fixed)
+## GUTENBERG handling (fixed)
 
-Project Gutenberg files start with a long legal notice ending in a
-`*END*THE SMALL PRINT! ... *END*` marker. The lexer recognizes this as
-a `GUTENBERG_END` token. `listword` discards everything counted before
-the marker so corpora vocabularies reflect actual book content, not
-the boilerplate. Initially this was reversed (we were stopping at the
+Project Gutenberg files wrap the book in boilerplate. The lexer
+(`js/src/lexer.js`) recognizes three markers:
+
+- `GUTENBERG_START` and `GUTENBERG_END`: the modern banners
+  `*** START OF (THE|THIS) PROJECT GUTENBERG ... ***` and
+  `*** END OF (THE|THIS) PROJECT GUTENBERG ... ***`, which bracket the
+  actual book content.
+- `GUTENBERG_END_LEGACY`: the older `*END*THE SMALL PRINT! ... *END*`
+  marker, the only one present in pre-modern etexts.
+
+Counting keeps only the content between the start and the end markers
+so corpora vocabularies reflect actual book content, not the
+boilerplate. Initially this was reversed (we were stopping at the
 marker, missing the entire book), fixed.
 
 ## Reference build artifacts
@@ -195,6 +216,14 @@ Dictionaries (built by `tools/build-base-dict.js` +
 dict`). Shipped filename = `fixtures/<getBYOSID>.dict.sab.gz`; for
 canonical premade cards, `getBYOSID` resolves to the rev-suffixed
 short nickname (e.g. `master-1`, `aesop-1`):
+
+> **Snapshot, not a contract.** The type/word counts below predate the
+> curated-corpus rebuild (corpora now build from `-curated.txt` sources)
+> and are internally inconsistent across this section. They are kept as
+> rough orientation only. For a labeled, reproducible figure use the
+> paper's Table 1 in `whats-new.html`: a master-style base dict of
+> **149,300 words / 52,128 types (historical snapshot)**. Re-derive from
+> a fresh build rather than trusting any number here.
 
 - `fixtures/mit-1.dict.sab.gz`: 25 types, 20K words, ~12 bits/word. Good for grammar tests.
 - `fixtures/master-1.dict.sab.gz`: full master, 51K types, 156K words, ~6.6 bits/word.
@@ -218,6 +247,7 @@ model`):
 - `fixtures/claude-tasting-1.model.sab.gz` (3.9K unique shapes (avg model length 17.7) short ritualized notes)
 - `fixtures/claude-oratory-1.model.sab.gz` (2.7K unique shapes from 2.7K sentences (avg model length 21.1) sweeping ceremonial cadence)
 
-Some corpus stats above slightly precede the worker arc, current
-master.dict.json is closer to 52,500 types, 190,950 words. The exact numbers
-shift as corpora are rebuilt; don't treat them as hard contracts.
+As flagged at the top of this section, the numbers above are a
+pre-curated-rebuild snapshot, not a contract. The exact counts shift
+every time corpora are rebuilt from their `-curated.txt` sources;
+re-derive from a fresh build when you need real figures.

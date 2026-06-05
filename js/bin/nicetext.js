@@ -29,9 +29,9 @@ function parseFlags(argv) {
 }
 
 function usage() {
-  process.stderr.write(`usage: nicetext -d <dict.json> -i <input> [-g <grammar.def>] [-o <output>] [--seed=N] [--stream-seed=N] [--max-length=N] [--no-validate]
+  process.stderr.write(`usage: nicetext -d <dict> -i <input> [-g <grammar.def>] [-o <output>] [--seed=N] [--stream-seed=N] [--max-length=N] [--no-validate]
 
-  -d, --dict     dictionary JSON (built by gendict)
+  -d, --dict     dictionary file (.dict.sab.gz or .dict.json, built by gendict)
   -i, --in       input file (any binary)
   -g, --grammar  CFG grammar file (.def). Without -g, falls back to a weighted random type stream.
   -o, --out      output file (default: stdout)

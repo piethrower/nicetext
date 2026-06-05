@@ -1,8 +1,8 @@
 # SAB Binary Format for Shared Read-Only Artifacts
 
-**Status:** locked-in. Six resource categories pack and unpack
+**Status:** locked-in. Eight resource categories pack and unpack
 through `js/src/sab.js` (`dict`, `model`, `wlist`, `twlist`, `freq`,
-`emoji-cldr`); every shipped fixture in `/fixtures` is a zero-parse
+`emoji-cldr`, `monotyped-model`, `rewriter`); every shipped fixture in `/fixtures` is a zero-parse
 `.sab.gz`. Anchor tests in `tests/node/{dict,modeltable,grammar}-sab.test.js`
 pin down the per-format layouts; `tests/node/sab.test.js` exercises
 each category's pack + unpack round-trip; `tests/node/sab-fixtures-guard.test.js`
@@ -27,6 +27,10 @@ RAM**. The shipped on-disk form is now SAB-shaped:
   counts)
 - `fixtures/<id>.emoji-cldr.sab.gz`: emoji → keyword-array map
   (NTCM)
+- `fixtures/<id>.monotyped-model.sab.gz`: per-corpus monotyped-model
+  precompute for Eve (NTMM, MM + collapsed-MM pools)
+- `fixtures/<id>.rewriter.sab.gz`: per-rewriter apply-time lookup
+  map (NTRW, `key → value-set`)
 
 Plus CFG grammars (`/grammars/*.def`), packed to SAB at runtime
 when loaded (no shipped `.sab.gz` for grammars yet, they remain
@@ -74,8 +78,9 @@ the SAB-fixtures arc realized it.
 
 The build pipeline (`tools/build-all-fixtures.js`) enforces the
 discipline: a final step asserts `/fixtures` contains only
-`.sab.gz`, raw corpora (`*.txt.gz`), and three allowlisted runtime
-metadata files. Any stray non-SAB fixture is a red build. See
+`.sab.gz`, raw corpora (`*.txt.gz`), `.ttf` font files (copied from
+`fixture-src/font/cooked/`), and four allowlisted runtime metadata
+files. Any stray non-SAB fixture is a red build. See
 `tools/sab-fixtures-guard.js`.
 
 ### 3. Pack at build time, wrap at load time
@@ -100,7 +105,7 @@ the resource-loader cache under a `pageLifeSpan:<byosId>` key, so
 the encoder / decoder sees it through the same `loadResource` API
 as any shipped fixture.
 
-## The six resource categories
+## The eight resource categories
 
 Single-source-of-truth registry is `SAB_RESOURCE_CATEGORIES` in `js/src/sab.js`.
 Each category has a distinct on-the-wire format and a corresponding
@@ -116,6 +121,8 @@ pack <category>`) and the runtime loader
 | `twlist`          | NTEN  | `js/src/builder/entries-sab.js`            | `.twlist.tsv.gz`       | BYOS session-base codebook             |
 | `freq`            | NTFQ  | `js/src/builder/freq-pack.js`              | `.freq.tsv.gz`         | BYOS Huffman re-weighting              |
 | `emoji-cldr`      | NTCM  | `js/src/builder/cldr-map-pack.js`          | `.emoji-cldr.json.gz`  | emoji aug (CLDR keyword pivots)        |
+| `monotyped-model` | NTMM  | `js/src/eve/monotyped-model-sab.js`        | `.monotyped-model.json.gz` | Eve MonoTypedModelCheck detector   |
+| `rewriter`        | NTRW  | `js/src/builder/rewriter-sab.js`           | `.rewriter.json.gz`    | cover-transforms rewriter apply-time lookup |
 
 ### Format discipline (every category)
 
@@ -276,13 +283,18 @@ on every reference. Strings ≤ 65535 bytes (the packer rejects longer).
 
 Actual `dict.sab.byteLength` from a fresh pack:
 
-| Dict | JSON disk | SAB packed | Types | Words | Pack time |
+| Dict | JSON intermediate | SAB packed | Types | Words | Pack time |
 |---|---|---|---|---|---|
 | jfk | 50 KB | 0.07 MB | 518 | 528 | 5 ms |
 | wizoz | 0.46 MB | 0.38 MB | 2,813 | 2,971 | 23 ms |
 | aesop | 0.62 MB | 0.70 MB | 5,145 | 5,521 | 46 ms |
 | mit | 2.5 MB | 1.20 MB | 37 | 25,840 | 168 ms |
 | master | 16 MB | 13.52 MB | 52,500 | 190,950 | 1.6 s |
+
+The "JSON intermediate" column is the size of the transient
+`.dict.json.gz` build-time native, sized here for context only. It is
+not an on-disk shipped form: `build-all-fixtures` deletes it after
+packing, and only the `.dict.sab.gz` ships.
 
 The master pack-time of ~1.6 s is dominated by tree construction
 plus byWord sorting. Pack happens once per dict per page session and
@@ -389,11 +401,15 @@ offset. Strings ≤ 65535 bytes (packer rejects longer).
 
 ### Measured sizes
 
-| Table | JSON disk | SAB packed | T' | Models | Pack time |
+| Table | JSON intermediate | SAB packed | T' | Models | Pack time |
 |---|---|---|---|---|---|
 | jfk | 43 KB | 0.04 MB | 518 | 47 | 4 ms |
 | aesop | 0.62 MB | 0.57 MB | 5,145 | 1,936 | 29 ms |
 | shakespeare | 9.2 MB | 7.03 MB | 22,931 | 71,867 | 219 ms |
+
+As with the dict table, the "JSON intermediate" column sizes the
+transient `.model.json.gz` build-time native, not a shipped on-disk
+form. Only the `.model.sab.gz` ships.
 
 ### Stream creation
 
@@ -800,9 +816,14 @@ and it owns the SAB exclusively until pack completes.
 
 ## Design journey: raof to Map to SAB
 
-Paper-bound material. This section is written with §7 of
-`whats-new.html` ("the modern JS port") in mind. The
-story is the technical decision arc, fairly accounted.
+Paper-bound material, and the authoritative home for this narrative:
+`docs/architecture-overview.md` points here rather than retelling it.
+This section is written with §7 of `whats-new.html` ("the modern JS
+port") in mind. The story is the technical decision arc, fairly
+accounted. For the labeled Map-vs-SAB measurement snapshot (startup,
+retained memory, lookup throughput), see Table 1 in §7.4 of
+`whats-new.html`; the numbers below are cited from that snapshot, not
+re-measured here.
 
 ### 1995: raof and friends
 
@@ -834,8 +855,9 @@ not by a B-tree on disk.
 
 This was the right call for a single-threaded utility. The dict lives
 in one process, in one Map, accessed by one event loop. Lookup is
-`Map.get`. Memory is fine: 30 MB parsed master is nothing on modern
-hardware.
+`Map.get`. Memory is fine: a master-style base dict is about 13.8 MB
+of Map heap per the §7.4 Table 1 snapshot, nothing on modern hardware
+for a single process.
 
 ### 2026 part two: SAB
 

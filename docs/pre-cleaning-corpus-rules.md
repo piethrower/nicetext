@@ -2,8 +2,9 @@
 
 Standalone preprocessing pass over corpus text before `genmodel` and
 `listword` (frequency counter) see it. Lives in `js/src/builder/`
-as a single function callable by both. Runs every rule each
-iteration, loops until the text is idempotent (no rule changes
+as a single function callable by both. Splits the text into
+line-bounded chunks, runs every rule on each chunk, rejoins, and
+loops the whole set until the text is idempotent (no rule changes
 anything). The loop is insurance against rules whose output triggers
 another rule's condition, not strictly required for today's rules
 but cheap and future-proof.
@@ -17,6 +18,7 @@ weighed but is always the tiebreaker, never the deciding factor.
 
 | # | Rule | Motivation | Impact on model | Action |
 |---|---|---|---|---|
+| 0 | Line endings → LF | CRLF (Windows) and bare CR (classic Mac) endings: `\r` survives Rule 1 (it's lexer-significant whitespace in the EXCEPT list), rides into cover via WHITESPACE tokens, then browser textareas strip it on `.value`, causing a stats/textarea mismatch and larger models for no benefit. Runs FIRST so every later rule and the lexer see one canonical newline. | Invisible | Replace CRLF pairs and bare CR with LF |
 | 1 | Non-printable bytes → single space | Strips control / format / PUA / unassigned bytes. Supersedes earlier ideas of separate BOM-strip and ASCII-control rules. | Invisible | Replace any run of non-printable bytes with one U+0020 space |
 | 2 | Curly quotes → straight ASCII | Smart `'`/`"` (U+2018/2019/201C/201D) don't match WORD_RE's apostrophe-suffix; words containing them split unpredictably | More believable: matches plain-ASCII prose; no beacon | Replace U+2018/2019 with `'`, U+201C/201D with `"` |
 | 3 | NBSP / thin spaces → regular space | Non-breaking space and thin/figure spaces don't match the lexer's `\s` class; they become PUNCT_CATCHALL tokens | Invisible | Replace U+00A0, U+2009, U+200A, U+202F, U+205F, U+3000 with U+0020 |
@@ -27,7 +29,7 @@ weighed but is always the tiebreaker, never the deciding factor.
 
 ## Status
 
-All seven rules are implemented in
+All eight rules are implemented in
 `js/src/builder/precleanCorpus.js` and called from
 `js/src/builder/genmodel.js` and `js/src/builder/listword.js`.
 
@@ -84,13 +86,26 @@ deliberately doesn't try to know about lexer caps.
 
 ## Loop and idempotence
 
-`precleanCorpus` applies every rule once per pass and re-runs the
-full set until a pass produces no change (`text === prev` exits
-the loop). JS string `===` on the largest corpus we ship (Shakespeare
-~5.4 MiB) is a single C++-level memcmp, cheaper than any
-per-rule short-circuit check. Build-time only, never on the
-encode/decode hot path. Expected pass count for the current
-rules: 2 (one productive pass plus one confirming pass).
+Within a pass, `precleanCorpus` splits the input into line-bounded
+chunks (`chunkPrecleanInput`, ~512 KB target, 2 MB hard cap) and runs
+the full rule set on each chunk in turn, then re-joins the processed
+chunks back into one string. The chunking keeps each rule's per-chunk
+regex bounded: it stays clear of Firefox's Irregexp recursion limit on
+multi-MB corpora, and it lets the worker emit one `onProgress` callback
+per chunk so the "Cleaning Corpus" modal keeps updating. All eight
+rules are safe at line boundaries (Rule 0 / Rules 2-5 are per-char;
+Rule 1's non-printable run and Rule 7's numeric chain can't cross `\n`;
+Rule 6's ZWJ at a chunk start sees `\n` as its left neighbor and
+correctly strips).
+
+The whole rejoined string is then compared against the pass input and
+the full set re-runs until a pass produces no change (`text !== prev`
+exits the loop). This idempotence check is still a single whole-string
+`===` (one C++-level memcmp on the rejoined text), not a per-chunk or
+per-rule short-circuit. Build-time only, never on the encode/decode hot
+path. In practice the loop terminates after one productive pass plus
+one confirming no-op pass for the corpora we ship, though the exact
+count depends on the input.
 
 ## Callers
 
@@ -102,8 +117,8 @@ rules: 2 (one productive pass plus one confirming pass).
   forwards the call to `js/src/worker/preclean-worker.js` so the
   UI thread stays responsive on multi-MB corpora (including binary
   files loaded into the BYOS Custom Corpus textarea). Worker posts
-  one `progress` message per rule completion (`{ pass, ruleIndex,
-  ruleCount, chars }`); the main thread surfaces this in the
+  one `progress` message per chunk completion (`{ pass, chunkIndex,
+  chunkCount, chars }`); the main thread surfaces this in the
   "Cleaning Corpus" modal. `precleanCorpusAsync(text, { signal,
   onProgress })` honours the modal's `AbortSignal`, on cancel the
   worker is terminated and the next call respawns it.

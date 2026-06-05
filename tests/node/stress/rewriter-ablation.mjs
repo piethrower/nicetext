@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // rewriter-ablation.mjs: stress sweep for the rewriter / aug
-// interaction that produced the typos round-trip break (see
-// tmp/typos-bug-findings.md). Builds the session artifacts for a
+// interaction that produced the typos round-trip break (augs must run
+// before the rewriter singletons are concatenated). Builds the session artifacts for a
 // fixed "user-shape" byos, then encodes a small secret across the
 // 13-row ablation matrix from probe-bisect3, asserting each row's
 // expected outcome.

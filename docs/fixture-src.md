@@ -4,20 +4,52 @@ Raw text and word-list inputs for the dict and model-table builders.
 Companion to `docs/builders.md`, which describes the tools that
 consume these files and produce `fixtures/*.json.gz` artifacts.
 
-## Corpora copied into ./fixture-src/
+## Corpora in ./fixture-src/texts/
 
-- `texts/jfk.txt` (16 KB): JFK inaugural
-- `texts/aesop.txt` (240 KB): Aesop's Fables
-- `texts/wizoz.txt` (230 KB): Wizard of Oz
-- `twlist/mitlist/{name_male,name_female,name_family,name_other,place}`: pre-tagged word lists from MIT (Bob Baldwin / Matt Bishop / Daniel Klein collection)
-- Shakespeare (5.5 MB uncompressed) skipped to keep repo light; copy from `OG-NiceText-C++/nicetext-1.0/examples/texts/shak/shaks12.txt.gz` if needed.
+Each public-domain corpus ships as a pair: a raw `<name>.txt` (the source
+text as imported) and a `<name>-curated.txt` sibling. The `-curated.txt`
+file is the build input: it carries a `CURATION NOTE` header and has the
+front-matter title block / CONTENTS list trimmed so the corpus-trained
+sentence model captures the body of the work rather than ambient prose.
+The byos `build.corpus` path points at the curated file.
+
+Public-domain literary corpora (raw `.txt` + `-curated.txt` each):
+
+- `aesop` — Aesop's Fables
+- `edward-lear-nonsense` — Edward Lear nonsense verse
+- `frankenstein` — Frankenstein
+- `gilbert-sullivan` — Gilbert & Sullivan librettos
+- `japanese-classical-verse` — Japanese classical verse (in translation)
+- `jfk` — JFK inaugural
+- `moby-dick` — Moby Dick
+- `mother-goose` — Mother Goose rhymes
+- `pride-and-prejudice` — Pride and Prejudice
+- `shakespeare` — Shakespeare (~5.5 MB raw)
+- `shakespeare-sonnets` — Shakespeare's sonnets
+- `sherlock-holmes` — Sherlock Holmes
+- `tale-of-two-cities` — A Tale of Two Cities
+- `walden` — Walden
+- `war-of-the-worlds` — War of the Worlds
+- `wizoz` — Wizard of Oz
+
+Exceptions to the pairing convention:
+
+- `texting-teen{1,2,3}.txt` — three numbered files, no `-curated` sibling; the byos globs `texting-teen*.txt`.
+- The three Claude-authored corpora (`claude-magical`, `claude-tasting`, `claude-oratory`) ship as numbered per-section files plus a concatenated `<name>.txt`, no `-curated` sibling. See below.
+
+Pre-tagged word lists (not corpora) live under `twlist/`, e.g.
+`twlist/mitlist/{name_male,name_female,name_family,name_other,place}`
+from the MIT collection (Bob Baldwin / Matt Bishop / Daniel Klein).
 
 ## Claude-authored corpora
 
 Three large corpora authored by Claude (Anthropic) for use as
-model-table sources. Each is built up section by section across
-multiple sessions, then concatenated and processed via
-`tools/build-corpus-dict.js` + `tools/build-model-table.js`.
+model-table sources. Each was built up section by section across
+multiple sessions, then concatenated into `<name>.txt` and processed via
+`tools/build-corpus-dict.js` + `tools/build-model-table.js`. All three
+are complete: every section file is present on disk, along with the
+concatenated `claude-magical.txt`, `claude-tasting.txt`, and
+`claude-oratory.txt`.
 
 Voice criteria: pattern-rich shapes, self-contained at sentence /
 paragraph level, drone-friendly (no document-level structure
@@ -120,25 +152,30 @@ Structural ingredients (mix freely within each speech):
 - Sweeping close: *"And so, my friends, we go forward..."*
 - Ceremonial declaration: *"I declare this library open", "Let the lamps be lit"*
 
-### Self-driving workflow
+### Authoring drafting workflow (historical)
 
-When a fresh session is asked to *"draft the next corpus section"* (or similar), follow these steps exactly:
+All sections are drafted and checked off; this records how they were
+produced. Each section was written as a self-contained file
+`fixture-src/texts/claude-<name>-NN.txt` (NN zero-padded), 3,000–5,000
+words in the matching voice, drawing on that corpus's structural
+ingredients, with no document-level frame so each entry stands alone.
+The per-section files were then concatenated into `<name>.txt`.
 
-1. Find the first `[ ]` (unchecked) item in the three section lists above. Scan top to bottom: magical-creatures first, then tasting, then oratory.
-2. Note its number NN, name, and parent corpus (`claude-magical` / `claude-tasting` / `claude-oratory`). Re-read the matching structural-ingredients list above.
-3. Produce **3,000–5,000 words** in the matching voice, drawing on the structural ingredients. Vary opening shapes; avoid repeating any single sentence skeleton more than three or four times. No document-level frame (no greeting / close / chapter arc): each entry self-contained.
-4. Write to `fixture-src/texts/claude-<name>-NN.txt` with NN zero-padded to two digits.
-5. Edit this file: change that line's `[ ]` to `[x]` and append ``, `claude-<name>-NN.txt` `` to the line.
-6. Stop. One section per session. Brief summary to the developer; do **not** auto-advance to the next.
-
-If the developer asks for a specific section by name (*"do claude-tasting section 7"*), draft that one regardless of order, and still check it off.
+To extend a corpus with a new section, write the next
+`claude-<name>-NN.txt`, append it to the section list above, and
+re-concatenate before rebuilding.
 
 ### Building dicts and model tables from these corpora
 
-When enough sections exist, concatenate and build (verify exact CLI syntax against existing tool examples):
+The builders are byos-driven and take a single argument: the corpus
+byos.json under `tools/byos/`. Each reads its own `build.corpus` path
+and base block, so there is no per-call source/output/name to pass.
+Concatenate the per-section files first, then run both builders:
 
 ```sh
 cat fixture-src/texts/claude-magical-*.txt > fixture-src/texts/claude-magical.txt
-node tools/build-corpus-dict.js fixture-src/texts/claude-magical.txt fixtures/claude-magical.dict.json.gz claude-magical
-node tools/build-model-table.js fixture-src/texts/claude-magical.txt fixtures/claude-magical.dict.json.gz fixtures/claude-magical.model.json.gz
+node tools/build-corpus-dict.js tools/byos/claude-magical.byos.json
+node tools/build-model-table.js tools/byos/claude-magical.byos.json
 ```
+
+See `docs/builders.md` for the full byos CLI, options, and pipeline.

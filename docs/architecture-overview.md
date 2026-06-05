@@ -45,15 +45,17 @@ sibling top-level dirs (`css/`, `js/`, `img/`), tests under `tests/node/`.
               build-all-fixtures.js, etc.).
 ```
 
-Dictionaries are loaded as JSON. In Node:
-`JSON.parse(gunzipSync(readFileSync(path)))` for `.gz` paths, plain
-otherwise. In browser: `fetch(url)` piped through
-`DecompressionStream('gzip')` for `.gz` URLs, plain otherwise. The
-encode/decode core just receives the parsed object.
+Dictionaries ship as `.dict.sab.gz`: a packed SAB binary, gzipped on
+disk. JSON is only a transient build intermediate (the builders emit
+JSON, `packDictToSAB` bakes it to the SAB layout). At load time the
+gzipped SAB is fetched/read, gunzipped, and wrapped via
+`wrapDictionaryFromSAB` into the runtime dict object the encode/decode
+core consumes, no `JSON.parse` on the runtime path. The binary layout
+and resource-loading mechanics live in `docs/architecture-sab.md`.
 
 ## Key design decisions (and why)
 
-1. **No port of RAOF / RBT / BST / mstring / initfile / heap / entropy.** These were 1990s on-disk-tree machinery for fitting dictionaries on small disks and finding entries fast. Modern JS holds the whole dictionary in a `Map`. Replaced with built-in JS data structures.
+1. **No port of RAOF / RBT / BST / mstring / initfile / heap / entropy.** These were 1990s on-disk-tree machinery for fitting dictionaries on small disks and finding entries fast. Replaced with built-in JS data structures, then later re-baked into a packed SAB layout for cross-worker sharing. The full "raof → Map → SAB" design journey lives in `docs/architecture-sab.md` (the authoritative home); don't re-tell it here.
 
 2. **No bit-faithful port of the `.dat`/`.jmp`/`.alt` binary format.** We don't read the OG dictionaries at all. We rebuild from the *source corpora* (texts and word lists in `OG-NiceText-C++/nicetext-1.0/examples/`) using JS-ported builders, producing JSON. The corpora are the source of truth; the binaries were derived artifacts.
 
@@ -130,16 +132,21 @@ Berrin, of Luxembourg, arrived with Hale.
 
 Recovered byte-identically.
 
-## Engine module surface (current)
+## Engine module surface (core, current)
+
+This section scopes to the **core encode/decode engine** modules in
+`js/src/`. The worker, streaming, SAB, and cover-pipeline layers that
+sit on top are not enumerated here, see the pointer at the end of this
+section.
 
 Browser-safe ESM in `js/src/`:
 
 - `js/src/bitstream.js`: `BitReader` / `BitWriter` classes (the only classes in the engine).
-- `js/src/dictionary.js`: `loadDictionary(json)` packs to SAB and returns `{json, sab, view, bytes, header, maxWordLength}`. Lookup functions: `lookupWord`, `lookupType`, `lookupTypeByName`, plus `readTreeNode` for the encoder's per-type Huffman tree walk.
+- `js/src/dictionary.js`: `loadDictionary(json)` packs to SAB and returns `{json, sab, view, bytes, header, maxWordLength, phraseIndex, maxPhraseLen}` (`wrapDictionaryFromSAB(sab)` builds the same wrapper minus `json` straight from a packed SAB, the path workers use). `phraseIndex` / `maxPhraseLen` index multi-word entries for greedy phrase fusion. Lookup functions: `lookupWord`, `lookupType`, `lookupTypeByName`, plus `readTreeNode` for the encoder's per-type Huffman tree walk.
 - `js/src/builder/sab-pack.js`: `packDictToSAB(json) → SharedArrayBuffer` (with `ArrayBuffer` fallback when SAB unavailable).
 - `js/src/typestream.js`: `weightedTypeStream(dict, opts)` and `roundRobinTypeStream(dict)`. The type stream is the seam where Phase 4's CFG-driven grammar plugs in.
-- `js/src/encode.js`: `encode(payload, dict, opts)`. Wraps payload with SIZER, walks the per-type Huffman tree one bit at a time, emits the leaf word. Stops after `minExtraBits` (default 64) bits past EOF.
-- `js/src/decode.js`: `decode(coverText, dict)`. Tokenizes via the lexer, looks up each known word via `lookupWord`, writes its `(code, bits)` to a BitWriter, hands the bytes to DESIZER. Unknown words and non-word tokens are silently skipped (matches OG scramble behavior).
+- `js/src/encode.js`: `encode(input, output, dict, opts = {})`. Streaming in/out: reads payload bytes from a `ReadableStream<Uint8Array>`, wraps with SIZER, walks the per-type Huffman tree one bit at a time, and writes UTF-8 cover-text bytes to a `WritableStream<Uint8Array>`. Stops after the EOF marker plus a random-bits tail (no whole-payload buffering).
+- `js/src/decode.js`: `decode(input, output, dict, opts = {})`. Streaming in/out: reads cover-text bytes from a `ReadableStream<Uint8Array>` through `TextDecoderStream`, tokenizes via the lexer, looks up each known word via `lookupWord`, writes its `(code, bits)` to a BitWriter, and drives the bytes through DESIZER to the output `WritableStream`. Unknown words and non-word tokens are silently skipped (matches OG scramble behavior).
 - `js/src/grammar/parser.js`: recursive-descent parser for `.def` files. Token set: IDENT (with hyphens/digits/commas/+), `{...}` PUNCT, `@N` WEIGHT, `:`, `;`, `|`, `//` line comments. First rule = start symbol.
 - `js/src/grammar/expand.js`: `loadGrammar(parsedTree)` packs to SAB; `makeModel(grammar, opts)` produces a sentence model (sequence of `{kind:'type'|'punct', ...}`); `modelStream(grammar, opts)` is the per-call wrapper. Recursive grammars are skip-and-retried past `maxLength` (default 1024).
 - `js/src/grammar/format.js`: `createFormatter()` applies format-token semantics to a stream of words+puncts. Implements `Cap`, `CAPSLOCKON`, `capslockoff`, `^literal^`, char-by-char interpretation (`n`=newline, `e`=empty, ` `=conditional space, `(`=space-before, default=emit+set space).
@@ -159,6 +166,22 @@ Browser-safe ESM in `js/src/`:
 
 **One deliberate deviation from OG:** after a `{^literal^}` verbatim emit, the formatter clears the pending-space flag (the OG left it untouched). This makes the literal authoritative about its own spacing, write `{^ of ^}` and get exactly that, no double-spaces. The OG behavior produced awkward double spacing in normal use.
 
+**Layers above the core (not enumerated above).** Added after the
+worker/streaming refactor, documented in their own files:
+- `js/src/worker/*` (`engine-worker.js`, `pool.js`, `spawn.js`,
+  `resource-worker.js`, `build-session-worker.js`, `aug-worker.js`,
+  `preclean-worker.js`, `jobs.js`, `parent-port.js`, `streams.js`):
+  on-demand worker pool and job dispatch. See
+  `docs/architecture-workers.md`.
+- `js/src/resource-loader.js` (+ `resource-loader-client.js`,
+  `sab.js`): single-source-of-truth fetch + gunzip + pack + cache for
+  SAB resources across realms. See `docs/architecture-sab.md`.
+- The streaming cover pipeline (`js/src/cover-pipeline.js`,
+  `cover-streaming.js`, `cover-escape.js`, `cover-markers.js`,
+  `stream.js`, `wrappers.js`): the post-processor stack that wraps /
+  strips cover text as gzip / base64 / uuencode / html / pdf / eml /
+  markdown envelopes.
+
 ## CLI surface
 
 Node-only wrappers in `js/bin/`:
@@ -172,7 +195,7 @@ process is itself the worker. See `docs/architecture-workers.md` §2.
 
 ## Lexer
 
-`js/src/lexer.js` is shared between `listword` (corpus → WLIST), `scramble` (cover text → bits), and `genmodel` (sample text → sentence-model table). Token types: `WORD`, `PUNCT`, `EOS`, `GUTENBERG_END`. Longest-match-wins like lex; on ties the earlier pattern wins.
+`js/src/lexer.js` is shared between `listword` (corpus → WLIST), `scramble` (cover text → bits), and `genmodel` (sample text → sentence-model table). The exported `TOKEN` set (values are lowercase strings) is `WORD` (`'word'`), `PUNCT` (`'punct'`), `EOS` (`'eos'`), `WHITESPACE` (`'whitespace'`, non-single-space inter-word runs), `GUTENBERG_START` (`'gutenberg-start'`), `GUTENBERG_END` (`'gutenberg-end'`), and `GUTENBERG_END_LEGACY` (`'gutenberg-end-legacy'`, the 1990s "END THE SMALL PRINT!" marker). Longest-match-wins like lex; on ties the earlier pattern wins.
 
 Known divergence from the OG lex: contractions use a permissive `'[A-Za-z]{0,2}` suffix instead of per-consonant constraints, because JS regex doesn't backtrack across CORE+SUFFIX boundaries the way lex's DFA does. Covers all real English contractions; no observed false matches in natural-language input.
 
@@ -189,4 +212,4 @@ Known divergence from the OG lex: contractions use a permissive `'[A-Za-z]{0,2}`
 - `nttpd/`: uninteresting and obsolete (per developer, 2026-04-26)
 - All RCS files, dev-only test harnesses (`bsttest`, `heaptest`, `inittest`, `listtest`, `rbttest`, `bitcp`, `numsize`, `raofmake`/`raofmalt`/`raofread`, `smush`)
 
-The OO collapse is examined in detail in `docs/architecture-sab.md` (the "raof → Map → SAB" design journey), the binary-format machinery was deleted in the JS port and partially reintroduced for cross-worker sharing.
+The OO collapse and the "raof → Map → SAB" design journey are examined in detail in `docs/architecture-sab.md` (the authoritative home for that story).

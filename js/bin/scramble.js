@@ -26,9 +26,9 @@ function parseFlags(argv) {
 }
 
 function usage() {
-  process.stderr.write(`usage: scramble -d <dict.json> -i <input.txt> -o <output.bin>
+  process.stderr.write(`usage: scramble -d <dict> -i <input.txt> -o <output.bin>
 
-  -d, --dict   path to dictionary JSON (must match the one used by nicetext)
+  -d, --dict   path to dictionary file (must match the one used by nicetext)
   -i, --in     path to cover text input
   -o, --out    path to output file (raw bytes)
 `);

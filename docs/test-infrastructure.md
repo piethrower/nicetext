@@ -5,7 +5,7 @@ How the same `tests/node/*.test.js` files run under both
 `tests/node/test-suite.html` (browser, via `tests/node/test-suite-
 worker.js`). One harness, runtime-portable shims, identical execution
 shape in both runtimes, the same engine+transport+UI design the
-stress test uses (see `tests/node/stress-engine.js` +
+stress test uses (see `tests/node/stress/stress-engine.js` +
 `tests/node/stress-worker.js` + `tests/node/stress-test.html`).
 
 ## Architecture (locked-in design)
@@ -35,7 +35,8 @@ Principles:
    Test files import from the shim by relative path
    (`./shims/node-X.js` or `../shims/node-X.js`). No importmap
    needed; works in pages, workers, and Node alike, same way
-   `stress-engine.js` is "browser-native" but runs in Node too.
+   `stress/stress-engine.js` is "browser-native" but runs in Node
+   too.
 
 3. **Cooperative yield is a project invariant.** The harness inserts
    one macrotask boundary (`await new Promise(r => setTimeout(r,
@@ -64,11 +65,9 @@ Principles:
    options. In Node it's a no-op; in browser the harness skips the
    test with a clear reason.
 
-6. **Persistence story** for user-built dictionaries / models:
-   `localStorage` for in-browser persistence between sessions, plus
-   download (export to JSON) / upload (import from JSON file). Same
-   for `.def` grammars and corpora. The `Build your own ...` pages
-   share a single persistence helper.
+   (The persistence story for user-built dictionaries / models
+   — `localStorage`, export/import — is a UI concern, not a
+   test-infrastructure one. See the web-UI / builders docs.)
 
 ## Components
 
@@ -121,13 +120,16 @@ Principles:
 
 ## Cross-runtime status
 
-- Node: `npm test` runs `tests/node/run-node.mjs`. ~689 tests.
+- Node: `npm test` runs `tests/node/run-node.mjs`. For the current
+  test count, see the `npm test` summary line (counts drift as
+  files are added; the harness reports the live total).
 - Browser: `tools/serve.sh && open
   http://127.0.0.1:8888/tests/node/test-suite.html` loads the
-  page, which spawns `test-suite-worker.js`. ~625 tests (the rest
-  are `nodeOnly()` for filesystem-walking checks or SAB tests
-  that need cross-origin isolation that the local
-  `python3 -m http.server` doesn't supply).
+  page, which spawns `test-suite-worker.js`. The browser total is
+  slightly lower than Node's (see the page's status line for the
+  live count): the difference is the `nodeOnly()` tests for
+  filesystem-walking checks plus SAB tests that need cross-origin
+  isolation the local `python3 -m http.server` doesn't supply.
 - Diagnostics: `tools/test-suite-hang.js` drives test-suite.html
   via Playwright, samples the status line at 500 ms, reports any
   perceived stall. `tools/test-suite-failures.js` lists every

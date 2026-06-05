@@ -1,5 +1,7 @@
 # Cycle Mode: Engineering Design Thoughts
 
+Status: not implemented — design record only.
+
 Implementation-side reasoning from the 2026-05-02 design conversation.
 Not a build plan; a record of what was decided, what was ruled out,
 and the open questions.
@@ -42,7 +44,7 @@ The engine is fully streaming end-to-end. Confirmed in code:
   `ReadableStream<Uint8Array>` and return a
   `Promise<ReadableStream<Uint8Array>>`.
 - `js/src/worker/streams.js` MessagePort-backed Readable / Writable
-  pairs with lazy pull-based backpressure across the worker boundary.
+  pairs with ack-based backpressure across the worker boundary.
 - `js/pipeline.js` already uses this for production save-as-stream
   egress.
 

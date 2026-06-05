@@ -1,8 +1,9 @@
 // Worker pool. Thin wrapper over js/src/worker/spawn.js that hands
 // out idle workers, routes one in-flight request per worker at a
 // time, and serializes job dispatch as a Promise the caller can
-// await. Used by Eve, the shared resource-loader, the aug pipeline,
-// and any future caller that wants the same dispatch contract.
+// await. Used by Eve and the shared resource-loader (the aug pipeline
+// uses its own bounded spawn, not this pool), and any future caller
+// that wants the same dispatch contract.
 //
 // The scheduler (js/src/scheduler.js) caps concurrent onJobReady
 // calls at the pool size, so the pool never needs an internal

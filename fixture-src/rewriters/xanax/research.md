@@ -1,5 +1,13 @@
 # a/an agreement: CMU-driven research
 
+> **Status: implemented.** The recommendation in this note shipped as the
+> `xanax` rewriter (`js/src/rewriter/xanax.js`): the two-tier CMU-exception
+> + strict-orthographic rule. The live byos surface is `rewriter.xanax`
+> (`{ enabled, intensity }`), not the `agreement: "a-an"` flag this note
+> drafted, and the `begins_with_a_vowel` augmentation it proposed dropping
+> is now a retired artifact (code retained, no longer wired into byos). This
+> doc is kept as the design rationale of record.
+
 Companion to the vowel-augmentation rethink in `whats-new.html` §6. The
 rethink proposes dropping the `begins_with_a_vowel` augmentation
 (touches ~14K dict entries to enforce a/an agreement structurally) in

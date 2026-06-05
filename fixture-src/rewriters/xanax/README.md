@@ -45,23 +45,29 @@ This directory holds the research and audit material:
   coverage-gap categorization, fallback-accuracy measurement.
   Originally `tools/aan-corpus-sweep.js`.
 
-## Current capability
+## Capability
 
-Strict-orthographic rule via `apply(phraseBuf)`. Examples:
+Two-tier agreement rule via `apply(phraseBuf)`:
 
-- "a apple" → "an apple"
-- "an cat" → "a cat"
-- "a hour" → kept as "a hour" (strict-ortho treats h as consonant;
-  the CMU-phonology refinement that would correctly emit "an hour"
-  is research-locked but not yet implemented).
+1. CMU-phonology exception sets, loaded from
+   `fixtures/rewriter-xanax.data.js`. Silent-h words
+   (`XANAX_TAKES_AN_DESPITE_CONSONANT_LETTER`: hour, honest, honor)
+   force "an"; vowel-letter-onset consonant words
+   (`XANAX_TAKES_A_DESPITE_VOWEL_LETTER`: united, one, European) force
+   "a".
+2. Strict-orthographic fallback for everything else (the ~99% case):
+   leading letter in [aeiou] gives "an", else "a".
 
-## Future arc
+Examples:
 
-The CMU-driven extension uses exception wlists (`fixture-src/wlist/`)
-produced by `derive-exceptions.js`, plus an encoder lookahead that
-consults them before falling back to strict-ortho. See
-`research.md` §"Encoder design recommendation" for the
-implementation order.
+- "a apple" → "an apple" (strict-ortho)
+- "an cat" → "a cat" (strict-ortho)
+- "a hour" → "an hour" (CMU exception set, silent h)
+- "a united" → "a united" (CMU exception set, consonant onset)
+
+The exception sets are produced offline by `derive-exceptions.js`
+(Phase 1 CMU classifier) and `corpus-sweep.js` (Phase 2/3 accuracy
+measurement). See `research.md` §"Encoder design" for the derivation.
 
 ## Round-trip safety
 

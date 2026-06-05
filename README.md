@@ -2,6 +2,8 @@
 
 Modern JavaScript port of **NiceText**, a 1995–2001 linguistic-steganography system by Mark T. Chapman and Dr. George Davida (UW-Milwaukee). Encodes any binary file as pseudo-natural-language text and recovers it losslessly.
 
+**▶ Try it now, right in your browser: [piethrower.github.io/nicetext](https://piethrower.github.io/nicetext)** — the live production build, running entirely client-side. No install, no upload, no sign-up.
+
 ## Status
 
 See [`docs/architecture-overview.md`](docs/architecture-overview.md) for the design, target architecture, and engine module surface.
@@ -17,8 +19,8 @@ img/         page images and SVG assets
 js/          web app entrypoints (app.js, penny.js, tutorial-script.js)
 js/src/      browser-safe ESM core (no Node deps; runs in Node and browsers)
 js/bin/      Node CLI wrappers (nicetext, scramble, gendict)
-tests/node/  node --test runner (browser-runnable via tests/node/test-suite.html, queued)
-data/        JSON dictionaries / type tables / model tables (built artifacts)
+tests/node/  test runner (also browser-runnable via tests/node/test-suite.html)
+fixtures/    built artifacts (SAB-packed dicts, models, twlists, wlists, freq)
 fixture-src/     raw word lists and natural-language texts
 tools/       build-time scripts (rebuild dicts from corpora, serve.sh, etc.)
 docs/        project docs (start with architecture-overview.md)
@@ -29,7 +31,7 @@ The 1995-2001 C++ source lives in the sibling [`OG-NiceText-C++`](../OG-NiceText
 ## Run tests
 
 ```sh
-npm test            # node --test tests/node/
+npm test            # node tests/node/run-node.mjs
 ```
 
 ## Run the web UI
@@ -49,8 +51,8 @@ repo over a local web server:
 ## Run the CLI
 
 ```sh
-node js/bin/nicetext.js -d data/mit.json -i secret.bin -o cover.txt
-node js/bin/scramble.js -d data/mit.json -i cover.txt -o recovered.bin
+node js/bin/nicetext.js -d fixtures/mit-1.dict.sab.gz -i secret.bin -o cover.txt
+node js/bin/scramble.js -d fixtures/mit-1.dict.sab.gz -i cover.txt -o recovered.bin
 ```
 
 ## License
