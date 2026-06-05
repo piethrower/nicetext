@@ -26,10 +26,13 @@ in the browser page. Out of scope:
 ### 1. Workers default-on for the page
 
 The browser page (`nicetext.html` and any future research-page figures
-that run encode/decode) always dispatches jobs through a worker pool.
-Pool size defaults to `navigator.hardwareConcurrency`, with a minimum
-of 1 and a developer setting to override. A pool of 1 is still a
-worker: same code path, no inline fallback.
+that run encode/decode) always runs the engine in a worker, never
+inline. Encode/decode spawn a fresh engine worker per job (§5);
+pooled callers (Eve, the resource-loader) size their pool from
+`defaultPoolSize()`, which is `navigator.hardwareConcurrency` with a
+minimum of 1 (a developer override is still open, see "What is not
+yet decided"). Whichever model, there is no inline fallback on the
+page: same worker code path even on a single-core machine.
 
 The reason: the main thread is fully UI-only. Penny's typewriter,
 tutorial transitions, button responsiveness, and the future
@@ -75,7 +78,7 @@ Both run via `node --test tests/node/` and via
 
 ### 4. Cross-runtime worker shim
 
-Built and verified by step 4 (commit forthcoming) with smoke tests
+Built and verified with smoke tests
 in `tests/node/worker-shim.test.js`. Two browser-safe ESM modules:
 
 - **`js/src/worker/spawn.js`**: parent-side. Exports
@@ -109,11 +112,13 @@ Verified end-to-end on the Node path (worker_threads):
 - ArrayBuffer transfer detaches sender, arrives intact in worker
 - multiple round-trips on one worker
 
-Browser-path verification: step 7 added all SAB and worker tests
-to `tests/node/manifest.json`. The same test files run in both
-runtimes, 117 in Node, 115 + 1 skip in the browser harness. The
-skipped test is `worker-shim: SharedArrayBuffer arrives without
-copy`, which requires browser cross-origin isolation (COOP/COEP).
+Browser-path verification: all SAB and worker tests live in
+`tests/node/manifest.json`, so the same test files run in both
+runtimes. For current counts see the `npm test` summary (counts
+drift as the suite grows; no fixed figure is kept here). One test is
+skipped in the browser harness: `worker-shim: SharedArrayBuffer
+arrives without copy`, which requires browser cross-origin isolation
+(COOP/COEP).
 `tools/serve.sh` does not set those headers, so SAB is unavailable
 in the local browser; the engine falls back to per-worker
 `ArrayBuffer` copies with the same byte layout (functional but no
@@ -125,38 +130,67 @@ roadmap), the Node branch quietly becomes a no-op: the
 `typeof Worker !== 'undefined'` check resolves true in Node too, the
 dynamic import of `node:worker_threads` never fires.
 
-### 5. On-demand workers + parent-side SAB cache
+### 5. Two worker models: streaming spawn-per-job, plus a pool
 
-Implemented in step 5 (commit forthcoming) by `js/src/worker/jobs.js`
-plus `js/src/worker/engine-worker.js`. Replaces the earlier
-"persistent pool + parent-as-broker registry (Variant B)" design.
+Implemented by `js/src/worker/jobs.js` plus
+`js/src/worker/engine-worker.js` (encode/decode) and
+`js/src/worker/pool.js` (the shared pool). Two distinct worker models
+coexist:
 
-**Model.** Workers are spawn-and-terminate. Each worker handles
-exactly one job (load / encode / decode), posts a single result
-message, and the parent terminates it. There is no worker pool, no
-correlation IDs, no idle-worker management. Workers are stateless
+**Encode/decode: streaming spawn-per-job.** Each encode or decode
+job spawns a fresh engine worker. The parent hands it two
+`MessageChannel` port pairs (one for the inbound byte stream, one for
+the outbound), pipes the caller's input `ReadableStream` into the
+worker's input port, and returns a `ReadableStream` wrapping the
+worker's output port. The worker is terminated when the output stream
+is fully drained, errors, or the caller cancels. No correlation IDs:
+one worker, one job, port-scoped streams. Workers are stateless
 transformers, conceptually like running shell commands.
 
-**Parent-side resource cache.** The parent maintains a
-`Map<path, Promise<sab>>` keyed by resource path. First job that
-needs a dict spawns a loader worker; that worker JSON-parses, packs
-to SAB, posts the SAB ref back, and is terminated. The parent caches
-the SAB and reuses it for every subsequent job. Concurrent first-load
-requests for the same path share the in-flight Promise so only one
-loader worker spawns.
+**Eve / resource-loader / aug: pooled or bounded-spawn.** Not
+everything is spawn-per-job. `js/src/worker/pool.js` exports
+`createPool({ workerUrl, size?, onEvent? })` returning
+`{ dispatch, terminate, size }`: it boots `size` workers up front
+(`defaultPoolSize() - 1` by default, clamped to >= 1), hands out an
+idle worker per `dispatch(job)`, routes replies by an auto-assigned
+per-job `jobId`, and queues dispatches when every worker is busy. Eve
+(`js/eve-worker.js`) drives a `createPool` through `scheduler.js`,
+and the shared resource-loader (`js/src/resource-loader.js`) lazily
+spins up one `createPool` over `resource-worker.js` for the page
+session. The aug pipeline (`js/src/builder/aug-pipeline.js`) runs its
+own short-lived bounded set of workers via `createWorker` +
+`defaultPoolSize` rather than `pool.js`, but the same idea: workers
+boot once and take several jobs, instead of spawn-per-job. So the
+blanket "there is no pool" claim is true only of the encode/decode
+hot path, not the system.
 
-**Why not a persistent pool.** Worker boot in Node `worker_threads`
-is ~50-200 ms; in browser similar. For a single-click encode that
-takes 1-3 s total, that boot cost is invisible. The expensive part
-of "first load" is the JSON.parse + pack (600 ms-2 s for master),
-and the SAB cache makes that a once-per-session cost regardless of
-how many workers are spawned.
+**Parent-side resource cache.** A `const cache = new Map()` in
+`js/src/resource-loader.js` keys resolved-or-in-flight SAB promises by
+`${resourceCategory}::${canonicalId}`. First job that needs a dict
+dispatches a loader to the resource-worker pool; that worker
+fetches/parses and packs to SAB, posts the SAB ref back, and the
+loader caches it for every subsequent job. Concurrent first-load
+requests for the same key attach as subscribers to the one in-flight
+Promise, so only one load runs. `jobs.js`'s `loadResource` is a thin
+pass-through to this shared loader (it sets `opts.fixture` per
+category and forwards).
+
+**Why spawn-per-job for encode/decode.** Worker boot in Node
+`worker_threads` is ~50-200 ms; in browser similar. For a
+single-click encode that takes 1-3 s total, that boot cost is
+invisible, so the encode/decode path doesn't pay the complexity of
+keeping a warm engine-worker pool. The expensive part of "first load"
+is the JSON.parse + pack (600 ms-2 s for master), and the SAB cache
+makes that a once-per-session cost regardless of how many workers are
+spawned. (Eve and the resource-loader, by contrast, fire many small
+jobs in bursts, which is why those use `createPool`.)
 
 **For batch parallelism (future).** The matrix figure and
 eight-styles panel will fire many small encodes. A simple
 *concurrency limiter* (cap on simultaneous worker spawns) is
-sufficient, much smaller than a pool because workers don't need to
-stay warm between jobs.
+sufficient, much smaller than a warm pool because the engine workers
+don't need to stay warm between jobs. The generic limiter already
+exists as `js/src/scheduler.js` (see "What is decided", below).
 
 **For cycle-mode pipeline (future).** Spawn N workers concurrently,
 wire them with `MessageChannel` + transferable streams, await the
@@ -166,21 +200,32 @@ worker lifetimes.
 
 **Public API** in `js/src/worker/jobs.js`:
 
-- `loadResource(path, kind) → Promise<SAB>`: explicit cache fill;
-  rarely needed by callers, used by the job runners internally.
-- `encodeJob(spec) → Promise<string>`: spec carries `payload`,
-  `dictPath`, optional `modelPath` or `grammarPath`, `mode`,
-  `randomSeed`, `streamSeed`, `maxLength`, `onProgress`, `signal`.
-  Returns the cover text.
-- `decodeJob(spec) → Promise<Uint8Array>`: spec carries `payload`
-  (cover text), `dictPath`, `onProgress`, `signal`. Returns
-  recovered bytes.
+- `loadResource(idOrPath, resourceCategory) → Promise<SAB>`: thin
+  pass-through to the shared `resource-loader.js` loader (it composes
+  `opts.fixture` from the category, then delegates). The actual cache
+  and fetch/parse/pack live in `resource-loader.js`, not here.
+- `encodeJob(spec) → Promise<ReadableStream<Uint8Array>>`: spec
+  carries `input` (a `ReadableStream<Uint8Array>` of secret bytes),
+  `dictPath`, optional `modelPath` or `grammarPath` (mutually
+  exclusive), `mode`, `randomSeed`, `streamSeed`, `maxLength`,
+  optional `rewriter` / `reformatter` cover-transform blocks,
+  `onProgress`, `onValidateProgress`, `signal`, and
+  `skipValidationSignal`. Resolves to a `ReadableStream` of the
+  cover-text bytes; reading it to `{done:true}` terminates the worker.
+- `decodeJob(spec) → Promise<ReadableStream<Uint8Array>>`: spec
+  carries `input` (the cover-text byte stream), `dictPath`,
+  `onProgress`, `signal`. Resolves to a `ReadableStream` of the
+  recovered secret bytes.
+
+Both jobs are streaming, not buffered: nothing accumulates the full
+cover or payload in the parent. The caller pipes bytes in and reads
+bytes out incrementally, which is what keeps large covers off the
+main thread's heap.
 
 Cancellation is `AbortSignal`-based: callers pass `spec.signal` and
-abort the controller to cancel. The parent posts `{type: 'cancel'}`
-to the in-flight worker; the worker's `onProgress` callback returns
-`'cancel'`, which the engine raises as a tagged Error; the parent
-rejects the job promise with a standard `AbortError`.
+abort the controller to cancel. Aborting errors the output stream,
+cancels the port reader, aborts the input pipe, and terminates the
+worker as a backstop.
 
 ### 6. Workers do JSON parse + SAB pack; parent does the I/O
 
@@ -209,6 +254,17 @@ passed verbatim to `fetch` and resolves against the document URL.
 In Node, the string must be an absolute filesystem path or a `file://`
 URL; tests typically pass `new URL('../../fixtures/jfk-1.dict.sab.gz', import.meta.url)` (or use the `loadDictFixture(fixtureURL('jfk'))` helper in `tests/node/_helpers.js`, which wraps the SAB via `wrapDictionaryFromSAB`).
 
+## What is decided since this doc was first written
+
+- **Concurrency limiter for batch parallelism**: resolved.
+  `js/src/scheduler.js` is the generic DAG/concurrency executor:
+  `runScheduler({ jobs, onJobReady, concurrency, signal, onProgress })`
+  caps in-flight `onJobReady` calls at `concurrency` and threads an
+  `AbortSignal` through. `pool.js` pairs with it (the scheduler is the
+  gate that keeps every pool dispatch finding a free worker). Eve, the
+  resource-loader, and the aug pipeline all run their batch work
+  through this path today.
+
 ## What is not yet decided
 
 These items are flagged for follow-up. Each decision gets developer
@@ -218,15 +274,15 @@ y/n approval before being locked in.
   candidates: pre-warm on dict-picker change (load fires when the
   user picks a chip or dropdown), lazy on first encode (load fires
   on Smuggle click, page shows progress), or hybrid (pre-warm small
-  dicts at page load, lazy-load large ones). Decide when wiring
-  `app.js` (step 6).
-- **Concurrency limiter for batch parallelism**: not needed yet, but
-  the matrix and eight-styles figures will fire many small encodes.
-  A simple cap on simultaneous worker spawns plus a queue of pending
-  job specs is sufficient. Design when those figures land.
-- **Pool-sizing override**: a developer setting to override
-  `navigator.hardwareConcurrency`. Where it lives (URL param,
-  localStorage, settings UI) is open. Not load-bearing for v1.
+  dicts at page load, lazy-load large ones). `app.js` today wraps the
+  resource-loader in a `dictWrapCache` (so a wrapped dict is reused
+  across keystrokes) but does not yet eagerly pre-warm on picker
+  change; the trigger policy remains open.
+- **Pool-sizing override**: a developer setting to override the
+  `defaultPoolSize()` default (`navigator.hardwareConcurrency`, or 1
+  where that is unavailable). Where it lives (URL param, localStorage,
+  settings UI) is open; no override mechanism exists yet. Not
+  load-bearing for v1.
 
 ## Companion document
 

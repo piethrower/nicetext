@@ -7,8 +7,37 @@ proposes BYOS-candidates rather than decoding to bytes herself:
 clicking a row in the browser hands suspected+BYOS off to `nicetext.html`
 for the real decode.
 
-This document is the design plan. A separate build-plan section at the
-end re-orders the work for clean commits.
+This document is part design plan, part retrospective. Phase I has
+SHIPPED; Phase II is genuinely unbuilt. The status box below draws the
+boundary; the build-plan section at the end is the remaining queue.
+
+## Status: BUILT vs NOT-BUILT
+
+**BUILT (Phase I, shipped).** Live as the "Eve" tab in `nicetext.html`.
+
+- Strategies 1-4: preclean-format check (`isNiceText`),
+  wlist/vocab membership (TW-list sources, custom corpus/TW-list, and
+  the corpus pseudo-TW-list axis), emoji-glyph inspection, and the
+  MonoTypedModelCheck (`story.style`, `phrases`, `story.sentence`).
+- The streaming Phase-I engine (`runPhase1` in `js/src/eve/core.js`).
+- The orchestrator and worker pool (`js/src/eve/orchestrator.js`,
+  `job-handlers.js`, `job-worker-entry.js`).
+- The node CLI (`tools/eve/run-pool.mjs`).
+- The browser Eve tab (`#panel-eve` in `nicetext.html`, driven by the
+  supervisor worker `js/eve-worker.js`).
+
+**NOT-BUILT (Phase II + deferred strategies).** Forward-looking; nothing
+below this line exists in the tree yet.
+
+- Phase II in its entirety: head-byte recognizers, decode replay,
+  combination enumeration, and the brute mode. No `recognizers.js`,
+  no `runPhase2`, no decode path. The "Phase II commits" queue near the
+  end of this doc is the authoritative "what's left" list.
+- Strategy 5 (precomputed knob-relevance fixture).
+- Strategy 6 (redacted-wlist negative detector).
+
+Sections below mark Phase II / deferred material inline; treat any such
+section as plan, not as shipped behavior.
 
 ## Hard boundary, Eve never modifies core engine behavior
 
@@ -75,7 +104,7 @@ Optional, in increasing-knowledge order:
 Eve has two cleanly-separable phases. Phase I is a complete utility on
 its own and ships first.
 
-### Phase I, suspected analysis (no decode)
+### Phase I, suspected analysis (no decode) (BUILT)
 
 Phase I never touches the decoder. It reads the raw suspected and emits a
 per-knob verdict: for each BYOS parameter, is the suspected consistent
@@ -85,7 +114,7 @@ how many BYOS combinations remain alive after the eliminations.
 Honest outcome: many knobs end up as "unknown," and that is fine. The
 goal is to shrink the search space cheaply before any decoding happens.
 
-### Phase II, recognize and enumerate
+### Phase II, recognize and enumerate (NOT-BUILT)
 
 Phase II adds head-byte recognizers and an enumeration engine. For the
 combinations still alive after Phase I (and respecting BYOS schema
@@ -118,8 +147,9 @@ Detectors funnel through the shared
 machinery for attribution and contradiction detection. One detector
 may inform several knobs; one knob may consume several detectors.
 
-Detectors group into five strategies. Strategies 1–4 are active;
-strategy 5 is deferred. Knobs that no current strategy can decide
+Detectors group into six strategies. Strategies 1-4 are BUILT
+(shipped in Phase I); strategies 5 and 6 are deferred (NOT-BUILT).
+Knobs that no current strategy can decide
 emit an honest `unknown` stub with named-rule attribution
 explaining why.
 
@@ -191,20 +221,22 @@ combinations (`{a,b,c}`, `{a,c}`, `{b,c}` all stay alive even if
 
 ### Strategy 3: suspected emoji-glyph inspection
 
-Covers `augment.wordsIntoEmoji` and `augment.mixedPhrases`.
-Unicode-class regex over the suspected, not a wlist comparison.
+Covers `augment.wordsIntoEmoji` and `augment.maxEmojiCluster`
+(an Eve-internal knob, not a byos field). Unicode-class regex over
+the suspected, not a wlist comparison.
 
 - `augment.wordsIntoEmoji`: any emoji glyph
   (`Extended_Pictographic` or `Regional_Indicator`) in
   suspected → `likely` on first hit. After full scan with zero
   hits → `unlikely`.
-- `augment.mixedPhrases`: longest emoji-glyph run inside one
+- `augment.maxEmojiCluster`: longest emoji-glyph run inside one
   WORD-token cluster. The lexer collapses adjacent emoji into a
   single WORD token, so the relevant signal is the glyph count
-  inside one cluster. A longest run of L rules out any
-  `mixedPhrases > L`. The observed `max` is carried in the
-  verdict's data field; the combination counter uses it as an
-  upper bound without needing a verdict promotion.
+  inside one cluster. The observed `max` is the upper bound the
+  combination counter uses. (The byos field this once mapped to,
+  `augment.mixedPhrases`, has been retired in `js/src/byos.js`;
+  each emoji aug now carries its own bound. Eve keeps the cluster
+  measurement under the internal `maxEmojiCluster` knob.)
 
 Implementation: `js/src/eve/checks.js / createWordsIntoEmojiCheck`,
 `createMixedPhrasesCheck`.
@@ -335,13 +367,13 @@ Knobs no current strategy can decide emit a verdict row of
 | `isNiceText` | 1 preclean-format | `preclean-check.js / runIsNiceTextCheck` |
 | `augment.wordsIntoEmoji` | 3 emoji-glyph | `checks.js / createWordsIntoEmojiCheck` |
 | `augment.emojiIntoWords` | 2 wlist comparison (CLDR-emoji-names source) | `checks.js / createSourceCheck` once recast |
-| `augment.mixedPhrases` | 3 emoji-glyph | `checks.js / createMixedPhrasesCheck` |
+| `augment.maxEmojiCluster` (Eve-internal, bounds retired `mixedPhrases`) | 3 emoji-glyph | `checks.js / createMixedPhrasesCheck` |
 | `augment.vowel` | stub | retiring |
 | `sources.<name>` | 2 wlist comparison | `checks.js / createSourceCheck` + vocab-check |
 | `customCorpus` | 2 wlist comparison | `checks.js / createCustomCorpusCheck` |
 | `customTwlist` | 2 wlist comparison | `checks.js / createCustomTwlistCheck` |
 | `story.vocabulary='corpus' with <stem>` | 2 wlist comparison | `job-handlers.js / runCorpusVocabCheckJob` |
-| `story.style.<card>` | 4 sentence-model | `style-check.js / aggregateStyleVerdicts` |
+| `story.style.<card>` | 4 sentence-model | `monotyped-model-check.js / aggregateMonotypedModelVerdicts` |
 | `phrases` | 4 sentence-model (CMM sub-strategy) | same |
 | `story.sentence` (random/sequential) | 4 sentence-model | same |
 | `frequencies.<name>` | stub (strategy 5 candidate) | none |
@@ -406,7 +438,10 @@ Phase I output, both CLI and browser:
   check," or leave on the check's verdict. This is how the developer
   uses outside knowledge to narrow further or override a wrong vote.
 
-## Phase II, recognize and enumerate
+## Phase II, recognize and enumerate (NOT-BUILT)
+
+Nothing in this section exists in the tree yet. It is the design for the
+"Phase II commits" queue below.
 
 Pipeline once Phase I has produced a surviving-combinations shortlist:
 
@@ -414,8 +449,10 @@ Pipeline once Phase I has produced a surviving-combinations shortlist:
    peel is a weak positive signal ("looks like NiceText"). The bare
    suspected is what enumeration operates on.
 
-2. **Premade-card replay.** Iterate the 21 cards in `cards.data.js`
-   that survive Phase I. For each, load the prebuilt dict from
+2. **Premade-card replay.** Iterate the 20 corpus-backed cards
+   (22 total) in `cards.data.js` that survive Phase I (the same
+   `.filter(c => c.build && c.build.corpus)` set `run-pool.mjs`
+   uses). For each, load the prebuilt dict from
    `fixtures/`, run `decode`, record EOF status, first N output bytes,
    bytes total, recognizer verdict.
 
@@ -503,7 +540,7 @@ Stdout (Phase I):
 Eve Phase I (suspected N tokens, M chars unwrapped)
   augment.wordsIntoEmoji   likely    (12 emoji glyphs in suspected)
   augment.emojiIntoWords   unknown   (no curated emoji-keyword tokens, but base overlap is high)
-  augment.mixedPhrases     <= 3      (longest emoji-run = 3)
+  augment.maxEmojiCluster  <= 3      (longest emoji-run = 3)
   augment.vowel            unlikely  (no vowel-augment tokens detected)
   sources.impf2p           likely    (84 distinctive tokens hit)
   sources.emoji16          likely    (...)
@@ -516,11 +553,11 @@ Combinations alive: 1248
 Stdout (Phase II, with recognizers):
 
 ```
-Eve Phase II premade-card replay (1248 alive after Phase I, 21 cards survive)
+Eve Phase II premade-card replay (1248 alive after Phase I, 20 cards survive)
   ✓ aesop          EOF=yes  head="Salted__\x12\x34..."  [salted hit]
   - frankenstein   EOF=no   recovered 0 bytes
   ...
-21 candidates / 1 hit
+20 candidates / 1 hit
 ```
 
 With `--out-dir=path`, dumps `{byosID}.json` per candidate (or one
@@ -543,34 +580,64 @@ not need a pool.
 
 ## File layout
 
-Following the stress-pattern:
+The real tree as shipped. Phase I lives entirely under `js/src/eve/`,
+`tools/eve/`, `js/eve-worker.js`, and the `#panel-eve` markup in
+`nicetext.html`. There is no standalone Eve page.
 
-- `js/src/eve/core.js`, pure browser-safe ESM. Exports `runPhase1` and
-  `runPhase2`. Owns the per-knob check registry, the recognizer set,
-  and the per-BYOS decode routine.
-- `js/src/eve/checks.js`, per-knob check functions.
-- `js/src/eve/recognizers.js`, head-byte sniffers.
-- `tools/eve/run-pool.mjs`, node CLI. Argv parsing, worker pool,
-  `--out-dir` writer, stdout formatting.
-- `tools/eve/worker.mjs`, worker entry, calls into `core.js`.
-- `eve.html`, browser page. Drag/drop suspected, inputs for custom
-  corpus / TW-list / recognizer, two views (Phase I and Phase II),
-  progress, cancel.
-- `js/eve.js`, browser-side page glue.
-- `tests/node/eve.test.js`, round-trip: encode a known secret with
-  known BYOS, run Eve over the suspected, assert Phase I narrows
-  correctly and Phase II finds the correct BYOS with a recognizer hit.
-- `tests/node/tmp/eve-*.mjs`, scratch probes during development.
+BUILT (Phase I):
 
-## Build plan, execution order
+- `js/src/eve/core.js`, browser-safe ESM. Exports ONLY `runPhase1`
+  (the streaming per-knob detector pass). No `runPhase2` exists.
+- `js/src/eve/checks.js`, per-knob check factories (`createSourceCheck`,
+  `createCustomCorpusCheck`, `createCustomTwlistCheck`,
+  `createWordsIntoEmojiCheck`, `createMixedPhrasesCheck`).
+- `js/src/eve/preclean-check.js`, strategy-1 `isNiceText` detector.
+- `js/src/eve/vocab-check.js`, strategy-2 matchingtwlist table +
+  candidate-combination enumeration.
+- `js/src/eve/monotyped-model-check.js`, strategy-4 monotyped-model
+  detector (`genMonotypedModel`, `runMonotypedModelCheckPerCard`,
+  `aggregateMonotypedModelVerdicts`).
+- `js/src/eve/monotyped-model-sab.js`, NTMM v2 SAB pack/unpack for the
+  per-corpus `*.monotyped-model.sab.gz` fixtures.
+- `js/src/eve/packed-strings-sab.js`, shared SAB string-pool helper.
+- `js/src/eve/combinations.js`, alive-combination counting
+  (`countCombinations`) under byos schema constraints.
+- `js/src/eve/verdict-state.js`, the `createVerdictState` / `applyRule`
+  attribution + contradiction machinery.
+- `js/src/eve/stub-verdicts.js`, honest `unknown` stubs for
+  undecidable knobs.
+- `js/src/eve/job-handlers.js`, per-job compute handlers (incl.
+  `runCorpusVocabCheckJob` for the corpus pseudo-TW-list axis).
+- `js/src/eve/orchestrator.js`, the Phase-I DAG: schedules jobs across
+  the pool, aggregates verdicts, streams events (`runOrchestrator`).
+- `js/src/eve/job-worker-entry.js`, the compute-worker entry (one file,
+  both runtimes).
+- `tools/eve/run-pool.mjs`, node CLI. Argv parsing, builds the job DAG
+  via `runOrchestrator`, drives a `worker_threads` pool, streams
+  verdict events to stdout.
+- `js/eve-worker.js`, browser supervisor worker. Spawned by the Eve
+  tab's "Go" click; owns the compute-worker pool and AbortController,
+  drives the orchestrator, streams events back to the page.
+- The Eve UI: `#panel-eve` / `#tab-eve` markup and glue in
+  `nicetext.html` (no separate `eve.html`).
 
-Phase I is largely landed: strategies 1, 2, 3, and 4 are wired
-(strategy 4 with a `matchDepth` shortcut for `story.sentence`
-pending the strict random/sequential variant comparison),
-strategy 5 is deferred. Phase II is the remaining front and
-follows the queue below.
+NOT-BUILT (Phase II, planned only):
 
-### Phase II commits
+- `js/src/eve/recognizers.js`, head-byte sniffers. Not yet created;
+  first commit of the Phase II queue.
+- The decode-replay / enumeration path and any `runPhase2` entry point.
+- Phase II UI surface (placement still open: extend the Eve tab, a new
+  tab, or a separate tool).
+
+## Build plan, what's left
+
+Phase I has SHIPPED: strategies 1, 2, 3, and 4 are wired (strategy 4
+with a `matchDepth` shortcut for `story.sentence` pending the strict
+random/sequential variant comparison); strategies 5 and 6 are deferred.
+Phase II is entirely unbuilt and is the remaining front. This queue is
+the authoritative "what's left" list.
+
+### Phase II commits (not started)
 
 1. **Recognizers.** Land `js/src/eve/recognizers.js` with the
    starter set. No decode yet, just the surface. Unit-test against
@@ -606,13 +673,13 @@ follows the queue below.
 - `--out-dir` writer: per-file `{byosID}.json` (easy to inspect) or
   one NDJSON stream (easy to grep). Lean NDJSON, `--per-file` as opt-in.
 
-## Tab placement (Phase I)
+## Tab placement (Phase I, shipped)
 
-Eve's UI is a tab inside `nicetext.html`, labeled "Eavesdropper"
-(the role; Eve is the persona). The tab description explains
-the framing: this is what an eavesdropper named Eve might do to
-figure out which BYOS parameters were used to generate the
-loaded suspected.
+Eve's UI is a tab inside `nicetext.html`. The shipped tab label is
+"Eve" (`#tab-eve`), with "An Eavesdropper" as an aside in the panel
+heading (`#panel-eve`). The description explains the framing: this is
+what an eavesdropper named Eve might do to figure out which BYOS
+parameters were used to generate the loaded suspected.
 
 Reasons for tab-not-separate-page:
 
@@ -621,20 +688,20 @@ Reasons for tab-not-separate-page:
 - The panel template fits: title, description, toolbar (Go /
   Cancel), narrative log in the action area, stats footer
   (combo count, must-literal count, loop progress).
-- When Eve identifies a likely BYOS, "Apply to Encode" or
-  "Apply to Decode" flips the active tab and prefills the BYOS
-  panel. No cross-page state transfer, no localStorage needed.
-- Receiver mental model: Conceal, Reveal, Eavesdropper as three
-  views on the same loaded suspected.
+- Receiver mental model: Conceal, Reveal, Eve as three views on the
+  same loaded suspected.
 
-The Go button is disabled when the suspected story tab has no
-content. Eve has nothing to analyze without a loaded suspected, so
-the action is gated on suspected presence.
+The toolbar ships only Go (`#eve-go`) and Cancel (`#eve-cancel`)
+buttons. Go is disabled until a suspected is loaded in The Cover
+Story tab; Eve has nothing to analyze otherwise. (A planned but
+NOT-BUILT "Apply to Encode" / "Apply to Decode" handoff would flip
+the active tab and prefill the BYOS panel once Eve identifies a likely
+BYOS. No such button exists in `#panel-eve` today.)
 
 Phase II placement (where the recognize + enumerate machinery
-lives) is deferred. It might extend the Eavesdropper tab, become
-its own tab, or move to a separate `eve.html` tool depending on
-how the recognizer / brute-force surface evolves.
+lives) is deferred. It might extend the Eve tab, become its own tab,
+or move to a separate tool depending on how the recognizer /
+brute-force surface evolves.
 
 ### Cover Story tab tracks preclean state
 
@@ -656,22 +723,22 @@ the raw suspected doesn't need to be retained.
 When the developer wants Eve to consider a custom corpus or
 custom TW-list (developer-supplied as an addition to the shipped
 fixtures), the existing "Story Style | Custom" tab already has
-the upload UI. Eve's Eavesdropper tab points the developer
+the upload UI. Eve's tab points the developer
 there: "to add a custom corpus or TW-list, switch to Story Style
 and upload it; come back here and re-run Go." No new upload
 plumbing needed. The Custom-tab upload feeds the shared cache
-that the Eavesdropper tab reads from.
+that the Eve tab reads from.
 
 ## Eve UI design contracts
 
-These contracts govern eve.html (and the CLI's narrative output by
-the same shape). They lock in choices that came out of the bullet-
-walkthrough conversation; future Eve work should follow them
-unless explicitly re-decided.
+These contracts govern the Eve tab (`#panel-eve` in `nicetext.html`)
+and the CLI's narrative output by the same shape. They lock in choices
+that came out of the bullet-walkthrough conversation; future Eve work
+should follow them unless explicitly re-decided.
 
 ### Narrative log, real-time
 
-eve.html is a streaming log of Eve's reasoning as the analysis
+The Eve panel is a streaming log of Eve's reasoning as the analysis
 progresses. Not a static table. Each test step appends a row to
 the running log with:
 
@@ -748,8 +815,8 @@ Re-read these before each step of implementation.
 - Test cadence: node smoke first, browser page second, full
   integration last.
 - Scratch in `./tmp/` or `tests/node/tmp/`, never absolute paths.
-- User-supplied content into the DOM via `textContent` only; CSP
-  meta tag mandatory on `eve.html`.
+- User-supplied content into the DOM via `textContent` only; the
+  `nicetext.html` CSP applies to the Eve panel.
 - No persistence of secrets, recovered payloads, or candidate
   head-bytes to localStorage, cookies, or IndexedDB.
 - Name the enclosing function and module before any diff in chat

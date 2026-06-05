@@ -1,7 +1,10 @@
 # Command-Line Reference
 
-Every CLI in the repo, what it does, and how to drive it. This is a
-reference, not a tutorial.
+The CLIs in the repo, what they do, and how to drive them. This is a
+reference, not a tutorial. It covers the user-facing transforms,
+builders, and tooling; a handful of single-purpose internal build
+scripts under `tools/` are listed by name at the end rather than
+documented flag-by-flag.
 
 ## What Node is for here
 
@@ -104,7 +107,7 @@ node js/bin/cover-wrap.js [--layers=<csv>] [--filename=<name>] [--subject=<text>
   omitted) emits the cover unchanged after escape. The full set:
     - **Formats** (compress / encode): `base64` (Linux-compatible bare
       form, `base64(1)` decodes it directly), `gzip`, `uuencode`.
-    - **Document envelopes**: `eml`, `html`, `html-active`, `latex`,
+    - **Document envelopes**: `eml`, `html`, `html-active`,
       `markdown`, `nroff`, `pdf`, `xml`.
     - **Program envelopes** (functional source files; recipient runs
       with the language's interpreter or compiler and gets the cover
@@ -200,8 +203,13 @@ node tools/build-base-dict.js <byos.json>
 ```
 
 Build one flat-style dictionary from a single byos.json (any byos
-with `story.style='flat'`, i.e., no story layer). Output is gzipped
-to `fixtures/{byos.name}.dict.json.gz`.
+with `story.style='flat'`, i.e., no story layer). Writes the native
+intermediate `fixtures/{byos-id}.dict.json.gz`, where `{byos-id}` is
+the canonical BYOS id from `getBYOSID()` (the nickname-rev form, e.g.
+`master-1`, for registry-matched cards). This native is **transient**:
+`tools/sab.js pack dict` compiles it to the shipped runtime fixture
+`fixtures/{byos-id}.dict.sab.gz` and then deletes the native. The
+`.sab.gz` is the artifact the engine loads.
 
 ### `tools/build-corpus-dict.js`
 
@@ -210,8 +218,13 @@ node tools/build-corpus-dict.js <corpus-byos.json>
 ```
 
 Build a corpus-bound dictionary: vocabulary is restricted to words
-that actually appear in the byos's referenced corpus. Output is
-gzipped to `fixtures/{byos.name}.dict.json.gz`.
+that actually appear in the byos's referenced corpus. Writes the
+native intermediate `fixtures/{byos-id}.dict.json.gz`, where
+`{byos-id}` is the canonical BYOS id from `getBYOSID()` (the
+nickname-rev form, e.g. `aesop-1`, for registry-matched cards). This
+native is **transient**: `tools/sab.js pack dict` compiles it to the
+shipped runtime fixture `fixtures/{byos-id}.dict.sab.gz` and then
+deletes the native. The `.sab.gz` is the artifact the engine loads.
 
 ### `tools/build-model-table.js`
 
@@ -221,8 +234,13 @@ node tools/build-model-table.js <corpus-byos.json>
 
 Build the sentence-model table for a corpus byos. The dedupe flag
 comes from `byos.story.sentence` (`'random'` → dedupe;
-`'sequential'` → preserve source order). Output is gzipped to
-`fixtures/{byos.name}.model.json.gz`.
+`'sequential'` → preserve source order). Reads the native dict
+intermediate and writes the native model intermediate
+`fixtures/{byos-id}.model.json.gz`, where `{byos-id}` is the
+canonical BYOS id from `getBYOSID()` (e.g. `aesop-1`). This native is
+**transient**: `tools/sab.js pack model` compiles it to the shipped
+runtime fixture `fixtures/{byos-id}.model.sab.gz` and then deletes the
+native. The `.sab.gz` is the artifact the engine loads.
 
 ### `tools/build-twlist-fixtures.js`
 
@@ -239,12 +257,30 @@ No args.
 ```
 node tools/build-freq-fixtures.js                # all sources
 node tools/build-freq-fixtures.js norvig         # one source
-node tools/build-freq-fixtures.js norvig google-books
+node tools/build-freq-fixtures.js norvig google
 ```
 
-Read raw frequency sources from `fixture-src/freq/<source>/` and emit
-pruned `fixtures/<source>.freq.tsv.gz`. Sources skip silently if
-their raw input is missing.
+Read raw frequency sources from `fixture-src/freq/<source>/raw/`,
+cook them (prune to the vocab union of the current dict + wlist
+fixtures) into the committed cache
+`fixture-src/freq/<source>/cooked/<source>.freq.tsv.gz`, then pack
+that cooked TSV into the runtime SAB fixture
+`fixtures/<source>.freq.sab.gz` (the shipped artifact; not a `.tsv`).
+Mtime-driven caching skips each step when its target is current.
+Sources skip silently when both their raw input and cooked cache are
+missing.
+
+The `gutenberg` source tokenizes ~37 K books and exhausts Node's
+default V8 heap. Run it (or "all") with `--max-old-space-size`:
+
+```
+node --max-old-space-size=8192 tools/build-freq-fixtures.js gutenberg
+node --max-old-space-size=8192 tools/build-freq-fixtures.js
+```
+
+`norvig` and `google` fit in the default heap. The orchestrator
+(`tools/build-all-fixtures.js`) passes the flag through automatically;
+ad-hoc CLI runs must supply it.
 
 ### `tools/build-confusables-map.js`
 
@@ -273,10 +309,61 @@ hand per `fixture-src/font/fetch.js`) is newer than the committed
 isn't transformed, so this is a verbatim copy. `build-all-fixtures.js`
 copies the cooked font to `fixtures/font/`.
 
-### Internal helpers (not user-facing)
+### `tools/sab.js` (native ↔ SAB pack/unpack)
+
+```
+node tools/sab.js pack <type>       # native → fixtures/<id>.<type>.sab.gz
+node tools/sab.js unpack <type>     # fixtures/<id>.<type>.sab.gz → native
+```
+
+The native-to-SAB compiler the whole fixture pipeline depends on.
+Every per-card dict/model builder, the twlist/wlist/freq builders, and
+the emoji-cldr builder emit a **native** intermediate (gzipped JSON,
+TSV, or text); `sab.js pack <type>` enumerates those natives, packs
+each into its runtime SharedArrayBuffer fixture
+(`fixtures/<id>.<type>.sab.gz`), and then deletes the native. `unpack`
+reverses it for inspection. `<type>` is one of: `twlist`, `dict`,
+`model`, `freq`, `emoji-cldr`, `emoji-keywords`. `build-all-fixtures.js`
+runs the pack passes as its final stage, so a full build leaves only
+SAB fixtures in `fixtures/`.
+
+### Other `tools/` build CLIs
+
+These are runnable (`#!/usr/bin/env node`, each with a usage/purpose
+header) but single-purpose enough that they are driven by
+`build-all-fixtures.js` or run by hand only during a corpus / wordlist
+refresh. Read each file's header comment for specifics.
+
+- `tools/build-corpus-wlist.js`: derive per-corpus `.wlist` natives
+  from the shipped corpus texts (one per unique corpus a card
+  references); packed to `fixtures/<stem>.wlist.sab.gz`.
+- `tools/build-twlist-wlist.js`: derive per-twlist-source `.wlist`
+  natives from the shipped `.twlist` sources (drops the type column);
+  packed to `fixtures/<name>.wlist.sab.gz`.
+- `tools/build-master-wlist.js`: union every word-bearing source in the
+  repo into `fixture-src/wlist/master.wlist.gz`, the input pool for the
+  impkimmo2026 rebuild.
+- `tools/build-englex-wlist.js`: enumerate every surface form ENGLEX +
+  PC-KIMMO can generate into `fixture-src/wlist/englex.wlist.gz` (an
+  additional input to `build-master-wlist.js`). Requires an
+  out-of-repo PC-KIMMO install.
+- `tools/build-redacted-wlist.js`: concatenate the redacted-wlist
+  sources into the native `fixtures/redacted.wlist.txt.gz`; packed to
+  `fixtures/redacted.wlist.sab.gz`.
+- `tools/build-monotyped-models.js`: per-corpus monotyped-model
+  precompute for Eve; emits `fixtures/<corpus>.monotyped-model.sab.gz`.
+- `tools/build-rewriter-fixtures.js`: production build for the
+  cover-transforms rewriter fixtures (twlist + data SABs per rewriter).
+- `tools/run-impkimmo2026.js [--shards N]`: rebuild
+  `impkimmo2026.twlist.gz` and its four variant twlists from
+  `master.wlist.gz`, sharding the recognize pass. Requires the
+  out-of-repo PC-KIMMO + ENGLEX install.
+
+### Internal helpers (not standalone CLIs)
 
 `tools/byos-build-helpers.js` and `tools/load-corpus.js` are imported
-by the builders above. They are not standalone CLIs.
+by the builders above and have no shebang or argv handling of their
+own.
 
 ## Tests
 

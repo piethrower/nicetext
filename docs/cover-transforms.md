@@ -262,21 +262,26 @@ Four fields, ordered top-to-bottom by per-emission run order:
 
 ### reformatter
 
-Two fields today (`case`, `lineBreak`). The expanded catalogue (case
-`randomCaps` / `sentenceStartLower`, `sentenceEnd`, `voice`) lands
-alongside the model-layer enhancer implementation in a later commit.
+Four fields (`voice`, `lineBreak`, `sentenceEnd`, `case`), listed in
+chain run order (`js/src/reformatter/index.js`).
 
 ```
 "reformatter": {
-  "lineBreak": { "enabled": true, "intensity": 100, "mode": "expand" },
-  "case":      { "enabled": true, "intensity": 100, "mode": "titleCase" }
+  "voice":       { "enabled": true, "intensity":  50, "mode": "pirate" },
+  "lineBreak":   { "enabled": true, "intensity": 100, "mode": "expand" },
+  "sentenceEnd": { "enabled": true, "intensity": 100 },
+  "case":        { "enabled": true, "intensity": 100, "mode": "titleCase" }
 }
 ```
 
+- `voice.mode`: a voice mode (e.g. `"pirate"`); the model-layer voice
+  reformatter (`js/src/reformatter/voice.js`) inserts new content, so
+  it runs first in the chain.
 - `lineBreak.mode`: `"expand"` (every `\n` to `\n\n`) or `"collapse"`
   (`\n\n` to `\n`).
 - `case.mode`: `"allCaps" | "allLowercase" | "titleCase" |
-  "sentenceCase"` (more modes in the next arc commit).
+  "sentenceCase"` (more modes in the next arc commit). `case` runs LAST
+  so it observes content inserted by `voice` and earlier enhancers.
 
 ### envelope
 
@@ -291,7 +296,7 @@ Single semantic container, parameterized:
 ```
 
 - `type`: 16 existing envelope types from `js/src/envelopes.js`
-  (eml, html, htmlActive, markdown, pdf, nroff, xml, python,
+  (eml, html, html-active, markdown, pdf, nroff, xml, python,
   javascript, cpp, java, perl, php, ruby, bash, go) plus `"none"`.
 - `fileNamePrefix`: base name; wrappers and the envelope add their
   extensions (`.txt`, `.gz`, `.b64`, `.uue`).
@@ -323,8 +328,8 @@ innermost. UI reverses for display.
 
 ```
 model stream
-  -> reformatter chain (model -> model enhancers, in block order)
-       case -> lineBreak -> sentenceEnd
+  -> reformatter chain (model -> model enhancers, chain run order)
+       voice -> lineBreak -> sentenceEnd -> case
   -> encoder
   -> rewriter chain (per-emission, in block order)
        british -> typos -> voice -> xanax
@@ -353,19 +358,33 @@ final output
 
 ### Rewriter interface
 
-Each rewriter exposes two methods:
+Each rewriter exposes a per-encode setup group plus an apply method
+(`js/src/encode.js`, `js/src/rewriter/<name>.js`):
 
-- `getRewriterUniqueTwlist() -> [{type, word}, ...]`
-  Returns the 0-bit unique-type singleton entries that sortdct injects
-  into the dict when this rewriter is enabled. Consumed by the unified
-  sortdct injection pass. Small for some rewriters (xanax: 2 entries),
-  larger for others (typos: one entry per canonical-variant pair).
+- `setRewriterData(data) -> void`
+  Hands the rewriter its apply-time lookup data, unpacked at engine
+  startup from the rewriter's `fixtures/<name>.rewriter.sab.gz` (NTRW)
+  fixture. Modules without apply-time data omit the setter.
+
+- `setRewriterIntensity(n) -> void`
+  Sets the per-emission replacement probability (integer 0..100) from
+  `byos.rewriter[name].intensity`.
+
+- `setRewriterRandom(rng) -> void`
+  Installs the non-secret RNG (derived from `randomSeed`) used for the
+  per-emission coin flip.
 
 - `apply(phraseBuf, ...) -> void`
   Per-emission entry point. Mutates the encoder's `phraseBuf` according
   to the rewriter's logic. Phrase-fusion conflicts are caught by the
   engine's natural per-push `analyzePhraseBuf` rewind path; the
   rewriter doesn't need its own check.
+
+There is no `getRewriterUniqueTwlist()` on the runtime side. Each
+rewriter's 0-bit unique-type singletons now live in its
+`fixtures/rewriter-<name>.twlist.sab.gz` fixture, which sortdct loads
+directly when the rewriter is enabled, so the loader sees one uniform
+shape across all rewriters.
 
 Internal runtime data (lookup maps, exception sets, trigger lists) is
 implementation detail per rewriter. The shape varies: xanax holds two
@@ -375,22 +394,26 @@ injection twlist.
 
 ### Storage strategy
 
-Threshold for choosing between baked JS and SAB fixtures: roughly 1K
-entries.
+All rewriter data ships as SAB fixtures. There is no baked-JS vs SAB
+threshold.
 
-- **Baked JS** (small): xanax exception sets (~700), british
-  (hundreds), voice (~30 per mode). Live in `fixtures/<rewriter>.data.js` as
-  exported `const Set` / `const Map`. Initialized once at module
-  import.
-- **Shared SAB** (large): typos is the only candidate likely to cross
-  the threshold depending on dataset size. If multiple rewriters
-  cross the threshold and share the lookup shape
-  (`Map<canonical, Set<variant>>`), they share one SAB format:
-  `fixtures/<rewriter>.lookup.sab.gz` with both forward and reverse
-  lookup support.
+- **Apply-time lookup data** ships per rewriter (and per mode where a
+  rewriter is multimodal) as `fixtures/<name>.rewriter.sab.gz` in the
+  NTRW format: `british-us-uk.rewriter.sab.gz`,
+  `british-uk-us.rewriter.sab.gz`, `typos-forward.rewriter.sab.gz`,
+  `typos-reverse.rewriter.sab.gz`, `voice-<mode>.rewriter.sab.gz`,
+  `xanax.rewriter.sab.gz`. Unpacked at engine startup into a
+  `Map<canonical, ...>` and handed to the rewriter via
+  `setRewriterData()`.
+- **0-bit unique-type singletons** ship as one shared twlist SAB per
+  rewriter, `fixtures/rewriter-<name>.twlist.sab.gz`
+  (`rewriter-xanax.twlist.sab.gz`, `rewriter-british.twlist.sab.gz`,
+  `rewriter-typos.twlist.sab.gz`, `rewriter-voice.twlist.sab.gz`).
+  sortdct loads this directly when the rewriter is enabled.
 
-The choice is per-rewriter and abstracted behind the `apply()` method.
-The encoder doesn't know which backend each rewriter uses.
+The choice is uniform across rewriters and abstracted behind the
+`apply()` / `setRewriterData()` interface. The encoder doesn't need to
+know each rewriter's internal data shape.
 
 ### Module locations
 
@@ -398,13 +421,17 @@ JS-side homes for the four categories:
 
 - **Rewriters:** `js/src/rewriter/<name>.js` (one file per rewriter,
   parallels `js/src/builder/`, `js/src/eve/`, `js/src/worker/`
-  subdir convention; each module exports `getRewriterUniqueTwlist`
-  and `apply`).
+  subdir convention; each module exports `apply` plus the
+  `setRewriterData` / `setRewriterIntensity` / `setRewriterRandom`
+  setup group).
 - **Reformatters:** `js/src/reformatter/<name>.js` (one file per
   reformatter; each exports `enhance(model, opts) -> model`).
   `js/src/reformatter/index.js` exports
   `wrapModelStreamWithReformatters(stream, byos.reformatter, rng)`
-  which the encoder calls before consuming models.
+  which the encoder calls before consuming models. `voice` exists in
+  both layers: `js/src/rewriter/voice.js` (per-emission rewriter) and
+  `js/src/reformatter/voice.js` (model-layer enhancer that inserts new
+  content and takes apply-time data via `setRewriterData()`).
 - **Envelopes:** `js/src/envelopes.js`.
 - **Wrappers:** `js/src/wrappers.js`.
 
@@ -424,11 +451,11 @@ Formatters have no source data (pure-JS surface transforms); no
 `fixture-src/formatters/` dir exists.
 
 Build pipeline: a single categorical `tools/build-rewriter-fixtures.js`
-walks each enabled rewriter's `fixture-src/rewriters/<name>/` and
-emits the appropriate artifact (`fixtures/<rewriter>.data.js` for
-baked JS, or `fixtures/<rewriter>.lookup.sab.gz` for SAB). The
-shape parallels existing `tools/build-twlist-fixtures.js` /
-`tools/build-freq-fixtures.js`.
+walks each enabled rewriter's `fixture-src/rewriters/<name>/` and emits
+the per-rewriter (and per-mode) apply-time
+`fixtures/<name>.rewriter.sab.gz` plus the shared 0-bit singleton
+`fixtures/rewriter-<name>.twlist.sab.gz`. The shape parallels existing
+`tools/build-twlist-fixtures.js` / `tools/build-freq-fixtures.js`.
 
 ## Eve impact
 
@@ -458,8 +485,11 @@ To add a new cover-transform:
 
 1. Decide the category (rewriter / formatter / envelope / wrapper).
 2. Identify the safety guidelines it must satisfy.
-3. For a rewriter: implement `getRewriterUniqueTwlist()` and `apply()`;
-   wire into the rewriter chain at the correct run-order position.
+3. For a rewriter: implement `apply()` plus the `setRewriterData` /
+   `setRewriterIntensity` / `setRewriterRandom` setup group, ship the
+   `fixtures/<name>.rewriter.sab.gz` and
+   `fixtures/rewriter-<name>.twlist.sab.gz` fixtures, and wire into the
+   rewriter chain at the correct run-order position.
 4. For a formatter: implement as a pure surface-string transform; wire
    into the formatter chain at the correct run-order position.
 5. For an envelope: add a new `<type>ApplyTransform` /

@@ -14,8 +14,8 @@
 // confirmation pass).
 //
 // Rules 5 (TR39 mixed-script normalize) and 7 (period-EXT chain
-// split) are NOT in this module yet, they need design decisions
-// the rest of the rules don't.
+// split) are implemented here alongside the others, as is the
+// later-added Rule 0 (line-ending normalization).
 //
 // Browser-safe ESM. No Node deps.
 

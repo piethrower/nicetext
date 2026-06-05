@@ -1,32 +1,44 @@
-# typos rewriter, placeholder
+# typos rewriter
 
-Stub directory. The `typos` rewriter substitutes canonical words for
-common typo variants (the → teh / het / eth, you → yuo, etc.).
-Intended steganographic effect: cover reads as if a human typo'd,
-plausible-by-default, zero bit cost (every variant is a 0-bit
-unique-type singleton).
+Cover-transform rewriter that swaps between canonical words and common
+typo variants (the to teh, you to yuo, etc.). Intended steganographic
+effect: the cover reads as if a human typo'd, plausible by default,
+zero bit cost (every variant is a 0-bit unique-type singleton).
 
-This directory is empty; the runtime stub lives at
-`js/src/rewriter/typos.js` and returns `[]` from
-`getRewriterUniqueTwlist()` with a no-op `apply()`. The byos.json
-field `rewriter.typos` exists in the schema (default `false`).
+## What it does
 
-Real implementation, when picked up:
+Two modes share one `apply()`:
 
-- Curated typo dataset (per-canonical Set of variants).
-- `fetch.js`: if the dataset is externally sourced.
-- Build hook in `tools/build-rewriter-fixtures.js` to emit either
-  `fixtures/typos.data.js` (baked JS, if entries < ~1K) or
-  `fixtures/typos.lookup.sab.gz` (shared SAB, for larger datasets)
-  per the storage threshold in `docs/cover-transforms.md`.
-- `js/src/rewriter/typos.js`: `getRewriterUniqueTwlist()` returning
-  one singleton per `(canonical, variant)` pair using the
-  `typo_word_<canonical>_<variant>` type-naming convention, real
-  `apply(phraseBuf)` mutating to a randomly-picked variant (RNG
-  draw, not payload bits, so all variants round-trip identically).
+- `forward` (introduce typos). `Map<canonical, Set<typos>>`.
+- `reverse` (correct typos). `Map<typo, { canonical }>`.
 
-Bidirectional capability is a future enhancement.
+The runtime (`js/src/rewriter/typos.js`) delegates to the shared
+lookup-swap factory in `js/src/rewriter/_lookup-swap.js`, reading the
+just-pushed WORD, gating on intensity plus a variant-pick coin, and
+mutating with surface-case preservation. `jobs.js` loads the
+mode-specific NTRW fixture (`fixtures/typos-{forward,reverse}.rewriter.sab.gz`)
+before encode runs. The byos surface is `rewriter.typos`, an
+`{ enabled, intensity, mode }` object.
 
-See `docs/cover-transforms.md` for the four-block architecture,
-safety guidelines (typos must satisfy Guideline 1: 0-bit unique-type
-WORD substitution), and the rewriter interface contract.
+## This directory
+
+- `pairs.tsv.gz`: 28,042 single-word `{typo, canonical}` pairs derived
+  from `client9/misspell` (MIT-licensed).
+- `fetch.js`: regenerates `pairs.tsv.gz` from the upstream source.
+- `LICENSE`: the client9/misspell MIT license for the pair data.
+
+## Round-trip safety
+
+The build pipeline (`tools/build-rewriter-fixtures.js`) emits one
+shared twlist, `fixtures/rewriter-typos.twlist.sab.gz` (~36K entries),
+holding a single 0-bit singleton per unique word appearing on either
+side of the pair set, typed `typos_w_<word>`. sortdct merges the
+singleton with any other-source types the same word picks up, but no
+other word shares the exact type signature, so the merged type stays
+singleton (0 bits per slot). Swapping canonical and typo mid-cover is
+therefore transparent to the decoder's bit recovery. There is no
+`getRewriterUniqueTwlist()` on the runtime side; every rewriter's
+unique twlist lives in its `rewriter-<name>.twlist.sab.gz` fixture.
+
+See `docs/cover-transforms.md` for the four-block architecture and
+the rewriter safety guidelines.

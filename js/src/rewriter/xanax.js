@@ -27,7 +27,8 @@
 //
 // Two-tier agreement rule (research.md §"Encoder design"):
 //
-//   1. CMU-phonology exception sets (fixtures/rewriter-xanax.data.js).
+//   1. CMU-phonology exception sets (loaded from
+//      fixtures/xanax.rewriter.sab.gz via setRewriterData()).
 //      If the next word is in XANAX_TAKES_A_DESPITE_VOWEL_LETTER (a-onset
 //      consonant words like "united", "one", "European"), force "a"
 //      even though the leading letter is in [aeiou].

@@ -2,9 +2,11 @@
 
 Approved design decisions for six related extensions to nicetext's
 tokenization, dictionary, encoder, and decoder. This file is the
-specification (the *what*). Implementation sequencing lives in a
-separate build plan; sequencing decisions there can change without
-re-opening these design questions.
+specification (the *what*). The design described here is now
+implemented and shipped; file:line citations throughout point at the
+landed code. Implementation sequencing lived in a separate build
+plan; sequencing decisions there could change without re-opening
+these design questions.
 
 The six items are packaged together because they all touch the
 lexer + dictionary + encoder/decoder contract. Designing them
@@ -26,18 +28,18 @@ of D + C.
 
 ### Decision
 
-UTF-8 is the canonical encoding throughout. ASCII-only assumptions are
-removed where they exist.
+UTF-8 is the canonical encoding throughout. ASCII-only assumptions
+have been removed where they existed. Implemented.
 
 ### What's already true
 
 The payload (secret) side is already byte-transparent end-to-end:
 
-- `getSourceBytes()` (`js/app.js:2293-2296`) reads the textarea via
+- `getSourceBytes()` (`js/app.js:4963`) reads the textarea via
   `new TextEncoder().encode(...)`, which always emits UTF-8.
 - `encode.js` writes cover bytes via the same `TextEncoder`.
 - `decode.js` displays recovered bytes via
-  `new TextDecoder('utf-8', { fatal: true })` (`js/app.js:327`); fatal
+  `new TextDecoder('utf-8', { fatal: true })` (`js/app.js:542`); fatal
   mode falls cleanly into the existing "(binary: N bytes ...)"
   preview path for non-UTF-8 byte sequences (e.g., ciphertext).
 
@@ -45,12 +47,13 @@ So payload-side UTF-8 needs no work; it has been working all along.
 The "ASCII only" framing in old docs applied strictly to **cover-side
 tokenization**, not to the secret.
 
-### What needs to change
+### What it took on the cover side (shipped)
 
-Cover-side. See B for the WORD_CHAR change. See E for whitespace
-handling. The "UTF-8 base" decision is mostly a renaming/clarifying
-move that records the existing reality and removes ASCII-only language
-from comments and docs.
+The cover-side work is implemented. See B for the WORD_CHAR change
+(`\p{Script=Latin}`, now live in `js/src/lexer.js`) and E for
+whitespace and EOS handling. The "UTF-8 base" decision was mostly a
+clarifying move that records the existing reality and removed
+ASCII-only language from comments and docs. It is done.
 
 ---
 
@@ -112,8 +115,8 @@ PUNCT tokens. Behavior at each pipeline stage:
   Chinese paragraphs produces cover text containing those Chinese
   paragraphs literally.
 - **Decode (cover → bits)**: PUNCT tokens skipped at
-  `decode.js:47` (`if (tok.type !== TOKEN.WORD) continue`). Zero
-  bits consumed. Round-trip safe.
+  `js/src/decode.js:67` (`if (tok.type !== TOKEN.WORD) continue`).
+  Zero bits consumed. Round-trip safe.
 
 Combined effect: any UTF-8 content the developer pastes into a
 corpus survives end-to-end into cover regardless of script. None of
@@ -137,7 +140,7 @@ Assuming `\p{Script=Latin}` for WORD plus emoji-cluster recognition
 | Input | gendict | genmodel | nicetext (encode) | scramble (decode) |
 |---|---|---|---|---|
 | **Latin word** (`café`, `Dvořák`) | Lexer emits as WORD. TW-list rule-2 gate accepts. | Captured under its assigned type. | Bit-bearing slot. | `lookupWord` finds entry; bits consumed. |
-| **CJK run** (any length) | Lexer emits as PUNCT (catch-all rule). TW-list rule-2 rejects. | Captured as literal inter-word punct via `pushPunct(tok.value)`. | `fmt.emitPunct(value)` writes literal verbatim. | Skipped at `decode.js:47`. Zero bits. |
+| **CJK run** (any length) | Lexer emits as PUNCT (catch-all rule). TW-list rule-2 rejects. | Captured as literal inter-word punct via `pushPunct(tok.value)`. | `fmt.emitPunct(value)` writes literal verbatim. | Skipped at `js/src/decode.js:67`. Zero bits. |
 | **Cyrillic / Greek / Arabic / etc.** | Same as CJK. | Same. | Same. | Same. |
 | **Emoji** (single or sequence) | After this step: PUNCT cluster, gate rejects in twlist context. After §C: WORD, gate accepts. | After this step: literal punct. After §C: bit-bearing if in dict. | After this step: emit verbatim. After §C: bit-bearing slot. | After this step: skipped. After §C: bit-bearing if in dict. |
 
@@ -347,9 +350,9 @@ runtime recognizes.
 
 ### Word-phrase companion fixture
 
-Companion fixture `fixtures/emoji-cldr-names-16.twlist.tsv.gz` carries
+Companion fixture `fixtures/emoji-cldr-names-16.twlist.sab.gz` carries
 CLDR-derived word-phrases, typed by the same verbatim subgroup
-labels used by `emoji16.twlist.tsv.gz`. Built once at
+labels used by `emoji16.twlist.sab.gz`. Built once at
 fixture-bake time by `fixture-src/twlist/emoji16/fetch.js`, not at
 runtime; consumers see it as a normal twlist source like any other.
 
@@ -394,7 +397,7 @@ nobody else recognizes).
 
 ### Curated keyword filter
 
-Optional companion fixture `fixtures/emoji16.curated-keywords.tsv.gz`
+Optional companion fixture `fixtures/emoji16-curated-keywords.twlist.sab.gz`
 ships a hand- or AI-curated list of CLDR keywords approved for
 augmentation use. One keyword per line, optional comment column.
 When a byos selects this fixture, Aug A and Aug B (including their
@@ -476,11 +479,13 @@ index keyed by first word, listing possible phrase completions:
 ```
 
 At lex time, when the next token is a WORD with first-word matches
-in the index, the lexer peeks ahead at subsequent WORD tokens
-(treating intervening WHITESPACE as transparent; PUNCT or EOS as
-hard barriers, see E) and attempts to match the longest entry. On
-match, the constituent WORD tokens are fused into a single token
-whose value is the canonical phrase string.
+in the index, the lexer peeks ahead at subsequent WORD tokens and
+attempts to match the longest entry. Any non-WORD token in the span
+is a hard fusion barrier: PUNCT, EOS, and WHITESPACE all reject the
+match (`matchPhraseInBuffer`, `js/src/lexer.js:480`, rationale at
+`js/src/lexer.js:458-473`; see E). On match, the constituent WORD
+tokens are fused into a single token whose value is the canonical
+phrase string.
 
 Lookup proceeds normally on the fused token; the phrase entry is
 found and its bits are recovered.
@@ -534,7 +539,8 @@ Dict has all three entries. Trace each branch concretely.
 
 **Positive case, encoder picks the phrase entry directly.**
 Huffman walk in some slot lands on the leaf `"happy :)"`. At
-`encode.js / encode` (line 221) the candidate contains a space:
+`js/src/encode.js:661` (the multi-word phrase-emit path) the
+candidate contains a space:
 `flushBuffer()` empties any pending single-word buffer, then
 `fmt.emitWord("happy :)")` emits the canonical string atomically.
 Decoder lexer fuses it back to one WORD on read. Bit accounting
@@ -567,28 +573,30 @@ case (encoder chose it as one phrase-slot). The defensive case
 guarantees the cover never carries the dangerous `"happy"` then
 `":)"` adjacency that the decoder would greedily fuse.
 
-**Boundary clearings.** PUNCT and EOS slots call `flushBuffer()`
-before emitting, matching the decoder's rule that fusion never
-crosses PUNCT/EOS. End-of-stream `flushBuffer()` emits any held
+**Boundary clearings.** PUNCT, EOS, and WHITESPACE slots call
+`flushBuffer()` before emitting, matching the decoder's rule that
+fusion never crosses any non-WORD token. End-of-stream
+`flushBuffer()` emits any held
 strict-prefix words raw (e.g. trailing `"happy"` with nothing
 after it); decoder sees a lone `"happy"`, no fusion candidate
 completes, accounting balances.
 
 **Failure mode.** If dict + grammar are arranged so every replay
 of rewound bits keeps re-producing the same phrase, the
-`MAX_NO_PROGRESS_MODELS = 256` guard at `encode.js / encode`
-(line 175) throws rather than looping.
+`MAX_NO_PROGRESS_MODELS = 256` guard at `js/src/encode.js:577`
+throws rather than looping.
 
-#### Punctuation resets the buffer
+#### Non-WORD tokens reset the buffer
 
-Whenever the encoder emits a PUNCT or EOS token (model-driven), the
-phrase-detection buffer is cleared. Symmetric to the decoder's
-fusion, which never crosses PUNCT or EOS.
+Whenever the encoder emits a PUNCT, EOS, or WHITESPACE token
+(model-driven), the phrase-detection buffer is cleared. Symmetric to
+the decoder's fusion, which never crosses a non-WORD token
+(WHITESPACE included, see `js/src/lexer.js:480`).
 
 #### Infinite-backtrack guard
 
 The existing `MAX_NO_PROGRESS_MODELS = 256` counter
-(`encode.js:86`) covers the analogous "many slots picked without
+(`js/src/encode.js:577`) covers the analogous "many slots picked without
 consuming bits" case and should be reused (or paralleled) here. If
 backtrack-induced skips exceed the threshold, the encoder throws
 the same family of error.
@@ -635,8 +643,9 @@ intentionally picks it from a type that contains it as an entry.
 ### Decisions
 
 1. Genmodel preserves the lexer's full `tok.value` for EOS tokens
-   (translated to the formatter's mini-language), instead of the
-   current hardcoded `'. n'` normalization.
+   (translated to the formatter's mini-language), in place of the
+   legacy hardcoded `'. n'` normalization. Shipped at
+   `js/src/builder/genmodel.js:243`.
 2. The lexer captures non-default whitespace runs between WORD
    tokens as a new explicit token class (WHITESPACE), recorded in
    the model as ordinary punct items. Single spaces remain implicit
@@ -651,25 +660,39 @@ intentionally picks it from a type that contains it as an entry.
    texting-style corpora (one message per line, no trailing
    `. ! ?`) where injecting visible punctuation would break the
    conversational tone. The build-time corpus loader
-   (`tools/load-corpus.js`) substitutes `\n` → `U+2028` for
-   `texting-teen*.txt` files; the lexer's `EOS_RE` matches a bare
-   `U+2028` as EOS; the formatter emits it verbatim, where renderers
-   display it as a soft line break. Other corpora are unaffected.
+   (`tools/load-corpus.js`) substitutes runs of `\n` → `U+2028`
+   followed by `\n` (LINE SEPARATOR plus a literal LF, so plain
+   textareas/terminals that ignore a bare `U+2028` still show the
+   break) for `texting-teen*.txt` files; the lexer's `EOS_RE` folds
+   `U+2028` into the EOS class and its whitespace slurp absorbs the
+   trailing `\n` into the same EOS token; the formatter emits it
+   verbatim, where renderers display it as a soft line break. Other
+   corpora are unaffected.
 
-### What's broken today
+### Implemented and located
 
-`genmodel.js:136` normalizes every EOS token to the literal punct
-string `'. n'` regardless of source value. Information lost:
+EOS preservation has shipped. `js/src/builder/genmodel.js:243`
+preserves the lexer's full `tok.value` for EOS tokens
+(`pushPunct(`^${eosValue}^`)`), replacing the legacy hardcoded
+`'. n'` normalization. The only adjustment over the raw value is a
+guard that appends a single trailing space when the EOS carries no
+trailing whitespace, so an end-of-corpus terminator can't abut the
+next sentence's first WORD and break round-trip bit accounting.
 
-- Specific terminator char (`?`, `!`, `!!!`, etc.) collapses to `.`.
+What this recovered, all of which was lost under the old
+normalization:
+
+- Specific terminator char (`?`, `!`, `!!!`, etc.) survives instead
+  of collapsing to `.`.
 - Trailing whitespace runs (`.\n            ` for centered headings,
-  `.\n\n` for paragraph breaks) collapse to a single newline.
-- All EOS tokens emit exactly one newline. Run-together sentences
-  (`Hello. Goodbye.` mid-paragraph) and paragraph-separated
-  sentences (`Hello.\n\nGoodbye.`) render identically in cover.
+  `.\n\n` for paragraph breaks) survive instead of collapsing to a
+  single newline.
+- Run-together sentences (`Hello. Goodbye.` mid-paragraph) and
+  paragraph-separated sentences (`Hello.\n\nGoodbye.`) now render
+  distinctly in cover.
 
-`format.js` already supports literal preservation via its
-mini-language. The fix is one line in genmodel.
+`format.js` carries the literal preservation via its mini-language;
+the genmodel change was the one piece that had to land to use it.
 
 ### Mini-language translation rules
 
@@ -715,10 +738,22 @@ when picking a phrase entry from a slot. Intra-phrase whitespace
 in the cover is therefore single-space, regardless of corpus
 spacing.
 
-The decoder's greedy fusion treats inter-WORD WHITESPACE as
-transparent for phrase matching: `a la carte`, `a   la   carte`,
-and `a\nla\ncarte` all fuse to the same phrase entry. Only PUNCT
-or EOS between two WORDs blocks fusion.
+The decoder's greedy fusion treats inter-WORD WHITESPACE as a hard
+fusion barrier, not as transparent. Only the canonical single-space
+form fuses: `a la carte` (the canonical the encoder emits) fuses,
+but `a   la   carte` and `a\nla\ncarte` do NOT, because the
+multi-character / non-space whitespace lexes as a WHITESPACE token,
+and any non-WORD token in the span rejects the match
+(`matchPhraseInBuffer`, `js/src/lexer.js:480`). This is the
+round-trip-safe choice: a single space inside a phrase canonical is
+not tokenized at all (`WHITESPACE_RE` requires 2+ chars or a
+non-space whitespace char), so any WHITESPACE token between two
+WORDs in cover came from a separate model punct, never from inside a
+phrase. Letting fusion cross WHITESPACE would let the decoder fuse
+`a\nla` while the encoder emitted `a` and `la …` as independent
+slots, drifting the bit count. PUNCT and EOS block fusion for the
+same reason. See `docs/cover-transforms.md` (whitespace edits are
+safe except where they cross a phrase-fusion boundary).
 
 ### Steganographic and robustness consequences
 
@@ -727,11 +762,15 @@ or EOS between two WORDs blocks fusion.
   paragraph breaks at same positions, same double-spacing, same
   indentation.
 - Post-processing the cover with whitespace transformations (word
-  wrap, double-spacing, indentation, line breaks) does not break
-  decoding. The decoder treats whitespace as transparent for
-  phrase matching, so only punctuation edits can break cover
-  decoding. This extends an existing property (whitespace-preserving
-  decode for words) cleanly to phrases.
+  wrap, double-spacing, indentation, line breaks) is decode-safe for
+  word-only stretches: bare WORD lookups ignore whitespace entirely.
+  The one constraint is phrases. Because WHITESPACE is a hard fusion
+  barrier, inserting whitespace inside a phrase's canonical
+  single-space span (`a la carte` → `a  la  carte`) destroys the
+  fusion and changes the bit reading. Whitespace edits that do not
+  cross a phrase boundary are safe. See `docs/cover-transforms.md`,
+  which spells out exactly which surface changes are safe (phrase
+  fusion is the surviving constraint there as well).
 
 ---
 
@@ -762,7 +801,8 @@ greeting, hello 👋
 The lexer treats both Latin words and emoji as WORD tokens (per
 B + C), so the phrase-detection mechanism doesn't care which type
 each component is. Defensive buffering, greedy fusion, canonical
-storage, punct as fusion barrier: all apply unchanged.
+storage, and the non-WORD fusion barrier (PUNCT, EOS, and
+WHITESPACE all block fusion): all apply unchanged.
 
 ---
 
@@ -774,7 +814,7 @@ storage, punct as fusion barrier: all apply unchanged.
   longer runs to 3) is a reasonable safety dial. Default unset
   (full faithfulness) until evidence shows a problem.
 - **Augmentation strictness for cross-modal.** Resolved by the
-  optional `fixtures/emoji16.curated-keywords.tsv.gz` fixture
+  optional `fixtures/emoji16-curated-keywords.twlist.sab.gz` fixture
   (see §C "Curated keyword filter"). Aug A, Aug B, and Aug-mix
   consume CLDR keywords; the curated-keywords fixture filters the
   keyword input set when selected, restricting augs to keywords

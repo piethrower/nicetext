@@ -717,7 +717,9 @@ async function handleBuild(msg) {
   // would fan emoji + emoji-phrase entries across every atomic type
   // each keyword word carries (including the singleton types) and
   // pollute the 0-bit-per-slot bucket invariant those transforms rely
-  // on for round-trip safety (see tmp/typos-bug-findings.md). Running
+  // on for round-trip safety. (First diagnosed via the typos rewriter,
+  // where `emojiIntoWords` collided with the `typos_w_<word>` singletons.)
+  // Running
   // augs first means `wordTypes.get(keyword)` returns only the base /
   // emoji codebook tags, so the fan-out can't reach the singleton
   // types. Then we concat the singletons here: each `<prefix>_w_<word>`
