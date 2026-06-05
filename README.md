@@ -8,8 +8,6 @@ Modern JavaScript port of **NiceText**, a 1995–2001 linguistic-steganography s
 
 See [`docs/architecture-overview.md`](docs/architecture-overview.md) for the design, target architecture, and engine module surface.
 
-The original C++ source is preserved verbatim in a sibling [`OG-NiceText-C++`](../OG-NiceText-C++) archive repository, read-only. File-level pointers throughout this codebase (e.g. `OG-NiceText-C++/nicetext-1.0/gendict/src/sorttwl.cc`) name paths inside that archive.
-
 ## Layout
 
 ```
@@ -25,8 +23,6 @@ fixture-src/     raw word lists and natural-language texts
 tools/       build-time scripts (rebuild dicts from corpora, serve.sh, etc.)
 docs/        project docs (start with architecture-overview.md)
 ```
-
-The 1995-2001 C++ source lives in the sibling [`OG-NiceText-C++`](../OG-NiceText-C++) archive repo.
 
 ## Run tests
 
