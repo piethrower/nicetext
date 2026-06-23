@@ -5,6 +5,8 @@
 //
 // Browser-safe ESM. No Node deps.
 
+import { allocPackBuffer } from '../sab-support.js';
+
 const MAGIC = 0x5247544E; // "NTGR" little-endian
 const VERSION = 1;
 
@@ -169,12 +171,7 @@ export function packGrammarToSAB(parsedGrammar) {
   const stringPoolOff = namesOff + N * NAME_ENTRY_SIZE;
   const totalSize = stringPoolOff + stringPoolLen;
 
-  let sab;
-  try {
-    sab = new SharedArrayBuffer(totalSize);
-  } catch {
-    sab = new ArrayBuffer(totalSize);
-  }
+  const sab = allocPackBuffer(totalSize);
   const view = new DataView(sab);
   const bytes = new Uint8Array(sab);
 

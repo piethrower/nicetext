@@ -20,8 +20,19 @@
 // Paths are relative throughout. The SW URL is computed from this
 // script's own URL (document.currentScript.src) so deployment-root
 // is wherever the deploy puts us, not a hardcoded absolute path.
+//
+// Server opt-out: a host can suppress the service-worker rescue by
+// sending `X-NiceText-No-Isolation: 1` (tools/serve.py --no-isolation).
+// This reproduces a no-SAB host — e.g. archive.org, which blocks
+// service workers outright — so the ArrayBuffer fallback can be tested
+// deterministically. Since a page can't read its own response headers,
+// we probe with one tiny same-origin HEAD request before registering.
 
-(function () {
+(async function () {
+  // Capture currentScript synchronously: it is null after the first
+  // `await` below, so the SW-URL resolution later needs this saved ref.
+  const myScript = document.currentScript;
+
   const sabAvailable = typeof SharedArrayBuffer !== 'undefined';
 
   if (window.crossOriginIsolated && sabAvailable) {
@@ -41,10 +52,23 @@
     return;
   }
 
-  // Compute SW URL from this script's URL via relative resolution.
+  // Honor the server opt-out before registering anything. Any probe
+  // failure falls through to normal registration, so real hosts
+  // (GitHub Pages, archive.org) are unaffected by this check.
+  try {
+    const probe = await fetch(location.href, { method: 'HEAD', cache: 'no-store' });
+    if (probe && probe.headers.get('X-NiceText-No-Isolation') === '1') {
+      console.info('[coi] server opted out of isolation (X-NiceText-No-Isolation); using ArrayBuffer fallback');
+      return;
+    }
+  } catch (err) {
+    // Ignore; fall through to normal service-worker registration.
+  }
+
+  // Compute SW URL from this script's URL via relative resolution
+  // (myScript was captured at the top, before the await above).
   // js/coi.js → coi-sw.js at the deployment root, regardless of
   // whether the deploy is at /, /nicetext/, /myrepo/, etc.
-  const myScript = document.currentScript;
   if (!myScript || !myScript.src) {
     console.warn('[coi] cannot determine script URL; ArrayBuffer fallback');
     return;

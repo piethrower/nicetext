@@ -21,6 +21,7 @@ import {
   loadSABfromFile,
   _registerCategory,
 } from '../../js/src/sab.js';
+import { allocPackBuffer } from '../../js/src/sab-support.js';
 
 const EXPECTED_TYPES = [
   'twlist', 'wlist', 'dict', 'model', 'freq', 'emoji-cldr',
@@ -58,7 +59,7 @@ test('every SAB resource category has both pack and unpack wired', () => {
       `pack for "${cat}" should be wired (no 'not yet implemented')`,
     );
     assert.doesNotThrow(
-      () => { try { unpack(new SharedArrayBuffer(0), cat); } catch (e) {
+      () => { try { unpack(allocPackBuffer(0), cat); } catch (e) {
         if (/not yet implemented/i.test(e.message)) throw e;
       } },
       /not yet implemented/i,
@@ -246,7 +247,7 @@ test('unpack throws "unknown resourceCategory" for an unrecognized category toke
 // without disturbing the auto-registered built-ins.
 test('_registerCategory wires a per-category packer; subsequent pack call dispatches to it', () => {
   let calledWith = null;
-  const fakeSab = new SharedArrayBuffer(8);
+  const fakeSab = allocPackBuffer(8);
   _registerCategory('freq', {
     pack: (native) => { calledWith = native; return fakeSab; },
   });

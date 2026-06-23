@@ -5,6 +5,7 @@
 // Browser-safe ESM. No Node deps. No fs, no Buffer, no process.
 
 import { mergesortAsync } from './mergesort-async.js';
+import { allocPackBuffer } from '../sab-support.js';
 
 const MAGIC = 0x4344544E; // "NTDC" little-endian
 const VERSION = 1;
@@ -246,16 +247,10 @@ export function packDictToSAB(json) {
   const stringPoolOff = byTypeNameOff + T * BYTYPENAME_ENTRY_SIZE;
   const totalSize = stringPoolOff + stringPoolLen;
 
-  // Allocate. SharedArrayBuffer in browsers requires COOP/COEP; in Node
-  // it works without configuration. Fall back to ArrayBuffer if SAB
-  // throws (older Node, browser without isolation), so the engine still
-  // works for inline callers; cross-worker sharing requires SAB though.
-  let sab;
-  try {
-    sab = new SharedArrayBuffer(totalSize);
-  } catch {
-    sab = new ArrayBuffer(totalSize);
-  }
+  // Allocate via the one gated allocator: a SharedArrayBuffer when the
+  // platform is cross-origin isolated (cross-worker sharing), otherwise a
+  // plain ArrayBuffer that each worker structured-clones.
+  const sab = allocPackBuffer(totalSize);
   const view = new DataView(sab);
   const bytes = new Uint8Array(sab);
 
@@ -477,12 +472,7 @@ export async function packDictToSABAsync(json, opts = {}) {
   const stringPoolOff = byTypeNameOff + T * BYTYPENAME_ENTRY_SIZE;
   const totalSize = stringPoolOff + stringPoolLen;
 
-  let sab;
-  try {
-    sab = new SharedArrayBuffer(totalSize);
-  } catch {
-    sab = new ArrayBuffer(totalSize);
-  }
+  const sab = allocPackBuffer(totalSize);
   const view = new DataView(sab);
   const sabBytes = new Uint8Array(sab);
 

@@ -37,6 +37,8 @@ const HDR_STRING_COUNT = 8;
 const HDR_POOL_OFFSET = 12;
 const HEADER_SIZE = 16;
 
+import { sabUsable } from '../sab-support.js';
+
 const TEXT_ENCODER = new TextEncoder();
 const TEXT_DECODER = new TextDecoder();
 
@@ -168,8 +170,12 @@ export function wrapPackedStrings(buf) {
 // from fetch+decompress), allocate a SharedArrayBuffer of the same
 // size, and copy the bytes in. Returns the SAB. Lets workers
 // expose their parsed result as a shared region while still
-// reading the source as a regular ArrayBuffer.
+// reading the source as a regular ArrayBuffer. When SAB is not
+// usable (no cross-origin isolation), returns the plain ArrayBuffer
+// unchanged — every worker then gets its own structured-clone copy,
+// which is functionally identical for our load-once read-only packs.
 export function copyIntoSharedArrayBuffer(arrayBuffer) {
+  if (!sabUsable()) return arrayBuffer;   // fallback: hand back the plain AB
   const u8src = new Uint8Array(arrayBuffer);
   const sab = new SharedArrayBuffer(u8src.byteLength);
   const u8dst = new Uint8Array(sab);

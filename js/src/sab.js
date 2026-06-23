@@ -36,6 +36,7 @@ import { packMonotypedModel, wrapMonotypedModel } from './eve/monotyped-model-sa
 import { parseTwlistLines } from './builder/sources.js';
 import { parseFreqLines } from './builder/frequencies.js';
 import { packRewriterMap, unpackRewriterMap } from './builder/rewriter-sab.js';
+import { allocPackBuffer, sabUsable } from './sab-support.js';
 
 const IS_NODE = typeof process !== 'undefined'
   && typeof process.versions === 'object'
@@ -255,7 +256,7 @@ _registerCategory('wlist', {
       const w = raw.trim().toLowerCase();
       if (w.length > 0) set.add(w);
     }
-    return packStrings([...set].sort(), { shared: true });
+    return packStrings([...set].sort(), { shared: sabUsable() });
   },
   unpack: (sab) => {
     const view = wrapPackedStrings(sab);
@@ -324,7 +325,7 @@ export async function loadSABfromFile(path) {
   const gunzipAsync = promisify(gunzip);
   const compressed = await readFile(path);
   const bytes = await gunzipAsync(compressed);
-  const sab = new SharedArrayBuffer(bytes.byteLength);
+  const sab = allocPackBuffer(bytes.byteLength);
   new Uint8Array(sab).set(
     new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
   );

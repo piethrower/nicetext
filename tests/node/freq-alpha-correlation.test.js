@@ -30,6 +30,7 @@ import assert from './shims/node-assert.js';
 import { readFileSync } from './shims/node-fs.js';
 import { gunzipSync } from './shims/node-zlib.js';
 import { unpackFreqFromSAB } from '../../js/src/builder/freq-pack.js';
+import { allocPackBuffer } from '../../js/src/sab-support.js';
 
 const FIXTURES = new URL('../../fixtures/', import.meta.url);
 
@@ -48,10 +49,10 @@ function readFreqFixture(url) {
   } else {
     raw = data;
   }
-  // Copy bytes into a fresh SharedArrayBuffer so the wrap path
-  // works identically across runtimes.
+  // Copy bytes into a fresh pack buffer (SAB when isolated, else a plain
+  // ArrayBuffer) so the wrap path works identically across runtimes.
   const view = new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
-  const sab = new SharedArrayBuffer(view.byteLength);
+  const sab = allocPackBuffer(view.byteLength);
   new Uint8Array(sab).set(view);
   return unpackFreqFromSAB(sab);
 }

@@ -5,6 +5,8 @@
 //
 // Browser-safe ESM. No Node deps.
 
+import { allocPackBuffer } from '../sab-support.js';
+
 const MAGIC = 0x5146544E; // "NTFQ" little-endian
 const VERSION = 1;
 
@@ -89,9 +91,7 @@ export function packFreqToSAB(parsed) {
   for (const r of rows) poolLen += r.bytes.length;
   const totalSize = stringPoolOff + poolLen;
 
-  let sab;
-  try { sab = new SharedArrayBuffer(totalSize); }
-  catch { sab = new ArrayBuffer(totalSize); }
+  const sab = allocPackBuffer(totalSize);
   const view = new DataView(sab);
   const bytes = new Uint8Array(sab);
 

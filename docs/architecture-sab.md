@@ -801,6 +801,53 @@ allocation is small (one short string at a time); the alternative
 would be one bulk-copy of the whole pool at wrap time per worker,
 trading allocations for fixed RAM cost.
 
+### Capability gate and fallback testing
+
+**Status (in progress).** The single capability gate, the mode
+indicator, and the two-port test harness described here have landed.
+Actually wiring the data path to use a plain `ArrayBuffer` when SAB is
+unavailable — the load path (`copyIntoSharedArrayBuffer`), the
+worker hand-offs, and the on-the-fly pack builders — is the remaining
+work. Until that lands, a non-isolated page renders but errors when it
+loads a style; the per-worker `ArrayBuffer`-copy fallback described
+above is the target, not yet the shipped runtime behavior.
+
+**One gate.** `js/src/sab-support.js` is the single source of truth so
+the decision lives in exactly one place and is made by asking the
+platform, never by sniffing headers or browser versions:
+
+- `sabUsable()` → boolean. Browser: `crossOriginIsolated === true &&
+  typeof SharedArrayBuffer === 'function'`. Node: SAB is always
+  available and there is no isolation concept, so it returns true
+  unless `NICETEXT_NO_SAB=1` forces the fallback path (the Node
+  equivalent of the browser's second port).
+- `bufferMode()` → `'shared' | 'copy'`. Every SAB-vs-`ArrayBuffer`
+  branch keys off these.
+
+**Mode indicator.** `js/sab-mode-badge.js` (loaded by `nicetext.html`,
+`test-suite.html`, `stress-test.html`) surfaces the chosen mode three
+ways: a corner badge (green **Shared Memory: On** / amber **Shared
+Memory: Off**), a console line, and `globalThis.__niceTextBufferMode`
+for test assertions. The badge fades in on load, auto-hides after a few
+seconds, and reappears (re-arming the same auto-hide) when you hover the
+NiceText logo. It is purely informational (`pointer-events: none`), and
+tests key off its `dataset.mode`, not its text.
+
+**Two-port harness.** The two modes are exercised by serving the same
+files two ways, so the *server* — not a client flag — decides the
+outcome, the realistic knob that mirrors GitHub Pages vs archive.org:
+
+- `tools/serve.py` (default, port 8888): sends COOP/COEP → isolated →
+  SAB path.
+- `tools/serve.py --no-isolation` (port 8889): omits COOP/COEP **and**
+  sends `X-NiceText-No-Isolation: 1`. `coi.js` probes that header with
+  one same-origin HEAD request and, when present, skips registering
+  `coi-sw.js`. Without that skip the service worker would re-inject the
+  COI headers and "rescue" the page back onto the SAB path, making the
+  fallback port secretly identical to the default one. The header keeps
+  the fallback port honest and reproduces archive.org, where service
+  workers are blocked outright.
+
 ### Node
 
 `node:worker_threads` supports `SharedArrayBuffer` natively, no header

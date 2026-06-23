@@ -398,9 +398,11 @@ async function loadWithRow(rowId, idOrPath, resourceCategory, opts = {}) {
 }
 
 function postSab(kind, sab, extra = {}) {
-  const isSab = typeof SharedArrayBuffer !== 'undefined' && sab instanceof SharedArrayBuffer;
-  const transferList = isSab ? [] : [sab];
-  parentPort.postMessage({ type: 'sab', kind, sab, ...extra }, transferList);
+  // Always structured-clone the buffer to the main thread, never transfer.
+  // A SAB can't be transferred; a fallback ArrayBuffer may still be held by
+  // a live local view in this worker (corpus dict, model table), and
+  // transferring would detach it. The extra copy is one load-once pack.
+  parentPort.postMessage({ type: 'sab', kind, sab, ...extra });
 }
 
 function emitProgress(step, fraction, detail) {

@@ -15,6 +15,7 @@ import { parseTwlistLines } from '../../js/src/builder/sources.js';
 import { wrapDictionaryFromSAB } from '../../js/src/dictionary.js';
 import { wrapModelTableFromSAB } from '../../js/src/modeltable.js';
 import { unpack as sabUnpack } from '../../js/src/sab.js';
+import { allocPackBuffer } from '../../js/src/sab-support.js';
 import {
   findCardByName, getDictPath, getModelPath, getCorpusPath,
 } from '../../js/src/byos.js';
@@ -112,10 +113,13 @@ export function readBytesMaybeGz(url) {
   return data;
 }
 
-// Wrap a fetched SAB-fixture byte buffer in a SharedArrayBuffer.
+// Copy fetched fixture bytes into a fresh pack buffer: a SharedArrayBuffer
+// when the platform is cross-origin isolated, otherwise a plain ArrayBuffer
+// (a non-isolated browser throws on `new SharedArrayBuffer`). Mirrors the
+// production allocator so the wrappers read either shape identically.
 function bytesToSAB(bytes) {
   const view = new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const sab = new SharedArrayBuffer(view.byteLength);
+  const sab = allocPackBuffer(view.byteLength);
   new Uint8Array(sab).set(view);
   return sab;
 }
