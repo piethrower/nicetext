@@ -23,6 +23,8 @@
 //
 // All multi-byte fields are little-endian. Browser-safe ESM. No deps.
 
+import { allocPackBuffer } from '../sab-support.js';
+
 const MAGIC = 0x4E45544E; // "NTEN" little-endian
 const VERSION = 1;
 
@@ -59,7 +61,7 @@ export function createEntriesSAB(entryCapacity, poolCapacity) {
     throw new Error('createEntriesSAB: poolCapacity must be a non-negative integer');
   }
   const total = entriesSabByteLength(entryCapacity, poolCapacity);
-  const sab = new SharedArrayBuffer(total);
+  const sab = allocPackBuffer(total);
   const dv = new DataView(sab);
   dv.setUint32(HDR_MAGIC, MAGIC, true);
   dv.setUint32(HDR_VERSION, VERSION, true);
@@ -346,7 +348,7 @@ export function createDedupTable(slotCount) {
     throw new Error('createDedupTable: slotCount must be a power of two');
   }
   const size = DD_HEADER_SIZE + slotCount * 4;
-  const sab = new SharedArrayBuffer(size);
+  const sab = allocPackBuffer(size);
   const dv = new DataView(sab);
   dv.setUint32(DD_HDR_MAGIC, DD_MAGIC, true);
   dv.setUint32(DD_HDR_VERSION, DD_VERSION, true);

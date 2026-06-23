@@ -32,6 +32,7 @@ import {
   setRewriterData,
 } from '../../js/src/rewriter/xanax.js';
 import { unpackRewriterMap } from '../../js/src/builder/rewriter-sab.js';
+import { allocPackBuffer } from '../../js/src/sab-support.js';
 
 // Bootstrap xanax's apply-time NTRW lookup so decideArticle's CMU-
 // exception path is exercised. Cross-runtime fixture load: node:fs
@@ -43,7 +44,7 @@ const _xanaxBytes = (typeof Buffer !== 'undefined' && Buffer.isBuffer(_xanaxRaw)
   ? gunzipSync(_xanaxRaw)
   : _xanaxRaw;
 const _xanaxView = new Uint8Array(_xanaxBytes.buffer, _xanaxBytes.byteOffset, _xanaxBytes.byteLength);
-const _xanaxSab = new SharedArrayBuffer(_xanaxView.byteLength);
+const _xanaxSab = allocPackBuffer(_xanaxView.byteLength);
 new Uint8Array(_xanaxSab).set(_xanaxView);
 setRewriterData(unpackRewriterMap(_xanaxSab));
 

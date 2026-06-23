@@ -55,6 +55,14 @@ Principles:
    reads fixtures via `fetch()` (preloaded into the node-fs shim's
    cache); cross-origin isolation (COOP/COEP) needed for SAB tests
    is provided by `tools/serve.py` (dev) and `coi-sw.js` (deployed).
+   The **ArrayBuffer fallback path** (no SAB) is exercised by letting
+   the server decide: `tools/serve.py --no-isolation` serves an
+   un-isolated port (it sends `X-NiceText-No-Isolation`, which `coi.js`
+   honors by skipping the COI service worker, so the page genuinely has
+   no SAB — mirroring archive.org). In Node, set `NICETEXT_NO_SAB=1` to
+   force the same path. The on-page badge and
+   `globalThis.__niceTextBufferMode` report which path is live; see
+   `docs/architecture-sab.md`.
 
 5. **Node-only tests use `nodeOnly()`.** A few tests reach for
    `readdirSync` to enumerate `tools/byos/*.byos.json` on disk, or

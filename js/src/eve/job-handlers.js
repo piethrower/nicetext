@@ -34,6 +34,7 @@ import {
 import { createVerdictState, applyRule } from './verdict-state.js';
 import { wrapPackedStrings } from './packed-strings-sab.js';
 import { wrapMonotypedModel } from './monotyped-model-sab.js';
+import { sabUsable } from '../sab-support.js';
 
 // Time-throttle a `progress(label)` callback so heavy inner loops
 // firing hot don't flood the worker postMessage channel. First call
@@ -191,7 +192,7 @@ export function runCorpusVocabCheckJob({ suspectedUniqueWords, vocabSab, corpusN
 //   payload: { suspectedText }
 //   result:  { monotypedModelSab, totalSuspected }
 export async function runBuildSuspectedMonotypedModelJob({ suspectedText }) {
-  const built = await genMonotypedModel(suspectedText, { shared: true });
+  const built = await genMonotypedModel(suspectedText, { shared: sabUsable() });
   return {
     monotypedModelSab: built.sab,
     totalSuspected: built.count,

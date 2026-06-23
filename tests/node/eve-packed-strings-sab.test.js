@@ -13,6 +13,7 @@ import {
   wrapPackedStrings,
   copyIntoSharedArrayBuffer,
 } from '../../js/src/eve/packed-strings-sab.js';
+import { sabUsable } from '../../js/src/sab-support.js';
 
 test('packed-strings: empty input round-trips', () => {
   const buf = packStrings([]);
@@ -74,12 +75,13 @@ test('packed-strings: large sorted set membership (250k entries)', () => {
   assert.equal(v.hasSorted('aaaa'), false);
 });
 
-test('packed-strings: shared option returns SharedArrayBuffer', () => {
-  const buf = packStrings(['x', 'y'], { shared: true });
-  assert.equal(typeof SharedArrayBuffer !== 'undefined', true);
-  // node and modern browsers both expose SharedArrayBuffer; the
-  // shared flag should pick it.
-  assert.equal(buf instanceof SharedArrayBuffer, true);
+test('packed-strings: shared flag picks SAB when isolated, ArrayBuffer otherwise', () => {
+  // Production drives the shared flag from sabUsable() (sab.js,
+  // job-handlers.js), so test it the same way: a SharedArrayBuffer when the
+  // platform can share one, a plain ArrayBuffer when it can't (a non-isolated
+  // browser has no SharedArrayBuffer at all). Both round-trip identically.
+  const buf = packStrings(['x', 'y'], { shared: sabUsable() });
+  assert.equal(buf instanceof (sabUsable() ? SharedArrayBuffer : ArrayBuffer), true);
   const v = wrapPackedStrings(buf);
   assert.deepEqual([...v.iterate()], ['x', 'y']);
 });
@@ -92,7 +94,10 @@ test('packed-strings: default (non-shared) returns ArrayBuffer', () => {
 test('packed-strings: copyIntoSharedArrayBuffer mirrors bytes', () => {
   const src = packStrings(['alpha', 'beta', 'gamma']);
   const sab = copyIntoSharedArrayBuffer(src);
-  assert.equal(sab instanceof SharedArrayBuffer, true);
+  // When SAB is usable, the bytes are mirrored into a SharedArrayBuffer.
+  // In fallback mode the plain ArrayBuffer is handed back unchanged; the
+  // reader works on either. Either way the byte content round-trips.
+  assert.equal(sab instanceof (sabUsable() ? SharedArrayBuffer : ArrayBuffer), true);
   assert.equal(sab.byteLength, src.byteLength);
   const v = wrapPackedStrings(sab);
   assert.deepEqual([...v.iterate()], ['alpha', 'beta', 'gamma']);

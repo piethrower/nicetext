@@ -5,6 +5,8 @@
 //
 // Browser-safe ESM. No Node deps.
 
+import { allocPackBuffer } from '../sab-support.js';
+
 const MAGIC = 0x544D544E; // "NTMT" little-endian
 const VERSION = 1;
 
@@ -130,9 +132,7 @@ export async function packModelTableToSABAsync(json, opts = {}) {
   const stringPoolOff = tokensOff + totalTokens * 4;
   const totalSize = stringPoolOff + stringPoolLen;
 
-  let sab;
-  try { sab = new SharedArrayBuffer(totalSize); }
-  catch { sab = new ArrayBuffer(totalSize); }
+  const sab = allocPackBuffer(totalSize);
   const view = new DataView(sab);
   const bytes = new Uint8Array(sab);
 
@@ -282,12 +282,7 @@ export function packModelTableToSAB(json) {
   const stringPoolOff = tokensOff + totalTokens * 4;
   const totalSize = stringPoolOff + stringPoolLen;
 
-  let sab;
-  try {
-    sab = new SharedArrayBuffer(totalSize);
-  } catch {
-    sab = new ArrayBuffer(totalSize);
-  }
+  const sab = allocPackBuffer(totalSize);
   const view = new DataView(sab);
   const bytes = new Uint8Array(sab);
 

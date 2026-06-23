@@ -30,6 +30,7 @@ import { buildHuffman, verifyHuffman } from '../../js/src/builder/huffman.js';
 import { combineFrequencies } from '../../js/src/builder/frequencies.js';
 import { unpackFreqFromSAB } from '../../js/src/builder/freq-pack.js';
 import { loadDictJsonFixture, fixtureURL } from './_helpers.js';
+import { allocPackBuffer } from '../../js/src/sab-support.js';
 
 const FIXTURES = new URL('../../fixtures/', import.meta.url);
 
@@ -57,7 +58,7 @@ function readFreqFixture(url) {
     raw = data;
   }
   const view = new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
-  const sab = new SharedArrayBuffer(view.byteLength);
+  const sab = allocPackBuffer(view.byteLength);
   new Uint8Array(sab).set(view);
   return unpackFreqFromSAB(sab);
 }
