@@ -3396,6 +3396,8 @@ body.paper {
 .paper-toc {
   position: sticky;
   top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
   font-size: 0.9rem;
   border-right: 1px solid var(--border);
   padding-right: 1rem;
@@ -3426,6 +3428,16 @@ body.paper {
   color: var(--accent);
   border-left-color: var(--accent);
 }
+.toc-part > a {
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+.toc-sub {
+  list-style: none;
+  padding: 0;
+  margin: 0.1rem 0 0.3rem;
+}
+.toc-sub a { padding-left: 1.2rem; font-size: 0.95em; }
 .toc-note {
   margin: 1rem 0 0;
   font-size: 0.75rem;
@@ -3450,12 +3462,40 @@ body.paper {
   margin: 0 0 0.4rem;
   letter-spacing: -0.01em;
 }
+.paper-author {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  margin: 0 0 0.1rem;
+  color: var(--fg);
+}
+.paper-date {
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+  margin: 0 0 1.8rem;
+  color: var(--muted);
+}
+.paper-abstract-label {
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 0.4rem;
+}
 .paper-lede {
   font-family: var(--font-serif);
   color: var(--muted);
   font-size: 1.02rem;
-  margin: 0 0 2rem;
+  margin: 0 0 1.5rem;
   font-style: italic;
+}
+.paper-ai-note {
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--muted);
+  margin: 0 0 2rem;
 }
 .paper-body section { margin: 0 0 2.2rem; }
 .paper-body h2 {
@@ -3465,6 +3505,16 @@ body.paper {
   margin: 0 0 0.6rem;
   scroll-margin-top: 1rem;
 }
+.paper-body h2.paper-part {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 3.2rem 0 1.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--accent);
+  scroll-margin-top: 1rem;
+}
+.paper-body h2.paper-part:first-of-type { margin-top: 0.6rem; }
 .paper-body p { margin: 0 0 0.9rem; }
 .paper-body a {
   color: var(--accent);
@@ -3671,6 +3721,8 @@ table.paper-table .paper-table-note {
   }
   .paper-toc {
     position: static;
+    max-height: none;
+    overflow-y: visible;
     border-right: none;
     border-bottom: 1px solid var(--border);
     padding: 0 0 0.8rem;
